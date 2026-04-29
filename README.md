@@ -31,8 +31,8 @@ The project is divided into two main infrastructure layers:
 | **Cilium** | `v1.19.3` | April 15, 2026 | eBPF-based networking, observability, and security. |
 | **ArgoCD** | `v9.5.6` | April 27, 2026 | Declarative GitOps continuous delivery tool for Kubernetes. |
 | **Gateway API** | `v1.5.1` | March 13, 2026 | Modern, expressive, and extensible routing for Kubernetes. |
-| **Terraform** | `v1.8+` | - | Infrastructure as Code tool. |
-| **Proxmox Provider** | `bpg/proxmox` | - | Modern, API-first Terraform provider for Proxmox VE. |
+| **Terraform** `hashicorp/hcl` | `v1.15.0` | April 29, 2026 | Infrastructure as Code tool. |
+| **Proxmox Provider** `bpg/proxmox` | `v0.104.0` | April 25, 2026 | Modern, API-first Terraform provider for Proxmox VE. |
 
 ## Keeping Versions Updated
 
