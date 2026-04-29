@@ -1,0 +1,5 @@
+proxmox_endpoint       = "https://<your-proxmox-ip>:8006/"
+proxmox_api_token      = "root@pam!terraform=your-token-here"
+proxmox_target_node    = "prox"
+proxmox_storage_device = "local"
+proxmox_network_bridge = "vmbr0"

@@ -1,0 +1,18 @@
+machine:
+  features:
+    hostDNS:
+      forwardKubeDNSToHost: false
+  install:
+    disk: ${install_disk}
+    image: ${install_image}
+  network:
+    nameservers:
+      - ${dns}
+    interfaces:
+      - deviceSelector:
+          physical: true
+        addresses:
+          - ${ip_address}
+        routes:
+          - network: ${network}
+            gateway: ${network_gateway}

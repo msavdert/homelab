@@ -1,0 +1,37 @@
+# Kubernetes Access Configuration
+kubernetes_config_path    = "../proxmox/kubeconfig"
+Kubernetes_config_context = "admin@talos-cluster"
+
+# Cilium Load Balancer Settings (Static IP Pool)
+install_cilium_lb_config            = true
+cilium_load_balancer_ip_range_start = "10.0.0.20"
+cilium_load_balancer_ip_range_stop  = "10.0.0.50"
+
+# ArgoCD Settings
+argocd_helm_values = [
+  {
+    name  = "global.domain"
+    value = "argocd.local"
+  },
+  {
+    # Enable insecure mode as we don't have SSL/TLS certificates yet
+    name  = "configs.params.server\\.insecure"
+    value = "true"
+  },
+  {
+    name  = "server.ingress.enabled"
+    value = "true"
+  },
+  {
+    name  = "server.ingress.ingressClassName"
+    value = "cilium"
+  },
+]
+
+# GitOps - App of Apps Configuration
+install_argocd_app_of_apps                 = false
+install_argocd_app_of_apps_git_repo_secret = false
+# If setting to true, provide the below variables:
+# argocd_app_of_apps_git_repo_secret_url      = "https://github.com/your-username/your-repo.git"
+# argocd_app_of_apps_git_repo_secret_username = "git"
+# argocd_app_of_apps_git_repo_secret_password_or_token = "your-github-pat"
