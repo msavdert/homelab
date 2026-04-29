@@ -1,6 +1,6 @@
 # Kubernetes Access Configuration
 kubernetes_config_path    = "../proxmox/kubeconfig"
-Kubernetes_config_context = "admin@talos-cluster"
+Kubernetes_config_context = "admin@talos"
 
 # Cilium Load Balancer Settings (Static IP Pool)
 install_cilium_lb_config            = true
