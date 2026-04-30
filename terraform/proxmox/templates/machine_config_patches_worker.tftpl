@@ -16,6 +16,10 @@ machine:
         routes:
           - network: ${network}
             gateway: ${network_gateway}
+  kernel:
+    modules:
+      - name: iscsi_tcp
+      - name: nbd
   disks:
     - device: /dev/sdb
       partitions:

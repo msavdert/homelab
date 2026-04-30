@@ -18,8 +18,12 @@ machine:
             gateway: ${network_gateway}
         vip:
           ip: ${vip_shared_ip}
+  kernel:
+    modules:
+      - name: iscsi_tcp
+      - name: nbd
 cluster:
-  allowSchedulingOnControlPlanes: true
+  allowSchedulingOnControlPlanes: false
   network:
     cni:
       name: none

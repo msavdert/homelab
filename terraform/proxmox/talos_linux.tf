@@ -36,7 +36,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
     templatefile("${path.module}/templates/machine_config_patches_controlplane.tftpl", {
       hostname             = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.controlplanes), each.key)) : each.value.hostname
       install_disk         = each.value.install_disk
-      install_image        = each.value.install_image
+      install_image        = data.talos_image_factory_urls.controlplane.urls.installer
       dns                  = var.domain_name_server
       ip_address           = "${each.key}/24"
       network              = var.network
@@ -48,7 +48,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
   ]
 }
 
-resource "talos_image_factory_schematic" "worker" {
+resource "talos_image_factory_schematic" "this" {
   schematic = yamlencode({
     customization = {
       systemExtensions = {
@@ -64,7 +64,13 @@ resource "talos_image_factory_schematic" "worker" {
 
 data "talos_image_factory_urls" "worker" {
   talos_version = var.talos_version
-  schematic_id  = talos_image_factory_schematic.worker.id
+  schematic_id  = talos_image_factory_schematic.this.id
+  platform      = "nocloud"
+}
+
+data "talos_image_factory_urls" "controlplane" {
+  talos_version = var.talos_version
+  schematic_id  = talos_image_factory_schematic.this.id
   platform      = "nocloud"
 }
 
