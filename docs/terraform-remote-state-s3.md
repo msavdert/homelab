@@ -8,7 +8,7 @@ All state files are stored in a single bucket named `general`, separated by pref
 
 | Layer | Key Path |
 | :--- | :--- |
-| **Proxmox/Infrastructure** | `homelab-terraform-state/terraform.tfstate` |
+| **Proxmox/Infrastructure** | `homelab-terraform-state/proxmox.tfstate` |
 | **Kubernetes/Apps** | `homelab-terraform-state/kubernetes.tfstate` |
 
 ---

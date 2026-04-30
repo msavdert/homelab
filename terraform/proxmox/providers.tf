@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
     bucket                      = "general"
-    key                         = "homelab-terraform-state/terraform.tfstate"
+    key                         = "homelab-terraform-state/proxmox.tfstate"
     region                      = "us-ashburn-1" # Update to your OCI region (e.g., eu-frankfurt-1)
-#    endpoint                    = "PLACEHOLDER_URL" # Paste your OCI S3 endpoint URL here
+#    endpoint                    = "OCI_URL_HERE" # Paste your OCI S3 endpoint URL here
 
     skip_credentials_validation = true
     skip_metadata_api_check     = true

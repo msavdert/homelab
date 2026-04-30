@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket                      = "general"
     key                         = "homelab-terraform-state/kubernetes.tfstate"
-    region                      = "us-ashburn-1" # Same region as Proxmox layer
+    region                      = "us-ashburn-1" # Update to your OCI region (e.g., eu-frankfurt-1)
     # endpoint                    = "OCI_URL_HERE"
 
     skip_credentials_validation = true
