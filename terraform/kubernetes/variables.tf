@@ -60,17 +60,22 @@ variable "install_argocd_app_of_apps" {
   default     = false
 }
 
-# See: https://argo-cd.readthedocs.io/en/latest/user-guide/application-specification/
-variable "argocd_app_of_apps_source" {
-  description = "Source section of ArgoCD Application CRD, use it to configure a git repository of your choice"
+variable "argocd_app_of_apps_repo_url" {
+  description = "Repository URL for your App of Apps repository"
   type        = string
-  default     = <<-EOT
-repoURL: https://github.com/msavdert/homelab.git
-targetRevision: main
-path: apps/
-directory:
-  recurse: true
-EOT
+  default     = "https://github.com/msavdert/homelab.git"
+}
+
+variable "argocd_app_of_apps_revision" {
+  description = "Target revision (branch/tag) for your App of Apps repository"
+  type        = string
+  default     = "main"
+}
+
+variable "argocd_app_of_apps_path" {
+  description = "Path within the repository where your ArgoCD applications are located"
+  type        = string
+  default     = "apps/production"
 }
 
 # See: https://argo-cd.readthedocs.io/en/latest/user-guide/application-specification/
@@ -96,7 +101,7 @@ variable "install_argocd_app_of_apps_git_repo_secret" {
 variable "argocd_app_of_apps_git_repo_secret_url" {
   description = "Repository URL for your private App of Apps repository"
   type        = string
-  default     = "https://github.com/msavdert/homelab.git"
+  default     = "" # Will default to var.argocd_app_of_apps_repo_url if empty
 }
 
 variable "argocd_app_of_apps_git_repo_secret_username" {

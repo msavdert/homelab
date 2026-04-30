@@ -31,7 +31,12 @@ argocd_helm_values = [
 # GitOps - App of Apps Configuration
 install_argocd_app_of_apps                 = false
 install_argocd_app_of_apps_git_repo_secret = false
+
+argocd_app_of_apps_repo_url = "https://github.com/msavdert/homelab.git"
+argocd_app_of_apps_revision = "main"
+argocd_app_of_apps_path     = "apps/production"
+
 # If setting to true, provide the below variables:
-# argocd_app_of_apps_git_repo_secret_url      = "https://github.com/your-username/your-repo.git"
+# argocd_app_of_apps_git_repo_secret_url      = "https://github.com/msavdert/homelab.git"
 # argocd_app_of_apps_git_repo_secret_username = "git"
 # argocd_app_of_apps_git_repo_secret_password_or_token = "your-github-pat"

@@ -1,2 +1,5 @@
-source: {}
+source:
+  repoURL: ""
+  targetRevision: ""
+  path: ""
 syncPolicy: {}

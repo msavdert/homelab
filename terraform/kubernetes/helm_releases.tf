@@ -43,8 +43,18 @@ resource "helm_release" "argocd_app_of_apps" {
   timeout    = 60
 
   set {
-    name  = "source"
-    value = var.argocd_app_of_apps_source
+    name  = "source.repoURL"
+    value = var.argocd_app_of_apps_repo_url
+  }
+
+  set {
+    name  = "source.targetRevision"
+    value = var.argocd_app_of_apps_revision
+  }
+
+  set {
+    name  = "source.path"
+    value = var.argocd_app_of_apps_path
   }
 
   set {
