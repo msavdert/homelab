@@ -52,7 +52,23 @@ Check that services are getting External IPs:
 ```bash
 kubectl get svc -A
 ```
-Check ArgoCD status:
-```bash
-kubectl get pods -n argocd
-```
+
+## Accessing ArgoCD
+
+After a successful apply, you can retrieve the initial admin credentials using Terraform:
+
+1. **Get the URL & Username:**
+   ```bash
+   terraform output argocd_url
+   terraform output argocd_username
+   ```
+2. **Get the Password:**
+   ```bash
+   terraform output -raw argocd_initial_admin_password
+   ```
+
+3. **Login:**
+   Open your browser and navigate to the URL. Use `admin` and the password retrieved above to log in.
+
+> [!TIP]
+> Since we use a local IP (`10.0.0.20`), you might need to add `10.0.0.20 argocd.local` to your local `/etc/hosts` file to use the domain name.
