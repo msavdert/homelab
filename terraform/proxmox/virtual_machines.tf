@@ -16,6 +16,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_control_plane" {
 
   machine = "q35"
   bios    = "ovmf"
+  boot_order = ["scsi0", "ide2"]
 
   cpu {
     cores = 2
@@ -87,6 +88,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_worker" {
 
   machine = "q35"
   bios    = "ovmf"
+  boot_order = ["scsi0", "ide2"]
 
   cpu {
     cores = 4
@@ -115,6 +117,14 @@ resource "proxmox_virtual_environment_vm" "kubernetes_worker" {
     datastore_id = var.proxmox_storage_device
     interface    = "scsi0"
     size         = 50
+    file_format  = "raw"
+    discard      = "on"
+  }
+
+  disk {
+    datastore_id = var.proxmox_storage_device
+    interface    = "scsi1"
+    size         = var.longhorn_disk_size
     file_format  = "raw"
     discard      = "on"
   }

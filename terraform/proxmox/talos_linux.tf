@@ -48,6 +48,26 @@ resource "talos_machine_configuration_apply" "controlplane" {
   ]
 }
 
+resource "talos_image_factory_schematic" "worker" {
+  schematic = yamlencode({
+    customization = {
+      systemExtensions = {
+        officialExtensions = [
+          "siderolabs/iscsi-tools",
+          "siderolabs/util-linux-tools",
+          "siderolabs/qemu-guest-agent"
+        ]
+      }
+    }
+  })
+}
+
+data "talos_image_factory_urls" "worker" {
+  talos_version = var.talos_version
+  schematic_id  = talos_image_factory_schematic.worker.id
+  platform      = "nocloud"
+}
+
 resource "talos_machine_configuration_apply" "worker" {
   depends_on                  = [proxmox_virtual_environment_vm.kubernetes_worker]
   client_configuration        = talos_machine_secrets.this.client_configuration
@@ -58,7 +78,7 @@ resource "talos_machine_configuration_apply" "worker" {
     templatefile("${path.module}/templates/machine_config_patches_worker.tftpl", {
       hostname        = each.value.hostname == null ? format("%s-worker-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
       install_disk    = each.value.install_disk
-      install_image   = each.value.install_image
+      install_image   = data.talos_image_factory_urls.worker.urls.installer
       dns             = var.domain_name_server
       ip_address      = "${each.key}/24"
       network         = var.network

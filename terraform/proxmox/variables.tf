@@ -25,6 +25,12 @@ variable "proxmox_network_bridge" {
   default     = "vnet1"
 }
 
+variable "longhorn_disk_size" {
+  description = "Size of the dedicated disk for Longhorn storage on worker nodes (in GB)"
+  type        = number
+  default     = 100
+}
+
 variable "talos_version" {
   type    = string
   default = "1.13.0"
