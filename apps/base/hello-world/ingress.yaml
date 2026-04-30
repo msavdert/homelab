@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: hello.savdert.com
+  - host: hello.homelab.savdert.com
     http:
       paths:
       - path: /
