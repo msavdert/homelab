@@ -106,3 +106,8 @@ spec:
 1. **Access Policies:** Always create an "Access Application" in Zero Trust for sensitive UIs (ArgoCD, Grafana).
 2. **Resource Limits:** Ensure your `cloudflared` pods have CPU/Memory limits to prevent them from consuming cluster resources.
 3. **No-TLS Verify:** If your internal services use self-signed certs, configure the tunnel service with `No TLS Verify`.
+
+## 💡 Troubleshooting Tips
+
+- **White Screen / 404 Assets:** If an application loads a white screen and shows 404 errors for JS/CSS files in the browser console, ensure your `Ingress` resource uses `path: /` and `pathType: Prefix`. This ensures all sub-paths for static assets are correctly routed to the backend service.
+
