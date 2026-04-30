@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.longhorn.io
+    targetRevision: 1.8.0
+    chart: longhorn
+    helm:
+      valuesObject:
+        preUpgradeChecker:
+          jobEnabled: false
+        defaultSettings:
+          defaultDataPath: /var/lib/longhorn
+        persistence:
+          defaultClassReplicaCount: 3
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged

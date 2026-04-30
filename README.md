@@ -29,6 +29,7 @@ The project is divided into two main infrastructure layers:
 | **Talos Linux** | `v1.13.0` | April 27, 2026 | Security-focused, immutable Linux distribution for Kubernetes. |
 | **Kubernetes** | `v1.36.0` | April 22, 2026 | Container orchestration platform. |
 | **Cilium** | `v1.19.3` | April 15, 2026 | eBPF-based networking, observability, and security. |
+| **Longhorn** | `v1.8.0` | Cloud Native | Distributed block storage for Kubernetes, automated via Talos extensions and Proxmox secondary disks. |
 | **ArgoCD** | `v9.5.6` | April 27, 2026 | Declarative GitOps continuous delivery tool for Kubernetes. |
 | **Gateway API** | `v1.5.1` | March 13, 2026 | Modern, expressive, and extensible routing for Kubernetes. |
 | **Terraform** `hashicorp/hcl` | `v1.15.0` | April 29, 2026 | Infrastructure as Code tool. |
@@ -80,6 +81,7 @@ This will install ArgoCD and Cilium, enabling the GitOps workflow.
 
 - **SSH-less Provisioning**: Fully automated deployment relying solely on the Proxmox API and Cloud-Init on IDE0.
 - **Talos Linux**: Security-focused, immutable, and minimal Linux distribution for Kubernetes.
+- **Automated Storage**: Longhorn distributed storage configured entirely via Terraform (dedicated 100GB disks + dynamic Talos extensions) and deployed via ArgoCD.
 - **GitOps**: Automated application lifecycle management using ArgoCD.
 - **Cilium**: High-performance networking and security with eBPF.
 - **Infrastructure as Code**: Fully reproducible environment using Terraform.
