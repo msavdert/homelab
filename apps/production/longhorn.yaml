@@ -17,6 +17,12 @@ spec:
           defaultDataPath: /var/lib/longhorn
         persistence:
           defaultClassReplicaCount: 3
+        ingress:
+          enabled: true
+          ingressClassName: cilium
+          host: longhorn.savdert.com
+          annotations:
+            ingress.cilium.io/loadbalancer-mode: shared
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
