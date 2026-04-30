@@ -44,16 +44,28 @@ The `deployment.yaml` runs the `cloudflared` daemon. It is configured with:
 
 ---
 
-## 🪄 Step 3: The "Wildcard Ingress" Trick
+## 🪄 Step 3: Wildcard Tunnel Setup (The "Magic" Trick)
 
-Instead of creating a new tunnel route for every single app, we use a single entry point: **Cilium Ingress**.
+Instead of creating a new tunnel route for every single app, we use a single entry point: **Cilium Ingress**. This allows total automation.
 
-### 1. Map the Tunnel to Cilium
-In the Cloudflare Dashboard, go to your Tunnel's **Public Hostnames** tab and add:
-- **Hostname:** `*.homelab.savdert.com` (or your domain)
-- **Service:** `http://cilium-ingress.kube-system:80`
+### 1. Cloudflare DNS Configuration
+1. Go to your domain's **DNS Records** in Cloudflare.
+2. Delete any existing `*` records if they point to other services (like Dokploy).
+3. Create a new **CNAME** record:
+   - **Name:** `*` (asterisk)
+   - **Target:** `<your-tunnel-id>.cfargotunnel.com`
+   - **Proxy Status:** Proxied (Orange Cloud)
 
-### 2. Create an Ingress Resource
+### 2. Tunnel Hostname Configuration
+In the Cloudflare Zero Trust Dashboard (**Networks > Tunnels**):
+1. Select your tunnel and click **Edit**.
+2. Go to the **Public Hostname** tab and add:
+   - **Subdomain:** `*`
+   - **Domain:** `savdert.com`
+   - **Service:** `http://cilium-ingress.kube-system:80`
+3. Under **HTTP Settings**, ensure `HTTP Host Header` is **empty** (Null).
+
+### 3. Create an Ingress Resource
 Now, for any app you want to expose, simply create an `Ingress` manifest in Kubernetes. 
 
 **Example for `hello-world`:**
@@ -67,7 +79,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: hello.homelab.savdert.com
+  - host: hello.savdert.com
     http:
       paths:
       - path: /
@@ -80,10 +92,10 @@ spec:
 ```
 
 ### What happens next?
-1. You go to `hello.homelab.savdert.com`.
+1. You go to `hello.savdert.com`.
 2. Cloudflare matches the `*` wildcard and sends the request through the tunnel.
 3. The request hits your `cloudflared` pod, which forwards it to `cilium-ingress`.
-4. Cilium sees the `Host: hello.homelab.savdert.com` header and routes it to the `hello-world` pod.
+4. Cilium sees the `Host: hello.savdert.com` header and routes it to the `hello-world` pod.
 
 **Result:** Total automation. No more manual Tunnel configuration in the dashboard!
 
