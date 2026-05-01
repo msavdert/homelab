@@ -6,48 +6,50 @@ data "helm_template" "cilium" {
   version      = "1.19.3"
   kube_version = var.kubernetes_version
   # ZORUNLU AYARLAR (Talos üzerinde Cilium'un çalışması için gereken minimum yapılandırma)
-  set {
-    name  = "ipam.mode"
-    value = "kubernetes"
-  }
-  set {
-    name  = "kubeProxyReplacement"
-    value = "true"
-  }
-  set {
-    name  = "securityContext.capabilities.ciliumAgent"
-    value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
-  }
-  set {
-    name  = "securityContext.capabilities.cleanCiliumState"
-    value = "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
-  }
-  set {
-    name  = "cgroup.autoMount.enabled"
-    value = "false"
-  }
-  set {
-    name  = "cgroup.hostRoot"
-    value = "/sys/fs/cgroup"
-  }
-  set {
-    name  = "k8sServiceHost"
-    value = "localhost"
-  }
-  set {
-    name  = "k8sServicePort"
-    value = "7445"
-  }
-  set {
-    name  = "ingressController.enabled"
-    value = "true"
-  }
-  set {
-    name  = "ingressController.loadbalancerMode"
-    value = "shared"
-  }
-  set {
-    name  = "gatewayAPI.enabled"
-    value = "true"
-  }
+  set = [
+    {
+      name  = "ipam.mode"
+      value = "kubernetes"
+    },
+    {
+      name  = "kubeProxyReplacement"
+      value = "true"
+    },
+    {
+      name  = "securityContext.capabilities.ciliumAgent"
+      value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+    },
+    {
+      name  = "securityContext.capabilities.cleanCiliumState"
+      value = "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+    },
+    {
+      name  = "cgroup.autoMount.enabled"
+      value = "false"
+    },
+    {
+      name  = "cgroup.hostRoot"
+      value = "/sys/fs/cgroup"
+    },
+    {
+      name  = "k8sServiceHost"
+      value = "localhost"
+    },
+    {
+      name  = "k8sServicePort"
+      value = "7445"
+    },
+    {
+      name  = "ingressController.enabled"
+      value = "true"
+    },
+    {
+      name  = "ingressController.loadbalancerMode"
+      value = "shared"
+    },
+    {
+      name  = "gatewayAPI.enabled"
+      value = "true"
+    }
+  ]
 }

@@ -7,13 +7,7 @@ resource "helm_release" "argocd" {
   namespace  = kubernetes_namespace_v1.argocd.id
   timeout    = 120
 
-  dynamic "set" {
-    for_each = var.argocd_helm_values
-    content {
-      name  = set.value.name
-      value = set.value.value
-    }
-  }
+  set = var.argocd_helm_values
 }
 
 resource "helm_release" "cilium_lb_config" {
@@ -23,15 +17,16 @@ resource "helm_release" "cilium_lb_config" {
   chart      = "${path.module}/helm_charts/cilium-lb-config"
   timeout    = 60
 
-  set {
-    name  = "ciliumLoadBalancerIpRange.start"
-    value = var.cilium_load_balancer_ip_range_start
-  }
-
-  set {
-    name  = "ciliumLoadBalancerIpRange.stop"
-    value = var.cilium_load_balancer_ip_range_stop
-  }
+  set = [
+    {
+      name  = "ciliumLoadBalancerIpRange.start"
+      value = var.cilium_load_balancer_ip_range_start
+    },
+    {
+      name  = "ciliumLoadBalancerIpRange.stop"
+      value = var.cilium_load_balancer_ip_range_stop
+    }
+  ]
 }
 
 resource "helm_release" "argocd_app_of_apps" {
@@ -42,23 +37,22 @@ resource "helm_release" "argocd_app_of_apps" {
   namespace  = kubernetes_namespace_v1.argocd.id
   timeout    = 60
 
-  set {
-    name  = "source.repoURL"
-    value = var.argocd_app_of_apps_repo_url
-  }
-
-  set {
-    name  = "source.targetRevision"
-    value = var.argocd_app_of_apps_revision
-  }
-
-  set {
-    name  = "source.path"
-    value = var.argocd_app_of_apps_path
-  }
-
-  set {
-    name  = "syncPolicy"
-    value = var.argocd_app_of_apps_sync_policy
-  }
+  set = [
+    {
+      name  = "source.repoURL"
+      value = var.argocd_app_of_apps_repo_url
+    },
+    {
+      name  = "source.targetRevision"
+      value = var.argocd_app_of_apps_revision
+    },
+    {
+      name  = "source.path"
+      value = var.argocd_app_of_apps_path
+    },
+    {
+      name  = "syncPolicy"
+      value = var.argocd_app_of_apps_sync_policy
+    }
+  ]
 }

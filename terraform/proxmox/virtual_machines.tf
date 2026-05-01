@@ -1,4 +1,4 @@
-resource "proxmox_virtual_environment_download_file" "talos_iso" {
+resource "proxmox_download_file" "talos_iso" {
   content_type = "iso"
   datastore_id = var.proxmox_storage_device
   node_name    = var.proxmox_target_node
@@ -7,7 +7,7 @@ resource "proxmox_virtual_environment_download_file" "talos_iso" {
 }
 
 resource "proxmox_virtual_environment_vm" "kubernetes_control_plane" {
-  depends_on = [proxmox_virtual_environment_download_file.talos_iso]
+  depends_on = [proxmox_download_file.talos_iso]
   for_each   = var.node_data.controlplanes
 
   name        = format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.controlplanes), each.key))
@@ -37,7 +37,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_control_plane" {
 
   cdrom {
     enabled   = true
-    file_id   = proxmox_virtual_environment_download_file.talos_iso.id
+    file_id   = proxmox_download_file.talos_iso.id
     interface = "ide2"
   }
 
@@ -79,7 +79,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_control_plane" {
 }
 
 resource "proxmox_virtual_environment_vm" "kubernetes_worker" {
-  depends_on = [proxmox_virtual_environment_download_file.talos_iso]
+  depends_on = [proxmox_download_file.talos_iso]
   for_each   = var.node_data.workers
 
   name        = format("%s-worker-%s", var.cluster_name, index(keys(var.node_data.workers), each.key))
@@ -109,7 +109,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_worker" {
 
   cdrom {
     enabled   = true
-    file_id   = proxmox_virtual_environment_download_file.talos_iso.id
+    file_id   = proxmox_download_file.talos_iso.id
     interface = "ide2"
   }
 

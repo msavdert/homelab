@@ -24,16 +24,21 @@ The project is divided into two main infrastructure layers:
 
 ## Component Stack & Versions
 
-| Component | Version | Release Date | Description |
-| :--- | :--- | :--- | :--- |
-| **Talos Linux** | `v1.13.0` | April 27, 2026 | Security-focused, immutable Linux distribution for Kubernetes. |
-| **Kubernetes** | `v1.36.0` | April 22, 2026 | Container orchestration platform. |
-| **Cilium** | `v1.19.3` | April 15, 2026 | eBPF-based networking, observability, and security. |
-| **Longhorn** | `v1.8.0` | Cloud Native | Distributed block storage for Kubernetes, automated via Talos extensions and Proxmox secondary disks. |
-| **ArgoCD** | `v9.5.6` | April 27, 2026 | Declarative GitOps continuous delivery tool for Kubernetes. |
-| **Gateway API** | `v1.5.1` | March 13, 2026 | Modern, expressive, and extensible routing for Kubernetes. |
-| **Terraform** `hashicorp/hcl` | `v1.15.0` | April 29, 2026 | Infrastructure as Code tool. |
-| **Proxmox Provider** `bpg/proxmox` | `v0.104.0` | April 25, 2026 | Modern, API-first Terraform provider for Proxmox VE. |
+| Category | Component | Version | Release Date | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **OS & K8s** | **Talos Linux** | `v1.13.0` | April 27, 2026 | Security-focused, immutable Linux distribution for Kubernetes. |
+| | **Kubernetes** | `v1.36.0` | April 22, 2026 | Container orchestration platform. |
+| **Networking** | **Cilium** | `v1.19.3` | April 15, 2026 | eBPF-based networking, observability, and security. |
+| | **Gateway API** | `v1.5.1` | March 13, 2026 | Modern, expressive, and extensible routing for Kubernetes. |
+| **Storage** | **Longhorn** | `v1.11.1` | April 18, 2026 | Distributed block storage for Kubernetes. |
+| **Databases** | **CloudNativePG** | `v0.28.0` | April 10, 2026 | PostgreSQL operator for Kubernetes. |
+| **GitOps & CI** | **ArgoCD (Chart)** | `v9.5.11` | April 27, 2026 | Declarative GitOps continuous delivery tool for Kubernetes. |
+| **Security** | **1Password Connect** | `v2.4.1` | March 20, 2026 | Secret management integration. |
+| **IaC Tools** | **Terraform** | `v1.15.0` | April 29, 2026 | Infrastructure as Code tool. |
+| **Providers** | **Proxmox Provider** | `v0.104.0` | April 25, 2026 | `bpg/proxmox` - Modern API-first provider. |
+| | **Helm Provider** | `v3.1.1` | April 30, 2026 | `hashicorp/helm` - For chart management. |
+| | **Kubernetes Provider** | `v3.1.0` | April 30, 2026 | `hashicorp/kubernetes` - For K8s resources. |
+| | **Talos Provider** | `v0.11.0` | April 30, 2026 | `siderolabs/talos` - For Talos configuration. |
 
 ## Keeping Versions Updated
 
