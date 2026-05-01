@@ -61,9 +61,12 @@ spec:
       - RespectIgnoreDifferences=true
 
   ignoreDifferences:
-    - group: discovery.k8s.io
-      kind: EndpointSlice
-      name: cilium-ingress
+    - group: ""
+      kind: Secret
+      name: cilium-ca
+      jsonPointers:
+        - /data/ca.crt
+        - /data/ca.key
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
       jsonPointers:
