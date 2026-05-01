@@ -61,6 +61,8 @@ spec:
       - RespectIgnoreDifferences=true
 
   ignoreDifferences:
+    - group: discovery.k8s.io
+      kind: EndpointSlice
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
       jsonPointers:
