@@ -4,17 +4,16 @@ This document outlines the setup, integration, and best practices for using [Ren
 
 ## Overview
 
-Renovate is an automated dependency update tool that monitors your repository for outdated dependencies and automatically creates Pull Requests (PRs) to update them. In this project, it is primarily used for:
+Renovate is an automated dependency update tool that monitors your repository for outdated dependencies and automatically creates Pull Requests (PRs) to update them. In this project, it manages:
 
-- **Argo CD Applications**: Updating `targetRevision` for Helm charts.
-- **Terraform**: Updating Provider and Module versions.
-- **Container Images**: Updating tags in Kubernetes manifests.
+- **Argo CD Applications**: Monitors `apps/` for Helm chart versions (`targetRevision`).
+- **Terraform**: Monitors `terraform/` for Provider and Module versions.
 
 ---
 
 ## Installation: GitHub App (Recommended)
 
-The easiest way to integrate Renovate with GitHub is by using the official **Mend Renovate** GitHub App.
+The easiest way to integrate Renovate is by using the official **Mend Renovate** GitHub App.
 
 ### Step-by-Step Setup
 1.  Go to the [Renovate GitHub App page](https://github.com/apps/renovate).
@@ -23,102 +22,107 @@ The easiest way to integrate Renovate with GitHub is by using the official **Men
 4.  Choose **Only select repositories** and select this repository (`homelab`).
 5.  Click **Install & Authorize**.
 6.  **Mend Onboarding Screens**:
-    *   **Select Product**: Choose **Renovate Only**. (The "Mend Application Security" option requires a paid license).
-    *   **Select Mode**: Choose **Scan and Alert**. This ensures Renovate creates Pull Requests and Issues rather than just scanning silently.
+    *   **Select Product**: Choose **Renovate Only**.
+    *   **Select Mode**: Choose **Scan and Alert**. This ensures Renovate creates Pull Requests rather than just scanning silently.
 
 ---
 
-## The Onboarding Process
+## Working Configuration (`renovate.json`)
 
-Once the app is installed, Renovate will not immediately start opening PRs for every dependency. Instead:
-
-1.  **Configure Renovate PR**: Renovate will open a single PR titled "Configure Renovate".
-2.  **Review the PR**: This PR contains a default `renovate.json` file. It will also provide a summary of all dependencies it found in your repo.
-3.  **Merge the PR**: Once you merge this onboarding PR, Renovate becomes active and will start managing your dependencies based on the configuration.
-
----
-
-## Implementation Strategy & Best Practices
-
-To avoid being overwhelmed by PRs ("PR fatigue") and to ensure stability, follow these best practices:
-
-### 1. Noise Reduction
-
-#### Dependency Grouping
-Group related updates together to reduce the number of open PRs. For example, grouping all Terraform providers into a single PR.
-```json
-{
-  "packageRules": [
-    {
-      "matchManagers": ["terraform"],
-      "groupName": "Terraform Providers"
-    }
-  ]
-}
-```
-
-#### Scheduling
-Limit when Renovate creates PRs. This prevents a flood of notifications during your workday.
-```json
-{
-  "schedule": ["before 8am on monday"]
-}
-```
-
-### 2. Dependency Dashboard
-Renovate creates a "Dependency Dashboard" issue in your repository. Use this to:
-- See a summary of all pending updates.
-- Manually trigger a PR for a specific update.
-- Re-trigger failed PRs.
-
-### 3. Automerging
-For low-risk updates (e.g., `patch` versions or specific non-breaking providers), you can enable automerge if your CI/CD pipeline passes.
-> [!IMPORTANT]
-> Only enable automerge if you have robust automated testing (e.g., `terraform plan` checks or Kubernetes linting).
-
-### 4. GitOps Specifics (Argo CD & Terraform)
-Renovate is highly compatible with GitOps:
-- **Argo CD**: It detects `targetRevision` in `Application` manifests and updates them.
-- **Terraform**: It parses `.tf` files and `.terraform.lock.hcl` to ensure providers are kept up to date.
-
----
-
-## Recommended Configuration (`renovate.json`)
-
-Here is a recommended starting configuration for this repository:
+Our project uses a specific configuration to ensure Argo CD manifests are correctly detected. Unlike Terraform, the Argo CD manager requires an explicit `fileMatch` pattern.
 
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":rebaseStalePrs",
-    ":enableHelpfulLabels",
-    ":prHourlyLimitNone",
-    ":prConcurrentLimit20"
+    ":rebaseStalePrs"
   ],
   "argocd": {
-    "fileMatch": ["apps/.+\\.yaml$"]
-  },
-  "terraform": {
-    "fileMatch": ["terraform/.+\\.tf$"]
+    "fileMatch": [
+      "(^|/)apps/.+\\.yaml$"
+    ]
   },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
       "matchManagers": ["terraform"],
-      "groupName": "Terraform Dependencies"
+      "groupName": "Terraform Updates"
     },
     {
-      "matchUpdateTypes": ["minor", "patch"],
       "matchManagers": ["argocd"],
-      "groupName": "ArgoCD App Updates"
+      "groupName": "ArgoCD Updates"
     }
   ]
 }
 ```
 
+### Key Components:
+- **`config:recommended`**: Enables standard best practices for dependency scanning.
+- **`argocd.fileMatch`**: Tells Renovate to scan all `.yaml` files inside the `apps/` directory (and subdirectories) for Argo CD `Application` manifests.
+- **`packageRules`**: Groups multiple updates into single PRs (e.g., all Terraform providers together) to reduce PR noise.
+
+---
+
+## Using the Dependency Dashboard
+
+Renovate creates a persistent Issue titled **"Dependency Dashboard"** in your repository. This is your control panel for managing updates.
+
+### 1. Config Migration
+If you see a checkbox for **"Config Migration Needed"**, select it. Renovate will open a PR to update your `renovate.json` to the latest standards. This is a safe and recommended operation.
+
+### 2. Rate-Limiting & Major Updates
+Renovate often rate-limits **Major** updates (e.g., v2.0.0 to v3.0.0) to prevent breaking your infrastructure all at once.
+- **Major Updates**: Usually contain breaking changes. Review the linked Release Notes carefully.
+- **Minor/Patch Updates**: Generally safe and grouped in the PRs you see immediately.
+
+### 3. Manual Triggers
+- **Rebase/Retry**: You can check boxes in the dashboard to force Renovate to recreate or update a specific PR.
+- **Run Again**: At the bottom of the dashboard, there is a checkbox to trigger a fresh scan of the entire repository. Use this after merging PRs to speed up the detection of the next set of updates.
+
+---
+
+## Post-Installation Workflow
+
+Once Renovate is active, follow this routine to keep your homelab healthy:
+
+### 1. Review the Pull Requests
+When a PR arrives:
+- **Read the Release Notes**: Renovate automatically embeds changelogs in the PR description. Check for any "Breaking Changes".
+- **Verify Terraform**: For Terraform PRs, it is recommended to run `terraform plan` locally to ensure no unexpected infrastructure changes occur.
+
+### 2. Merge and Observe
+- **Merge**: Once satisfied, merge the PR into `main`.
+- **Observe Argo CD**: Watch your Argo CD dashboard. It will detect the Git change and synchronize the new versions (e.g., updating Longhorn or Cilium) into your cluster.
+
+### 3. Future Automation (Optional)
+As you gain confidence in your setup, you can enable **Automerge** for specific types of updates (like `patch` versions) by adding the following to your `renovate.json`:
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ]
+}
+```
+*Note: Only enable automerge if you have automated tests to verify the changes.*
+
+---
+
+## Troubleshooting
+
+### The "Action Required: Fix Renovate Configuration" Issue
+If you see this error, it usually means there is a syntax error or an invalid manager configuration.
+- **Solution**: Ensure your `fileMatch` regex is correct. Using `(^|/)` at the start of the pattern helps Renovate match directories correctly regardless of the root path.
+- **Validation**: You can validate your config locally using:
+  ```bash
+  npx --yes --package renovate -- renovate-config-validator
+  ```
+
+---
+
 ## Useful Resources
 - [Renovate Official Documentation](https://docs.renovatebot.com/)
-- [Renovate Configuration Options](https://docs.renovatebot.com/configuration-options/)
-- [Renovate Templates](https://docs.renovatebot.com/presets-config/)
+- [Argo CD Manager Configuration](https://docs.renovatebot.com/modules/manager/argocd/)
+- [Terraform Manager Configuration](https://docs.renovatebot.com/modules/manager/terraform/)
