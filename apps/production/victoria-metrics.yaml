@@ -16,9 +16,11 @@ spec:
         fullnameOverride: "vm"
         victoria-metrics-operator:
           admissionWebhooks:
-            enabled: true
+            enabled: false
             certManager:
               enabled: true
+            annotations:
+              cert-manager.io/inject-ca-from: monitoring/vm-victoria-metrics-operator-admission
         vmsingle:
           enabled: true
           spec:
