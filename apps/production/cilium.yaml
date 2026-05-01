@@ -63,6 +63,7 @@ spec:
   ignoreDifferences:
     - group: discovery.k8s.io
       kind: EndpointSlice
+      name: cilium-ingress
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
       jsonPointers:
