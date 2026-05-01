@@ -35,12 +35,21 @@ spec:
           grafana.ini:
             database:
               wal: true
+          podSecurityContext:
+            fsGroup: 472
+            runAsGroup: 472
+            runAsUser: 472
           resources:
             limits:
               memory: 512Mi
             requests:
               cpu: 100m
               memory: 256Mi
+          # Readiness probe'u biraz esnetiyoruz
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 10
           ingress:
             enabled: true
             ingressClassName: cilium
