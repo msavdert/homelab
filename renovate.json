@@ -5,8 +5,8 @@
     ":rebaseStalePrs"
   ],
   "argocd": {
-    "fileMatch": [
-      "(^|/)apps/.+\\.yaml$"
+    "managerFilePatterns": [
+      "/(^|/)apps/.+\\.yaml$/"
     ]
   },
   "packageRules": [
