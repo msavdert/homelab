@@ -1,72 +1,41 @@
-# VictoriaMetrics K8s Stack: Unified Observability
+# VictoriaMetrics Observability Stack
 
-This documentation details the implementation of the **VictoriaMetrics K8s Stack** (v0.76.0), providing a high-performance, resource-efficient alternative to the traditional Prometheus-Grafana stack.
+This folder contains the GitOps manifests for the VictoriaMetrics monitoring stack, managed via ArgoCD.
 
----
+## Architecture & Design Decisions
 
-## 1. Why VictoriaMetrics (VM)?
+The stack is designed to be fully automated and self-healing. To achieve "zero manual intervention" during cluster bootstrapping, we implemented several critical configurations:
 
-In a homelab environment where CPU, RAM, and Disk space are precious, VictoriaMetrics outshines the competition:
-- **3x-6x Less Memory**: VM handles the same amount of metrics with a fraction of the RAM used by Prometheus.
-- **10x Better Compression**: Data is stored much more efficiently, allowing for months of retention on small disks.
-- **MetricsQL**: A super-set of PromQL that adds powerful functions (like `rate` over arbitrary intervals) and better performance for complex queries.
-- **Native Long-Term Storage**: Unlike Prometheus, which requires sidecars like Thanos or Mimir for long-term storage, VM handles it natively out of the box.
+### 1. Dependency Management (ArgoCD Sync Waves)
+The observability stack has strict dependencies on other infrastructure components. We use ArgoCD sync-waves to ensure the correct order:
+- **Wave -10**: `prometheus-operator-crds` & `gateway-api-crds`. Critical CRDs must exist before any operator starts.
+- **Wave -8**: `cert-manager`. Provides TLS certificates for admission webhooks.
+- **Wave -4**: `victoria-metrics-stack`. The main monitoring components.
 
----
+### 2. VictoriaMetrics Operator & Admission Webhooks
+The operator uses Admission Webhooks for resource validation. 
+- **Cert-Manager Integration**: We delegate certificate management to `cert-manager`.
+- **Manual Annotation**: Due to limitations in some Helm chart versions, we explicitly add `cert-manager.io/inject-ca-from` to force CA bundle injection. This prevents the "unknown authority" TLS errors common in fresh installs.
 
-## 2. Prerequisites: Prometheus Operator CRDs
+### 3. Grafana Persistence (SQLite on Longhorn)
+Running SQLite on network-attached storage (Longhorn) requires specific optimizations to prevent `SQLITE_BUSY` (database is locked) errors:
+- **WAL Mode**: Enabled `database.wal: true` in `grafana.ini` to allow concurrent read/write operations.
+- **Permissions**: Explicitly set `podSecurityContext` to UID/GID `472` to ensure Grafana has write access to the persistent volume.
+- **Probes**: Relaxed `readinessProbe` to give the database enough time for migrations during cold starts.
 
-Before deploying the VictoriaMetrics Stack, the **Prometheus Operator CRDs** must be installed in the cluster.
+## Prerequisites
 
-### Why are they required?
-VictoriaMetrics Operator includes a **Prometheus Converter** feature. This allows the operator to "see" and "convert" standard Prometheus objects like `ServiceMonitor` and `PodMonitor` (used by operators like CloudNativePG) into VictoriaMetrics-native configurations.
-- **The Crash Issue**: If these CRDs are not present, the VictoriaMetrics Operator will fail to start (CrashLoopBackOff) with the error: `no matches for kind "ServiceMonitor"`.
-- **The Best Practice**: We manage these CRDs via a separate ArgoCD application: `apps/production/prometheus-crds.yaml` with a `sync-wave` of `-10`.
+Before deploying this stack, ensure the following applications are running in your cluster:
+1. **Longhorn**: For persistent storage.
+2. **cert-manager**: For webhook certificate management.
 
-### Official Reference
-> *"Note that Prometheus CRDs are not supplied with the VictoriaMetrics operator, so you need to install them separately."*
-> — [VictoriaMetrics Official Docs: Prometheus Integration](https://docs.victoriametrics.com/operator/integrations/prometheus/#prometheus-objects-conversion)
+## Installation from Scratch
+The entire stack is declarative. To re-install:
+1. Apply the `app-of-apps` (or the specific production manifests).
+2. ArgoCD will respect the sync-waves.
+3. The `prometheus-operator-crds` will install first.
+4. The VictoriaMetrics operator will start, request a certificate from `cert-manager`, and initialize the stack without manual `kubectl` intervention.
 
----
-
-## 3. Architecture & Components
-
-We use the **`victoria-metrics-k8s-stack`**, which installs the following:
-- **VMOperator**: The brain that manages the lifecycle of all other components.
-- **VMSingle**: An all-in-one metrics database (Single Node). We chose this for the homelab as it avoids the networking/complexity overhead of a full `VMCluster`.
-- **VMAgent**: A lightweight scraper that replaces the Prometheus scraper. It collects metrics and pushes them to VMSingle.
-- **VMAlert**: Evaluates alerting rules and sends notifications to Alertmanager.
-- **Grafana**: Pre-configured with official VictoriaMetrics dashboards.
-
----
-
-## 3. Implementation Details (GitOps)
-
-### Deployment Patterns:
-- **Sync Wave (-4)**: Deployed after foundational networking (Cilium) and security (cert-manager) are ready.
-- **ServerSideApply**: Used in ArgoCD to handle the large VictoriaMetrics CRDs without exceeding annotation limits.
-
-### Homelab Optimizations:
-- **Integer CPUs**: We set CPU limits to whole numbers (e.g., `1` instead of `500m`). VictoriaMetrics is written in Go and performs significantly better when it can map its threads to physical CPU cores.
-- **Resource Parity**: Requests are set equal to Limits to prevent OOM (Out Of Memory) kills, which can corrupt the database during heavy ingestion.
-- **Retention Strategy**: Configured for **6 months** by default. Thanks to VM's compression, this typically fits within a 20GB volume for a 4-node cluster.
-
----
-
-## 4. Integration: CloudNativePG (CNPG)
-
-One of the primary goals of this stack is monitoring our PostgreSQL databases.
-- **Discovery**: The `VMAgent` automatically scans the cluster for `PodMonitor` resources.
-- **Automation**: When `enablePodMonitor: true` is set in the CNPG cluster YAML, the operator creates a PodMonitor. `VMAgent` detects this via the `VMOperator` and starts scraping PostgreSQL metrics (port 9187) immediately.
-
----
-
-## 5. Reference & Further Reading
-
-- [VictoriaMetrics Official Documentation](https://docs.victoriametrics.com/)
-- [Prometheus vs VictoriaMetrics: 2026 Comparison](https://victoriametrics.com/blog/victoriametrics-vs-prometheus/)
-- [Monitoring Kubernetes with VictoriaMetrics Guide](https://docs.victoriametrics.com/guides/k8s-monitoring/)
-- [MetricsQL Language Reference](https://docs.victoriametrics.com/metricsql/)
-
----
-*Last Updated: 2026-05-01*
+## Troubleshooting
+- **Progressing State**: If the app stays in `Progressing` but pods are `Healthy`, it's likely a health-check mismatch in ArgoCD for custom resources like `VMSingle`. The system is technically operational.
+- **Webhook Errors**: If you encounter TLS errors during an *upgrade*, manually delete the `ValidatingWebhookConfiguration` to allow the new certificate to be injected. (This is not required for a fresh install).
