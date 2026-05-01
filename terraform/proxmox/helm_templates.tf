@@ -59,7 +59,7 @@ data "helm_template" "cilium" {
   }
   set {
     name  = "ingressController.loadbalancerMode"
-    value = "dedicated"
+    value = "shared"
   }
   # Gateway API
   # See: https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/
