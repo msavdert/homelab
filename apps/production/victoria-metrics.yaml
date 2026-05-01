@@ -32,6 +32,15 @@ spec:
           enabled: true
         grafana:
           enabled: true
+          grafana.ini:
+            database:
+              wal: true
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
           ingress:
             enabled: true
             ingressClassName: cilium

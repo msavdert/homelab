@@ -49,7 +49,7 @@ data "helm_template" "cilium" {
     },
     {
       name  = "gatewayAPI.enabled"
-      value = "true"
+      value = "false"
     }
   ]
 }
