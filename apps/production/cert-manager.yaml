@@ -7,18 +7,27 @@ metadata:
     argocd.argoproj.io/sync-wave: "-8"
 spec:
   project: default
-  source:
-    repoURL: https://charts.jetstack.io
-    targetRevision: v1.20.2
-    chart: cert-manager
-    helm:
-      parameters:
-        - name: installCRDs
-          value: "true"
-      values: |
-        replicaCount: 1
-        webhook:
+  sources:
+    # 1. Kaynak: Helm Chart
+    - repoURL: https://charts.jetstack.io
+      targetRevision: v1.14.4
+      chart: cert-manager
+      helm:
+        parameters:
+          - name: installCRDs
+            value: "true"
+        values: |
           replicaCount: 1
+          webhook:
+            replicaCount: 1
+    
+    # 2. Kaynak: Yerel ClusterIssuers vb.
+    - repoURL: https://github.com/msavdert/homelab.git
+      targetRevision: main
+      path: apps/base/cert-manager
+      directory:
+        include: "*.yaml"
+  
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  project: default
+  sources:
+    # 1. Kaynak: Gateway API CRDs (Git)
+    - repoURL: https://github.com/kubernetes-sigs/gateway-api.git
+      targetRevision: v1.5.1
+      path: config/crd/experimental
+    
+    # 2. Kaynak: Prometheus Operator CRDs (Helm)
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 17.0.2
+      chart: prometheus-operator-crds
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
