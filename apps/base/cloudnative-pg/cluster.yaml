@@ -1,0 +1,42 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-main
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+
+  # Use the specialized StorageClass
+  storage:
+    size: 10Gi
+    storageClass: longhorn-cnpg-strict-local
+  
+  # Separate WAL storage for performance isolation (Best Practice)
+  walStorage:
+    size: 5Gi
+    storageClass: longhorn-cnpg-strict-local
+
+  # Pod Anti-Affinity is critical when using strict-local storage
+  # to ensure instances are on different physical nodes.
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+
+  # Monitoring integration (Prometheus)
+  monitoring:
+    enablePodMonitor: true
+
+  # Backup configuration placeholder (Recommended to use S3/Minio)
+  # backup:
+  #   barmanObjectStore:
+  #     destinationPath: s3://my-postgres-backups/
+  #     endpointURL: https://minio.example.com
+  #     s3Credentials:
+  #       name: minio-creds
+  #       key: ...
+
+  # Lifecycle settings
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"
