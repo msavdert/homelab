@@ -5,6 +5,7 @@ data "helm_template" "cilium" {
   chart        = "cilium"
   version      = "1.19.3"
   kube_version = var.kubernetes_version
+  # ZORUNLU AYARLAR (Talos üzerinde Cilium'un çalışması için gereken minimum yapılandırma)
   set {
     name  = "ipam.mode"
     value = "kubernetes"
@@ -36,58 +37,5 @@ data "helm_template" "cilium" {
   set {
     name  = "k8sServicePort"
     value = "7445"
-  }
-  # L2 Loadbalancer
-  # See: https://docs.cilium.io/en/stable/network/l2-announcements/
-  set {
-    name  = "l2announcements.enabled"
-    value = "true"
-  }
-  set {
-    name  = "k8sClientRateLimit.qps"
-    value = "50"
-  }
-  set {
-    name  = "k8sClientRateLimit.burst"
-    value = "100"
-  }
-  # Ingress Controller
-  # See: https://docs.cilium.io/en/stable/network/servicemesh/ingress/
-  set {
-    name  = "ingressController.enabled"
-    value = "true"
-  }
-  set {
-    name  = "ingressController.loadbalancerMode"
-    value = "shared"
-  }
-  # Gateway API
-  # See: https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/
-  set {
-    name  = "gatewayAPI.enabled"
-    value = "true"
-  }
-  set {
-    name  = "gatewayAPI.enableAlpn"
-    value = "true"
-  }
-  set {
-    name  = "gatewayAPI.enableAppProtocol"
-    value = "true"
-  }
-  set {
-    name  = "gatewayAPI.gatewayClass.create"
-    value = "true"
-    type  = "string"
-  }
-  # Egress Gateway
-  # See: https://docs.cilium.io/en/stable/network/egress-gateway/egress-gateway/
-  set {
-    name  = "egressGateway.enabled"
-    value = "true"
-  }
-  set {
-    name  = "bpf.masquerade"
-    value = "true"
   }
 }
