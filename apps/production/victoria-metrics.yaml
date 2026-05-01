@@ -14,10 +14,11 @@ spec:
     helm:
       valuesObject:
         fullnameOverride: "vm"
-        admissionWebhooks:
-          enabled: true
-          certManager:
+        victoria-metrics-operator:
+          admissionWebhooks:
             enabled: true
+            certManager:
+              enabled: true
         vmsingle:
           enabled: true
           spec:
@@ -49,7 +50,6 @@ spec:
             requests:
               cpu: 100m
               memory: 256Mi
-          # Readiness probe'u biraz esnetiyoruz
           readinessProbe:
             initialDelaySeconds: 30
             periodSeconds: 10
