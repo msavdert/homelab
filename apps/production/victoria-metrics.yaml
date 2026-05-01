@@ -42,8 +42,8 @@ spec:
             enabled: true
             admin:
               existingSecret: grafana-admin-credentials
-              userKey: admin-user
-              passwordKey: admin-password
+              userKey: user
+              passwordKey: password
             grafana.ini:
               database:
                 wal: true
