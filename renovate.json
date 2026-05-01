@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":rebaseStalePrs",
+    ":enableHelpfulLabels",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimit20"
+  ],
+  "argocd": {
+    "fileMatch": ["apps/.+\\.yaml$"]
+  },
+  "terraform": {
+    "fileMatch": ["terraform/.+\\.tf$"]
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": ["terraform"],
+      "groupName": "Terraform Dependencies"
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": ["argocd"],
+      "groupName": "ArgoCD App Updates"
+    }
+  ]
+}
