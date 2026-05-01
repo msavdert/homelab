@@ -1,19 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudnative-pg
+  name: postgres-shared-cluster
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-4"
+    argocd.argoproj.io/sync-wave: "0" # Operatörden sonra kurulmalı
 spec:
   project: default
   source:
-    repoURL: https://cloudnative-pg.github.io/charts
-    targetRevision: 0.28.0
-    chart: cloudnative-pg
+    repoURL: https://github.com/msavdert/homelab.git
+    targetRevision: main
+    path: apps/base/cloudnative-pg
+    directory:
+      include: "*.yaml"
   destination:
     server: https://kubernetes.default.svc
-    namespace: cnpg-system
+    namespace: postgres
   syncPolicy:
     automated:
       prune: true
