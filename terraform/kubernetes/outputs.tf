@@ -21,3 +21,9 @@ output "argocd_initial_admin_password" {
   sensitive   = true
   description = "The initial admin password for ArgoCD"
 }
+
+output "admin_user_token" {
+  value       = kubernetes_secret_v1.admin_user_token.data["token"]
+  sensitive   = true
+  description = "The permanent token for the admin-user service account"
+}

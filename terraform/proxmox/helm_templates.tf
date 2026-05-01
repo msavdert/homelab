@@ -38,4 +38,16 @@ data "helm_template" "cilium" {
     name  = "k8sServicePort"
     value = "7445"
   }
+  set {
+    name  = "ingressController.enabled"
+    value = "true"
+  }
+  set {
+    name  = "ingressController.loadbalancerMode"
+    value = "shared"
+  }
+  set {
+    name  = "gatewayAPI.enabled"
+    value = "true"
+  }
 }
