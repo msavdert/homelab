@@ -23,11 +23,17 @@ Running SQLite on network-attached storage (Longhorn) requires specific optimiza
 - **Permissions**: Explicitly set `podSecurityContext` to UID/GID `472` to ensure Grafana has write access to the persistent volume.
 - **Probes**: Relaxed `readinessProbe` to give the database enough time for migrations during cold starts.
 
+### 4. Secret Management (1Password)
+Admin credentials for Grafana are managed via 1Password:
+- **OnePasswordItem**: A CRD that syncs credentials from the `homelab` vault.
+- **Keys**: Expects `admin-user` and `admin-password` fields in the 1Password item.
+
 ## Prerequisites
 
 Before deploying this stack, ensure the following applications are running in your cluster:
 1. **Longhorn**: For persistent storage.
 2. **cert-manager**: For webhook certificate management.
+3. **1Password Connect**: For secret synchronization.
 
 ## Installation from Scratch
 The entire stack is declarative. To re-install:

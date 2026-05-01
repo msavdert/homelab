@@ -7,62 +7,75 @@ metadata:
     argocd.argoproj.io/sync-wave: "-4"
 spec:
   project: default
-  source:
-    repoURL: https://victoriametrics.github.io/helm-charts/
-    targetRevision: 0.76.0
-    chart: victoria-metrics-k8s-stack
-    helm:
-      valuesObject:
-        fullnameOverride: "vm"
-        victoria-metrics-operator:
-          admissionWebhooks:
-            enabled: true
-            certManager:
+  sources:
+    # 1. Kaynak: Uzak Helm Chart
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.76.0
+      chart: victoria-metrics-k8s-stack
+      helm:
+        valuesObject:
+          fullnameOverride: "vm"
+          victoria-metrics-operator:
+            admissionWebhooks:
               enabled: true
-            annotations:
-              cert-manager.io/inject-ca-from: monitoring/victoria-metrics-stack-victoria-metrics-operator-validation
-        vmsingle:
-          enabled: true
-          spec:
-            retentionPeriod: "6"
-            storage:
-              storageClassName: longhorn
-              accessModes: ["ReadWriteOnce"]
-              resources:
-                requests:
-                  storage: 20Gi
-        vmagent:
-          enabled: true
-          spec:
-            scrapeInterval: "30s"
-        vmalert:
-          enabled: true
-        grafana:
-          enabled: true
-          grafana.ini:
-            database:
-              wal: true
-          podSecurityContext:
-            fsGroup: 472
-            runAsGroup: 472
-            runAsUser: 472
-          resources:
-            limits:
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
-          readinessProbe:
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 10
-          ingress:
+              certManager:
+                enabled: true
+              annotations:
+                cert-manager.io/inject-ca-from: monitoring/victoria-metrics-stack-victoria-metrics-operator-validation
+          vmsingle:
             enabled: true
-            ingressClassName: cilium
-            hosts:
-              - grafana.savdert.com
-            annotations:
-              ingress.cilium.io/loadbalancer-mode: shared
+            spec:
+              retentionPeriod: "6"
+              storage:
+                storageClassName: longhorn
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 20Gi
+          vmagent:
+            enabled: true
+            spec:
+              scrapeInterval: "30s"
+          vmalert:
+            enabled: true
+          grafana:
+            enabled: true
+            admin:
+              existingSecret: grafana-admin-credentials
+              userKey: admin-user
+              passwordKey: admin-password
+            grafana.ini:
+              database:
+                wal: true
+            podSecurityContext:
+              fsGroup: 472
+              runAsGroup: 472
+              runAsUser: 472
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 100m
+                memory: 256Mi
+            readinessProbe:
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              failureThreshold: 10
+            ingress:
+              enabled: true
+              ingressClassName: cilium
+              hosts:
+                - grafana.savdert.com
+              annotations:
+                ingress.cilium.io/loadbalancer-mode: shared
+    
+    # 2. Kaynak: Yerel Manifestler (OnePasswordItem vb.)
+    - repoURL: https://github.com/msavdert/homelab.git
+      targetRevision: main
+      path: apps/base/victoria-metrics
+      directory:
+        include: "*.yaml"
+  
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
