@@ -14,7 +14,22 @@ In a homelab environment where CPU, RAM, and Disk space are precious, VictoriaMe
 
 ---
 
-## 2. Architecture & Components
+## 2. Prerequisites: Prometheus Operator CRDs
+
+Before deploying the VictoriaMetrics Stack, the **Prometheus Operator CRDs** must be installed in the cluster.
+
+### Why are they required?
+VictoriaMetrics Operator includes a **Prometheus Converter** feature. This allows the operator to "see" and "convert" standard Prometheus objects like `ServiceMonitor` and `PodMonitor` (used by operators like CloudNativePG) into VictoriaMetrics-native configurations.
+- **The Crash Issue**: If these CRDs are not present, the VictoriaMetrics Operator will fail to start (CrashLoopBackOff) with the error: `no matches for kind "ServiceMonitor"`.
+- **The Best Practice**: We manage these CRDs via a separate ArgoCD application: `apps/production/prometheus-crds.yaml` with a `sync-wave` of `-10`.
+
+### Official Reference
+> *"Note that Prometheus CRDs are not supplied with the VictoriaMetrics operator, so you need to install them separately."*
+> — [VictoriaMetrics Official Docs: Prometheus Integration](https://docs.victoriametrics.com/operator/integrations/prometheus/#prometheus-objects-conversion)
+
+---
+
+## 3. Architecture & Components
 
 We use the **`victoria-metrics-k8s-stack`**, which installs the following:
 - **VMOperator**: The brain that manages the lifecycle of all other components.
