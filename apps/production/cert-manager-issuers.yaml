@@ -1,23 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudnative-pg-operator
+  name: cert-manager-issuers
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-4"
+    argocd.argoproj.io/sync-wave: "-6"
 spec:
   project: default
   source:
-    repoURL: https://cloudnative-pg.github.io/charts
-    targetRevision: 0.28.0
-    chart: cloudnative-pg
+    repoURL: https://github.com/msavdert/homelab.git
+    targetRevision: main
+    path: apps/base/cert-manager
   destination:
     server: https://kubernetes.default.svc
-    namespace: cnpg-system
+    namespace: cert-manager
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true # Needed for Large CRDs

@@ -34,6 +34,8 @@ The project is divided into two main infrastructure layers:
 | **Databases** | **CloudNativePG** | `v0.28.0` | April 10, 2026 | PostgreSQL operator for Kubernetes. |
 | **GitOps & CI** | **ArgoCD (Chart)** | `v9.5.11` | April 27, 2026 | Declarative GitOps continuous delivery tool for Kubernetes. |
 | **Security** | **1Password Connect** | `v2.4.1` | March 20, 2026 | Secret management integration. |
+| | **cert-manager** | `v1.20.2` | May 1, 2026 | [Automated certificate management](apps/base/cert-manager/README.md). |
+| **Observability** | **VictoriaMetrics Stack** | `v0.76.0` | April 28, 2026 | [High-performance metrics stack](apps/base/victoria-metrics/README.md). |
 | **IaC Tools** | **Terraform** | `v1.15.0` | April 29, 2026 | Infrastructure as Code tool. |
 | **Providers** | **Proxmox Provider** | `v0.104.0` | April 25, 2026 | `bpg/proxmox` - Modern API-first provider. |
 | | **Helm Provider** | `v3.1.1` | April 30, 2026 | `hashicorp/helm` - For chart management. |
