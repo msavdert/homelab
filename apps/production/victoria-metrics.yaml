@@ -13,6 +13,7 @@ spec:
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
+        fullnameOverride: "vm" # Shortens names to prevent >63 char error
         vmsingle:
           enabled: true
           spec:

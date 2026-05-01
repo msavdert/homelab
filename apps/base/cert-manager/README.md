@@ -1,86 +1,63 @@
-# cert-manager: GitOps Deployment & Homelab Best Practices
+# cert-manager: Automated Certificate Management for Homelab
 
-This guide covers the deployment of **cert-manager** (v1.20.2) using **ArgoCD**. It is designed for a homelab environment where security and automation are priorities.
-
----
-
-## 1. Overview
-
-`cert-manager` is a native Kubernetes certificate management controller. It helps in issuing certificates from various sources like Let's Encrypt, HashiCorp Vault, Venafi, a simple signing key pair, or self-signed.
-
-In this homelab, we use it to:
-- Secure internal Operator webhooks (VictoriaMetrics, CNPG).
-- Provide real TLS certificates for exposed services via **Cloudflare DNS-01**.
+This documentation explains the design, implementation, and best practices for **cert-manager** (v1.20.2) in this homelab environment.
 
 ---
 
-## 2. Installation via ArgoCD
+## 1. What is cert-manager?
 
-Using the official OCI Helm chart is the best practice for 2026.
+`cert-manager` is a native Kubernetes certificate management controller. It builds upon Kubernetes by introducing several Custom Resource Definitions (CRDs) like `Certificates`, `Issuers`, and `ClusterIssuers`.
 
-### ArgoCD Application Manifest
-See `apps/production/cert-manager.yaml`.
-
-```yaml
-# Summary of sync configuration
-installCRDs: true
-sync-wave: "-8"
-ServerSideApply: true
-```
+### Why is it mandatory in this Homelab?
+Modern Kubernetes operators (like **VictoriaMetrics** and **CloudNativePG**) use **Admission Webhooks**. These webhooks allow the operator to validate or mutate resources before they are applied to the cluster. Kubernetes requires these webhooks to communicate over **HTTPS**.
+- **The Problem**: Manually managing these internal certificates is a maintenance nightmare.
+- **The Solution**: `cert-manager` automates the entire lifecycle (issuance and renewal) of these certificates, ensuring operators never stop working due to expired TLS.
 
 ---
 
-## 3. Configuration (Issuers)
+## 2. Implementation Strategy (GitOps)
 
-After installing `cert-manager`, you need to define a **ClusterIssuer** to actually issue certificates.
+We deploy `cert-manager` via **ArgoCD** using the official **OCI-based Helm Chart**.
 
-### A. Internal Self-Signed (For Webhooks)
-Required for many operators to function. See `issuers.yaml` in this directory.
-
-### B. Let's Encrypt with Cloudflare (For Public Services)
-Best practice for homelabs to avoid opening ports 80/443 for HTTP-01 challenges.
-
-1. **Create a Secret with your Cloudflare API Token**:
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cloudflare-api-token-secret
-  namespace: cert-manager
-type: Opaque
-stringData:
-  api-token: <YOUR_CLOUDFLARE_TOKEN>
-```
-
-2. **Create the ClusterIssuer**:
-```yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-cloudflare
-spec:
-  acme:
-    email: your-email@example.com
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: letsencrypt-cloudflare-account-key
-    solvers:
-    - dns01:
-        cloudflare:
-          email: your-email@example.com
-          apiTokenSecretRef:
-            name: cloudflare-api-token-secret
-            key: api-token
-```
+### Key Configuration Decisions:
+- **OCI Helm Chart**: We use `quay.io/jetstack/charts/cert-manager`. In 2026, OCI charts are the standard for performance and security.
+- **CRD Management**: We set `installCRDs: true`. To prevent ArgoCD from failing due to the massive size of these CRDs, we enable **`ServerSideApply=true`** in the sync options.
+- **Sync Waves (-8)**: `cert-manager` is a foundation service. By assigning it to wave `-8`, we ensure it is fully ready before any other operators (like VictoriaMetrics) attempt to request certificates.
 
 ---
 
-## 4. Troubleshooting
+## 3. Issuers: The "Notaries" of the Cluster
 
-- **Check API**: `kubectl get clusterissuers`
-- **Challenges**: `kubectl get challenges -A`
-- **Orders**: `kubectl get orders -A`
+We use two types of Issuers to balance security and convenience.
+
+### A. ClusterIssuer: `selfsigned-issuer` (Internal)
+Used for internal service-to-service communication where a public CA isn't needed.
+- **Use case**: Admission webhooks for operators.
+- **Config**: A simple `selfSigned: {}` block.
+
+### B. ClusterIssuer: `letsencrypt-cloudflare` (Public)
+Used for services exposed to the internet (e.g., Grafana, Nextcloud).
+- **Challenge Type**: **DNS-01**.
+- **Why DNS-01?**: Unlike HTTP-01, DNS-01 doesn't require opening port 80 to the internet. Since this is a homelab, we use **Cloudflare** to prove domain ownership by automatically creating temporary DNS TXT records.
+- **Token Security**: The Cloudflare API token is stored as a Kubernetes Secret, which can be managed via 1Password or Sealed Secrets.
 
 ---
 
+## 4. Best Practices Applied
+
+1. **Resource Parity**: Although lightweight, we set `requests` equal to `limits` to ensure the controller is never throttled during high-load API operations.
+2. **Monitoring**: Enabled the `prometheus.servicemonitor` flag. This allows **VictoriaMetrics** to automatically scrape cert-manager health metrics, alerting us if a certificate renewal fails.
+3. **Webhook Redundancy**: In production, `replicaCount` for the webhook component should be at least 2 to prevent API blocking during node restarts.
+4. **Separation of Concerns**: Issuers are managed in a separate ArgoCD Application (`cert-manager-issuers`) to ensure the Controller is ready before the Issuers are created.
+
+---
+
+## 5. Reference & Further Reading
+
+- [Official cert-manager Documentation](https://cert-manager.io/docs/)
+- [GitOps Installation Best Practices](https://cert-manager.io/docs/installation/continuous-deployment-and-gitops/)
+- [Cloudflare DNS-01 Configuration Guide](https://cert-manager.io/docs/configuration/acme/dns01/cloudflare/)
+- [Jetstack OCI Chart Migration Guide](https://blog.jetstack.io/blog/cert-manager-oci-helm-charts/)
+
+---
 *Last Updated: 2026-05-01*
