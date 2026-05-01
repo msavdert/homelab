@@ -11,5 +11,3 @@ parameters:
   dataLocality: "strict-local"
   fsType: "ext4"
   unmapMarkSnapChainRemoved: "ignored"
-  nodeSelector: ""
-  recurringJobSelector: ""

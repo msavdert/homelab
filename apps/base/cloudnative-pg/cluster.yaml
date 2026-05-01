@@ -4,7 +4,7 @@ metadata:
   name: postgres-main
 spec:
   instances: 3
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+  imageName: ghcr.io/cloudnative-pg/postgresql:18
 
   # Use the specialized StorageClass
   storage:
