@@ -22,10 +22,12 @@ SigNoz requires persistent storage for three main components:
 
 All components are configured to use the `longhorn` storage class for automated volume provisioning and replication.
 
-### 🌐 Ingress & TLS
-The SigNoz UI is exposed at `https://signoz.savdert.com` using:
-- **Ingress Controller**: Cilium
 - **TLS**: Automated via `cert-manager` using the `letsencrypt-prod` issuer.
+
+### 🔐 1Password Integration (Root Bootstrap)
+This deployment uses `OnePasswordItem` to securely bootstrap the root admin account. The credentials are pulled from the `SigNoz` item in the `homelab` vault.
+- **Enabled**: `SIGNOZ_USER_ROOT_ENABLED: "true"`
+- **Secret**: `signoz-admin-credentials` (Created via `apps/base/signoz/onepassword-item.yaml`)
 
 ## 🏁 Post-Installation Steps
 
@@ -35,11 +37,17 @@ The SigNoz UI is exposed at `https://signoz.savdert.com` using:
    - SigNoz provides an OTel Collector out of the box.
    - Point your applications to `signoz-otel-collector.signoz.svc.cluster.local:4317` (gRPC) or `4318` (HTTP) for telemetry ingestion.
 
-## 💡 Best Practices
+## 📊 Cluster Monitoring (k8s-infra)
 
-- **Retention Policies**: ClickHouse storage can grow quickly. Configure data retention policies in the SigNoz settings panel to match your storage capacity (Longhorn is currently configured with 20Gi for ClickHouse).
-- **Resource Monitoring**: SigNoz is resource-intensive. Monitor the memory usage of ClickHouse and the OTEL collector.
-- **Backup**: Use Longhorn snapshots to backup the ClickHouse data volumes regularly.
+We use the `k8s-infra` chart to monitor the health of our Kubernetes cluster. This component collects:
+- **Node Metrics**: CPU, RAM, Disk usage.
+- **Container Logs**: Automated log collection from all pods.
+- **Kubelet Stats**: Resource usage per pod/node.
+- **K8s Events**: Cluster-level events (pod restarts, errors, etc.)
+
+Configuration is managed in `apps/base/k8s-infra/values.yaml`.
+
+## 💡 Best Practices
 
 ## 📚 Resources
 
