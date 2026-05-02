@@ -43,13 +43,11 @@ spec:
   ignoreDifferences:
     - group: apps
       kind: Deployment
-      jsonPointers:
-        - /spec/template/spec/containers/0/env/0/resourceFieldRef/divisor
-        - /spec/template/spec/containers/0/env/1/resourceFieldRef/divisor
-        - /spec/template/spec/containers/0/env/2/resourceFieldRef/divisor
-        - /spec/template/spec/containers/0/env/3/resourceFieldRef/divisor
+      jqPathExpressions:
+        - .spec.template.spec.containers[].env[]?.valueFrom.resourceFieldRef.divisor
     - group: apps
       kind: StatefulSet
-      jsonPointers:
-        - /spec/volumeClaimTemplates/0/apiVersion
-        - /spec/volumeClaimTemplates/0/kind
+      jqPathExpressions:
+        - .spec.template.spec.containers[].env[]?.valueFrom.resourceFieldRef.divisor
+        - .spec.volumeClaimTemplates[].apiVersion
+        - .spec.volumeClaimTemplates[].kind
