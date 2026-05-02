@@ -14,13 +14,17 @@ spec:
       chart: signoz
       helm:
         valueFiles:
-          - $homelab/apps/base/signoz/values.yaml
+          - $homelab-ref/apps/base/signoz/values.yaml
     
-    # 2. Source: Local Repository for values.yaml and manifests
+    # 2. Source: Reference for values.yaml (Root access)
+    - repoURL: https://github.com/msavdert/homelab.git
+      targetRevision: main
+      ref: homelab-ref
+
+    # 3. Source: Local manifests (onepassword-item.yaml etc)
     - repoURL: https://github.com/msavdert/homelab.git
       targetRevision: main
       path: apps/base/signoz
-      ref: homelab
   
   destination:
     server: https://kubernetes.default.svc
