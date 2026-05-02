@@ -43,8 +43,15 @@ spec:
   ignoreDifferences:
     - group: apps
       kind: Deployment
-      jqPathExpressions:
-        - .spec.template.spec.containers[].env[]?.valueFrom.resourceFieldRef.divisor
+      jsonPointers:
+        - /spec/template/spec/containers/0/env/5/resourceFieldRef/divisor
+        - /spec/template/spec/containers/0/env/6/resourceFieldRef/divisor
+        - /spec/template/spec/containers/0/env/7/resourceFieldRef/divisor
+        - /spec/template/spec/containers/0/env/8/resourceFieldRef/divisor
+        - /spec/template/spec/containers/1/env/5/resourceFieldRef/divisor
+        - /spec/template/spec/containers/1/env/6/resourceFieldRef/divisor
+        - /spec/template/spec/containers/1/env/7/resourceFieldRef/divisor
+        - /spec/template/spec/containers/1/env/8/resourceFieldRef/divisor
     - group: apps
       kind: StatefulSet
       jqPathExpressions:
