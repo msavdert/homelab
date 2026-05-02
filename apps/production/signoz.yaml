@@ -14,7 +14,7 @@ spec:
       chart: signoz
       helm:
         valueFiles:
-          - $homelab/values.yaml
+          - $homelab/apps/base/signoz/values.yaml
     
     # 2. Source: Local Repository for values.yaml and manifests
     - repoURL: https://github.com/msavdert/homelab.git
