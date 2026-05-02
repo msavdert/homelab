@@ -35,8 +35,22 @@ otelCollector:
 otelCollectorMetrics:
   replicaCount: 1
 
-# SigNoz Ingress (Exposing the Frontend)
+# SigNoz Root User Bootstrap (GitOps)
+# Note: Requires a "SigNoz" item in 1Password 'homelab' vault with 'password' field.
 signoz:
+  additionalEnvs:
+    - name: SIGNOZ_USER_ROOT_ENABLED
+      value: "true"
+    - name: SIGNOZ_USER_ROOT_EMAIL
+      value: "admin@savdert.com"
+    - name: SIGNOZ_USER_ROOT_ORG_NAME
+      value: "Savdert Homelab"
+    - name: SIGNOZ_USER_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: signoz-admin-credentials
+          key: password
+
   ingress:
     enabled: true
     className: cilium
