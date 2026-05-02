@@ -10,7 +10,7 @@ spec:
   sources:
     # 1. Source: SigNoz Official Helm Chart
     - repoURL: https://charts.signoz.io
-      targetRevision: 0.120.0
+      targetRevision: 0.121.0
       chart: signoz
       helm:
         valueFiles:
