@@ -75,6 +75,12 @@ spec:
       path: apps/base/victoria-metrics
       directory:
         include: "*.yaml"
+    
+    # 3. Kaynak: Prometheus Operator CRDs (Helm)
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 28.0.1
+      chart: prometheus-operator-crds
+
   
   destination:
     server: https://kubernetes.default.svc
