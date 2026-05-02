@@ -42,14 +42,9 @@ signoz:
     className: cilium
     annotations:
       ingress.cilium.io/loadbalancer-mode: shared
-      cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
       - host: signoz.savdert.com
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
             port: 8080
-    tls:
-      - secretName: signoz-ui-tls
-        hosts:
-          - signoz.savdert.com
