@@ -1,32 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: signoz
+  name: signoz-k8s-infra
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1" # Deploy after signoz backend
 spec:
   project: default
   sources:
-    # 1. Source: SigNoz Official Helm Chart
+    # 1. Source: SigNoz Official K8s-Infra Helm Chart
     - repoURL: https://charts.signoz.io
-      targetRevision: 0.121.0
-      chart: signoz
+      targetRevision: 0.15.0
+      chart: k8s-infra
       helm:
         valueFiles:
-          - $homelab-ref/apps/base/signoz/values.yaml
+          - $homelab-ref/apps/base/k8s-infra/values.yaml
     
-    # 2. Source: Reference for values.yaml (Root access)
+    # 2. Source: Reference for values.yaml
     - repoURL: https://github.com/msavdert/homelab.git
       targetRevision: main
       ref: homelab-ref
-
-    # 3. Source: Local manifests (onepassword-item.yaml etc)
-    - repoURL: https://github.com/msavdert/homelab.git
-      targetRevision: main
-      path: apps/base/signoz
-      directory:
-        exclude: "values.yaml"
   
   destination:
     server: https://kubernetes.default.svc

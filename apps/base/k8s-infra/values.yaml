@@ -1,0 +1,20 @@
+# SigNoz K8s-Infra Helm Chart Values optimized for Homelab
+# Reference: https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml
+
+signoz:
+  # Sending data to the SigNoz backend in the same namespace
+  otelCollectorEndpoint: "signoz-otel-collector.signoz.svc.cluster.local:4317"
+  otelInsecure: true
+
+# Recommended presets for full cluster visibility
+presets:
+  logsCollection:
+    enabled: true
+  hostMetrics:
+    enabled: true
+  kubeletStats:
+    enabled: true
+  kubernetesEvents:
+    enabled: true
+  clusterMetrics:
+    enabled: true

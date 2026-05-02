@@ -1,51 +1,36 @@
 # SigNoz Helm Chart Values optimized for Homelab
-# See: https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml
+# Reference: https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml
 
 global:
   storageClass: longhorn
 
-# ClickHouse configuration
 clickhouse:
   persistence:
     size: 20Gi
-    storageClass: longhorn
-  # Reducing replicas for homelab
   layout:
     shardsCount: 1
     replicasCount: 1
 
-# Zookeeper configuration
 zookeeper:
   persistence:
     size: 5Gi
-    storageClass: longhorn
   replicaCount: 1
 
-# SigNoz Query Service
 queryService:
   persistence:
     size: 1Gi
-    storageClass: longhorn
 
-# SigNoz OTEL Collector
 otelCollector:
   replicaCount: 1
 
-# SigNoz OTEL Collector Metrics
-otelCollectorMetrics:
-  replicaCount: 1
-
-# SigNoz Root User Bootstrap (GitOps)
-# Note: Requires a "SigNoz" item in 1Password 'homelab' vault with 'password' field.
 signoz:
-  additionalEnvs:
-    - name: SIGNOZ_USER_ROOT_ENABLED
-      value: "true"
-    - name: SIGNOZ_USER_ROOT_EMAIL
-      value: "admin@savdert.com"
-    - name: SIGNOZ_USER_ROOT_ORG_NAME
-      value: "Savdert Homelab"
-    - name: SIGNOZ_USER_ROOT_PASSWORD
+  # Root User Bootstrap (GitOps)
+  # Note: Requires a "SigNoz" item in 1Password 'homelab' vault with 'password' field.
+  env:
+    SIGNOZ_USER_ROOT_ENABLED: "true"
+    SIGNOZ_USER_ROOT_EMAIL: "admin@savdert.com"
+    SIGNOZ_USER_ROOT_ORG_NAME: "Savdert Homelab"
+    SIGNOZ_USER_ROOT_PASSWORD:
       valueFrom:
         secretKeyRef:
           name: signoz-admin-credentials
