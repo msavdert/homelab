@@ -1,0 +1,55 @@
+# SigNoz Helm Chart Values optimized for Homelab
+# See: https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml
+
+global:
+  storageClass: longhorn
+
+# ClickHouse configuration
+clickhouse:
+  persistence:
+    size: 20Gi
+    storageClass: longhorn
+  # Reducing replicas for homelab
+  layout:
+    shardsCount: 1
+    replicasCount: 1
+
+# Zookeeper configuration
+zookeeper:
+  persistence:
+    size: 5Gi
+    storageClass: longhorn
+  replicaCount: 1
+
+# SigNoz Query Service
+queryService:
+  persistence:
+    size: 1Gi
+    storageClass: longhorn
+
+# SigNoz OTEL Collector
+otelCollector:
+  replicaCount: 1
+
+# SigNoz OTEL Collector Metrics
+otelCollectorMetrics:
+  replicaCount: 1
+
+# SigNoz UI (Frontend)
+frontend:
+  ingress:
+    enabled: true
+    className: cilium
+    annotations:
+      ingress.cilium.io/loadbalancer-mode: shared
+      # Use cert-manager if available (assuming it is based on previous file listings)
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - host: signoz.savdert.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: signoz-ui-tls
+        hosts:
+          - signoz.savdert.com
