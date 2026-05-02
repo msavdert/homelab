@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   sources:
-    # 1. Kaynak: Gateway API CRDs (Git)
+    # 1. Source: Gateway API CRDs (Git)
     - repoURL: https://github.com/kubernetes-sigs/gateway-api.git
       targetRevision: v1.5.1
       path: config/crd/experimental

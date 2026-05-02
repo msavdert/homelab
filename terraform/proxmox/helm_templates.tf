@@ -5,7 +5,7 @@ data "helm_template" "cilium" {
   chart        = "cilium"
   version      = "1.19.3"
   kube_version = var.kubernetes_version
-  # ZORUNLU AYARLAR (Talos üzerinde Cilium'un çalışması için gereken minimum yapılandırma)
+  # MANDATORY SETTINGS (Minimum configuration required for Cilium to work on Talos)
   set = [
     {
       name  = "ipam.mode"

@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   sources:
-    # 1. Kaynak: Helm Chart
+    # 1. Source: Helm Chart
     - repoURL: https://charts.jetstack.io
       targetRevision: v1.20.2
       chart: cert-manager
@@ -21,7 +21,7 @@ spec:
           webhook:
             replicaCount: 1
     
-    # 2. Kaynak: Yerel ClusterIssuers vb.
+    # 2. Source: Local ClusterIssuers etc.
     - repoURL: https://github.com/msavdert/homelab.git
       targetRevision: main
       path: apps/base/cert-manager

@@ -20,6 +20,8 @@ spec:
     - repoURL: https://github.com/msavdert/homelab.git
       targetRevision: main
       ref: values
+      directory:
+        exclude: "README.md"
   
   destination:
     server: https://kubernetes.default.svc
