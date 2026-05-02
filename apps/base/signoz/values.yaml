@@ -35,14 +35,13 @@ otelCollector:
 otelCollectorMetrics:
   replicaCount: 1
 
-# SigNoz UI (Frontend)
-frontend:
+# SigNoz Ingress (Exposing the Frontend)
+signoz:
   ingress:
     enabled: true
     className: cilium
     annotations:
       ingress.cilium.io/loadbalancer-mode: shared
-      # Use cert-manager if available (assuming it is based on previous file listings)
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
       - host: signoz.savdert.com

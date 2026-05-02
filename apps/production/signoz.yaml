@@ -14,14 +14,12 @@ spec:
       chart: signoz
       helm:
         valueFiles:
-          - $values/apps/base/signoz/values.yaml
+          - $homelab/apps/base/signoz/values.yaml
     
     # 2. Source: Local Repository for values.yaml
     - repoURL: https://github.com/msavdert/homelab.git
       targetRevision: main
-      ref: values
-      directory:
-        exclude: "README.md"
+      ref: homelab
   
   destination:
     server: https://kubernetes.default.svc
