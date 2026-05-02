@@ -48,6 +48,7 @@ signoz:
         paths:
           - path: /
             pathType: ImplementationSpecific
+            port: 3301
     tls:
       - secretName: signoz-ui-tls
         hosts:
