@@ -50,7 +50,6 @@ spec:
               externalLabels:
                 cluster: homelab
               extraArgs:
-                http.listenAddr: ":8429"
                 # Enable OTLP ingestion for Metrics
                 opentelemetry.enabled: "true"
           vmalert:
