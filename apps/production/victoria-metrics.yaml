@@ -1,0 +1,149 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoria-metrics-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-4"
+spec:
+  project: default
+  sources:
+    # 1. Metrics Stack (Metrics, Grafana, Alerting)
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.77.0
+      chart: victoria-metrics-k8s-stack
+      helm:
+        valuesObject:
+          fullnameOverride: "vm"
+          argocdReleaseOverride: "victoria-metrics-stack"
+          victoria-metrics-operator:
+            enabled: true
+            admissionWebhooks:
+              enabled: true
+              certManager:
+                enabled: true
+          # Switching to VMCluster for HA/Learning
+          vmsingle:
+            enabled: false
+          vmcluster:
+            enabled: true
+            spec:
+              retentionPeriod: "1" # 1 month
+              replicationFactor: 2
+              vmstorage:
+                replicaCount: 2
+                storageClassName: longhorn
+                storage:
+                  volumeClaimTemplate:
+                    spec:
+                      resources:
+                        requests:
+                          storage: 20Gi
+              vminsert:
+                replicaCount: 2
+              vmselect:
+                replicaCount: 2
+          vmagent:
+            enabled: true
+            spec:
+              scrapeInterval: "30s"
+              externalLabels:
+                cluster: homelab
+              extraArgs:
+                http.listenAddr: ":8429"
+                # Enable OTLP ingestion for Metrics
+                opentelemetry.enabled: "true"
+          vmalert:
+            enabled: true
+            spec:
+              replicaCount: 1
+              evaluationInterval: "30s"
+              # Connects to the local Alertmanager by default
+          alertmanager:
+            enabled: true
+            spec:
+              replicaCount: 1
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    storageClassName: longhorn
+                    resources:
+                      requests:
+                        storage: 1Gi
+          grafana:
+            enabled: true
+            admin:
+              existingSecret: grafana-admin-credentials
+              userKey: user
+              passwordKey: password
+            ingress:
+              enabled: true
+              ingressClassName: cilium
+              hosts:
+                - grafana.savdert.com
+              annotations:
+                ingress.cilium.io/loadbalancer-mode: shared
+    
+    # 2. Logs Stack
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.12.4
+      chart: victoria-logs-single
+      helm:
+        valuesObject:
+          fullnameOverride: "vlogs"
+          server:
+            retentionPeriod: "1"
+            persistentVolume:
+              enabled: true
+              storageClass: longhorn
+              size: 20Gi
+    
+    # 3. Traces Stack
+    - repoURL: https://victoriametrics.github.io/helm-charts/
+      targetRevision: 0.0.7
+      chart: victoria-traces-single
+      helm:
+        valuesObject:
+          fullnameOverride: "vtraces"
+          vtsingle:
+            spec:
+              retentionPeriod: "1"
+              storage:
+                storageClassName: longhorn
+                resources:
+                  requests:
+                    storage: 10Gi
+
+    # 4. Local Manifests (OnePasswordItem, etc.)
+    - repoURL: https://github.com/msavdert/homelab.git
+      targetRevision: main
+      path: apps/base/victoria-metrics
+      directory:
+        include: "*.yaml"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+  ignoreDifferences:
+    # Ignore CA Bundle injected by cert-manager/operator
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: vm-victoria-metrics-operator-admission
+      jqPathExpressions:
+        - '.webhooks[]?.clientConfig.caBundle'
+    # Ignore Secret data for validation certs
+    - group: ""
+      kind: Secret
+      name: vm-victoria-metrics-operator-validation
+      jsonPointers:
+        - /data
