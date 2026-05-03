@@ -20,6 +20,10 @@ spec:
             enabled: true
             certManager:
               enabled: true
+        vmsingle:
+          enabled: false
+        vmdistributed:
+          enabled: false
         vmcluster:
           enabled: true
           spec:
