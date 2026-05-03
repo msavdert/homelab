@@ -22,7 +22,6 @@ spec:
     chart: victoria-metrics-k8s-stack
     helm:
       valuesObject:
-        fullnameOverride: "vm"
         victoria-metrics-operator:
           enabled: true
           admissionWebhooks:
@@ -105,14 +104,12 @@ spec:
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration
-      name: vm-victoria-metrics-operator-admission
       jqPathExpressions:
         - '.webhooks[]?.clientConfig.caBundle'
     - group: ""
       kind: Secret
-      name: vm-victoria-metrics-operator-validation
-      jsonPointers:
-        - /data
+      jqPathExpressions:
+        - '.data'
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -130,7 +127,6 @@ spec:
     chart: victoria-logs-single
     helm:
       valuesObject:
-        fullnameOverride: "vlogs"
         server:
           retentionPeriod: "1"
           securityContext:
@@ -166,7 +162,6 @@ spec:
     chart: victoria-traces-single
     helm:
       valuesObject:
-        fullnameOverride: "vtraces"
         vtsingle:
           spec:
             retentionPeriod: "1"
