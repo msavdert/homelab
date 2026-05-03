@@ -128,6 +128,7 @@ spec:
     chart: victoria-logs-single
     helm:
       valuesObject:
+        fullnameOverride: "vlogs"
         server:
           retentionPeriod: "1"
           securityContext:
@@ -163,6 +164,7 @@ spec:
     chart: victoria-traces-single
     helm:
       valuesObject:
+        fullnameOverride: "vtraces"
         vtsingle:
           spec:
             retentionPeriod: "1"
