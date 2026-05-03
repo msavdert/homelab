@@ -10,7 +10,7 @@ metadata:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victoria-metrics-stack
+  name: vms-stack
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
@@ -116,7 +116,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victoria-logs
+  name: vlogs-app
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
@@ -152,7 +152,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: victoria-traces
+  name: vtraces-app
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
