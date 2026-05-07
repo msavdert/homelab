@@ -1,0 +1,14 @@
+# Proxmox API Credentials and Endpoint
+proxmox_endpoint       = "https://127.0.0.1:8006/" # Update with your Proxmox IP/Hostname
+proxmox_target_node    = "pve"
+proxmox_iso_storage    = "local"
+proxmox_vm_storage     = "local-zfs"
+proxmox_network_bridge = "vnet0"
+
+# Network configuration matching the SDN VNet (localnat-10.0.0.0-24)
+network               = "10.0.0.0/24"
+network_gateway       = "10.0.0.1"
+domain_name_server    = "1.1.1.1"
+cluster_vip_shared_ip = "10.0.0.9"
+
+# Note: proxmox_api_token must be provided either here or via TF_VAR_proxmox_api_token environment variable.

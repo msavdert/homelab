@@ -1,0 +1,43 @@
+machine:
+  sysctls:
+    # Enable BPF JIT for better eBPF performance
+    # Ref: https://oneuptime.com/blog/post/2026-03-03-configure-calico-ebpf-mode-on-talos-linux/
+    net.core.bpf_jit_enable: "1"
+    # Lower restrictions for performance events to allow Beyla eBPF probes
+    # Ref: https://grafana.com/docs/beyla/latest/setup/kubernetes/
+    kernel.perf_event_paranoid: "1"
+  features:
+    hostDNS:
+      forwardKubeDNSToHost: false
+  install:
+    disk: ${install_disk}
+    image: ${install_image}
+  network:
+    nameservers:
+      - ${dns}
+    interfaces:
+      - deviceSelector:
+          physical: true
+        addresses:
+          - ${ip_address}
+        routes:
+          - network: ${network}
+            gateway: ${network_gateway}
+  kernel:
+    modules:
+      - name: iscsi_tcp
+      - name: nbd
+  disks:
+    - device: ${longhorn_disk_device}
+      partitions:
+        - mountpoint: /var/lib/longhorn
+          size: 0
+  kubelet:
+    extraMounts:
+      - destination: /var/lib/longhorn
+        type: bind
+        source: /var/lib/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
