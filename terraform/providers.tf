@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "general"
-    key    = "homelab-terraform-state/homeops.tfstate"
+    key    = "homelab-terraform-state/homelab.tfstate"
     region = "us-ashburn-1" # Update to your OCI region (e.g., eu-frankfurt-1)
     # REQUIRED: Uncomment and set your OCI Object Storage S3-compatible endpoint URL.
     # Without this, Terraform will attempt to connect to AWS S3 and fail.

@@ -2,7 +2,7 @@ resource "proxmox_download_file" "talos_iso" {
   content_type = "iso"
   datastore_id = var.proxmox_iso_storage
   node_name    = var.proxmox_target_node
-  url          = var.talos_linux_iso_image_url
+  url          = data.talos_image_factory_urls.this.urls.iso
   file_name    = var.talos_linux_iso_image_filename
 }
 
