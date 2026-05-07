@@ -24,10 +24,14 @@ kubectl get nodes
 ```
 
 ### 2. Bootstrap ArgoCD (Manual Deployment)
-We use Kustomize to install ArgoCD with best-practice configurations.
+We use Kustomize to install ArgoCD with best-practice configurations. 
+
+> [!IMPORTANT]
+> Since ArgoCD CRDs are large, you MUST use Server-Side Apply to avoid "annotation too long" errors.
+
 ```bash
-# Apply the bootstrap manifests
-kubectl apply -k kubernetes/bootstrap/argocd
+# Apply the bootstrap manifests with server-side apply
+kubectl apply -k kubernetes/bootstrap/argocd --server-side --force-conflicts
 ```
 
 ### 3. Access ArgoCD UI

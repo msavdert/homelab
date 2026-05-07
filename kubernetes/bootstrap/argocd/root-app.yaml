@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     # Replace with your actual repository URL
-    repoURL: https://github.com/melihsavdert/homelab.git
+    repoURL: https://github.com/msavdert/homelab.git
     path: kubernetes/infrastructure
     targetRevision: HEAD
   destination:
