@@ -7,7 +7,7 @@ This component implements a production-grade secret management system for the ho
 - **Storage Backend**: Infisical Cloud (SaaS)
 - **Authentication**: Universal Auth (Machine Identity)
 - **Abstraction Layer**: External Secrets Operator (ESO) v2.4.1
-- **Environment**: `homelab`
+- **Environment**: `prod`
 
 ## Architecture
 

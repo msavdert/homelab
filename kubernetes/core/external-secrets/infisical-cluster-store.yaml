@@ -3,12 +3,11 @@ kind: ClusterSecretStore
 metadata:
   name: infisical-backend
   annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,Validate=false
     argocd.argoproj.io/sync-wave: "5"
 spec:
   provider:
     infisical:
-      hostAPI: "https://app.infisical.com/api"
+      hostAPI: "https://app.infisical.com"
       auth:
         universalAuthCredentials:
           clientId:
