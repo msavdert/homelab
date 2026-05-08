@@ -47,9 +47,6 @@ data "helm_template" "cilium" {
     { name = "cgroup.hostRoot", value = "/sys/fs/cgroup" },
     { name = "k8sServiceHost", value = "localhost" },
     { name = "k8sServicePort", value = "7445" },
-    { name = "ingressController.enabled", value = "true" },
-    { name = "ingressController.loadbalancerMode", value = "shared" },
-    { name = "gatewayAPI.enabled", value = "false" },
   ]
 }
 

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # 1. Gateway API CRDs (Experimental Channel v1.5.1)
+  # Essential for Cilium Gateway API features like TLSRoute and CORS filters
+  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
+  # 2. L2 Announcements and IP Pool configuration
+  - l2-announcements.yaml
+  # 3. Shared Gateway API Gateway
+  - gateway.yaml
+
+helmCharts:
+  - name: cilium
+    repo: https://helm.cilium.io
+    version: "1.19.3"
+    releaseName: cilium
+    namespace: kube-system
+    valuesFile: values.yaml
+    includeCRDs: true

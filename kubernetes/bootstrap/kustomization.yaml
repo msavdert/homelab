@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+
+resources:
+  - namespace.yaml
+  # Pinning to a specific version for Renovate tracking and GitOps best practices
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.1/manifests/install.yaml
+  # Root Application to trigger ApplicationSets
+  - root-application.yaml
