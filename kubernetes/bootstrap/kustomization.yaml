@@ -27,5 +27,10 @@ patches:
             - cilium.io
             kinds:
             - CiliumIdentity
+            - CiliumEndpoint
             clusters:
             - "*"
+          - apiGroups:
+            - "*"
+            kinds:
+            - Event
