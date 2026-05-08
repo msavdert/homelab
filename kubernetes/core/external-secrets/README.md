@@ -63,7 +63,7 @@ kubectl create secret generic infisical-auth \
 To use a secret in your application, create an `ExternalSecret` resource:
 
 ```yaml
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: my-app-secrets
