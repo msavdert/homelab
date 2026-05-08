@@ -4,7 +4,8 @@ namespace: argocd
 
 resources:
   - namespace.yaml
-  # Pinning to a specific version for Renovate tracking and GitOps best practices
+  # Using the latest version as requested
   - https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.1/manifests/install.yaml
-  # Root Application to trigger ApplicationSets
   - root-application.yaml
+  # Best Practice: NetworkPolicy fix for internal ArgoCD communication on Cilium/Talos
+  - argocd-netpol-fix.yaml
