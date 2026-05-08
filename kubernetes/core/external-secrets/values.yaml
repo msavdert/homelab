@@ -3,8 +3,11 @@ replicaCount: 1
 serviceAccount:
   create: true
 
-certController:
-  create: false
-
+# Webhook and CertController are essential for CRD validation and security
 webhook:
-  create: false
+  create: true
+  replicaCount: 1
+
+certController:
+  create: true
+  replicaCount: 1

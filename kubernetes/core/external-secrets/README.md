@@ -9,9 +9,6 @@ This component implements a production-grade secret management system for the ho
 - **Abstraction Layer**: External Secrets Operator (ESO) v2.4.1
 - **Environment**: `homelab`
 
-> [!IMPORTANT]
-> **CRD Management**: ESO 2.4.1 CRDs are very large (~600KB). We use Kustomize patches to force `ServerSideApply=true` on these CRDs to bypass the 256KB annotation limit, ensuring stable syncs in ArgoCD.
-
 ## Architecture
 
 We use the **ClusterSecretStore** pattern, which provides a global secret provider accessible by all namespaces in the cluster. This allows applications to define `ExternalSecret` resources in their own namespaces without needing individual credentials for Infisical.
@@ -47,27 +44,18 @@ Before this component can sync secrets, you must perform a manual bootstrap of t
 5. Note the **Client ID**, **Client Secret**, and **Project Slug**.
 
 ### 2. Kubernetes Bootstrap
-Run the following commands to provide the "initial spark" to the cluster:
+Run the following commands (or use 1Password CLI) to provide the "initial spark" to the cluster:
 
 ```bash
 # Create the namespace
 kubectl create namespace external-secrets
 
-# Create the auth secret
+# Create the auth secret (Example using 1Password CLI)
 kubectl create secret generic infisical-auth \
-  --from-literal=clientId="YOUR_CLIENT_ID" \
-  --from-literal=clientSecret="YOUR_CLIENT_SECRET" \
-  -n external-secrets
-```
-
-## Configuration
-
-### Project Slug Update
-You **MUST** update the `projectSlug` in [infisical-cluster-store.yaml](infisical-cluster-store.yaml) with your actual Infisical Project Slug:
-
-```yaml
-secretsScope:
-  projectSlug: "your-project-slug-here"
+  --namespace external-secrets \
+  --from-literal=clientId="$(op read "op://Private/Infisical/homelab-eso-cliendId")" \
+  --from-literal=clientSecret="$(op read "op://Private/Infisical/homelab-eso-secret-clientSecret")" \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ## Usage Example
