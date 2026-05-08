@@ -22,5 +22,5 @@ spec:
       secretsScope:
         # Home > project: homelab > Project Settings -> General
         projectSlug: "homelab-y-vgb"
-        environmentSlug: "homelab"
+        environmentSlug: "prod"
         secretsPath: "/"
