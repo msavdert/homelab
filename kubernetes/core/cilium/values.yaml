@@ -42,9 +42,9 @@ hubble:
   ui:
     enabled: true
 
-# Ingress Controller (Legacy)
+# Ingress Controller (Legacy - Disabled in favor of Gateway API)
 ingressController:
-  enabled: true
+  enabled: false
   loadbalancerMode: shared
 
 # Modern Gateway API

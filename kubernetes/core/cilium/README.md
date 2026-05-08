@@ -24,8 +24,8 @@ Once the cluster is bootstrapped and ArgoCD is running, the management of Cilium
 
 #### Advanced Features Enabled via ArgoCD:
 - **Hubble**: Network observability (UI and Relay).
-- **Gateway API**: Modern Kubernetes ingress management.
-- **L2 Announcements**: Required for LoadBalancer IPs on our Bare Metal Proxmox environment.
+- **Gateway API**: Modern Kubernetes ingress management (Primary solution).
+- **L2 Announcements (v2)**: Stable L2 advertisement for LoadBalancer IPs.
 - **Performance Tuning**: Optimized client rate limits for CRD stability.
 
 ## ArgoCD Best Practices & Compatibility
