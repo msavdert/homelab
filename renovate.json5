@@ -1,52 +1,71 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    ":semanticCommits",
-    ":timezone(America/New_York)"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    ':semanticCommits',
+    ':timezone(America/New_York)',
   ],
-  // Terraform directory scanning
-  "terraform": {
-    "fileMatch": ["infrastructure/terraform/.+\\.tf$"]
+  terraform: {
+    managerFilePatterns: [
+      '/infrastructure/terraform/.+\\.tf$/',
+    ],
   },
-  // Kubernetes manifests and Argo CD Applications scanning
-  "kubernetes": {
-    "fileMatch": ["kubernetes/.+\\.yaml$"]
+  kubernetes: {
+    managerFilePatterns: [
+      '/kubernetes/.+\\.yaml$/',
+    ],
   },
-  // Argo CD supported Kustomize and Helm management
-  "argocd": {
-    "fileMatch": ["kubernetes/.+\\.yaml$"]
+  argocd: {
+    managerFilePatterns: [
+      '/kubernetes/.+\\.yaml$/',
+    ],
   },
-  "packageRules": [
-    // RULE 1: KUBERNETES - Group Minor and Patch updates and enable automerge
+  packageRules: [
     {
-      "matchManagers": ["kubernetes", "helmv3", "kustomize", "argocd"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "kubernetes minor/patch updates",
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
+      matchManagers: [
+        'kubernetes',
+        'helmv3',
+        'kustomize',
+        'argocd',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+      ],
+      groupName: 'kubernetes minor/patch updates',
+      automerge: true,
+      automergeType: 'pr',
+      platformAutomerge: true,
     },
-    // RULE 2: TERRAFORM - Group Minor and Patch updates and enable automerge
     {
-      "matchManagers": ["terraform"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "terraform minor/patch updates",
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
+      matchManagers: [
+        'terraform',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+      ],
+      groupName: 'terraform minor/patch updates',
+      automerge: true,
+      automergeType: 'pr',
+      platformAutomerge: true,
     },
-    // RULE 3: MAJOR UPDATES - Never automerge, require manual approval
     {
-      "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": false, // Opens PR immediately but won't merge
-      "addLabels": ["needs-review", "major-update"]
+      matchUpdateTypes: [
+        'major',
+      ],
+      dependencyDashboardApproval: false,
+      addLabels: [
+        'needs-review',
+        'major-update',
+      ],
     },
-    // RULE 4: TALOS OS - Always separate OS updates and require manual approval
     {
-      "matchPackageNames": ["siderolabs/talos"],
-      "groupName": "talos os updates",
-      "automerge": false
-    }
-  ]
+      matchPackageNames: [
+        'siderolabs/talos',
+      ],
+      groupName: 'talos os updates',
+      automerge: false,
+    },
+  ],
 }
