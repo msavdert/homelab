@@ -104,7 +104,7 @@ The `external-secret.yaml` in this directory will automatically sync these to a 
 
 Tailscale automates the Let's Encrypt lifecycle via **MagicDNS**.
 
-1. Go to **Settings** -> **[DNS](https://login.tailscale.com/admin/settings/dns)** in the Admin Console.
+1. Go to **[DNS](https://login.tailscale.com/admin/dns)** in the Admin Console.ole.
 2. Ensure **MagicDNS** is **Enabled**.
 3. Scroll down to **HTTPS Certificates** and click **Enable**.
 
