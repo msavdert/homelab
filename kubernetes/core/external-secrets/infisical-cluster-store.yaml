@@ -1,0 +1,23 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: infisical-backend
+spec:
+  provider:
+    infisical:
+      hostAPI: "https://app.infisical.com/api"
+      auth:
+        universalAuthCredentials:
+          clientId:
+            name: infisical-auth      # Bootstrap secret created manually
+            key: clientId
+            namespace: external-secrets
+          clientSecret:
+            name: infisical-auth
+            key: clientSecret
+            namespace: external-secrets
+      secretsScope:
+        # Home > project: homelab > Project Settings -> General
+        projectSlug: "homelab-y-vgb"
+        environmentSlug: "homelab"
+        secretsPath: "/"
