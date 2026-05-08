@@ -9,3 +9,16 @@ resources:
   - root-application.yaml
   # Best Practice: NetworkPolicy fix for internal ArgoCD communication on Cilium/Talos
   - argocd-netpol-fix.yaml
+
+# Enable Helm support for Kustomize globally in ArgoCD
+patches:
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cm
+      data:
+        kustomize.buildOptions: --enable-helm
