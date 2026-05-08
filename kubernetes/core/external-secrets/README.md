@@ -9,6 +9,9 @@ This component implements a production-grade secret management system for the ho
 - **Abstraction Layer**: External Secrets Operator (ESO) v2.4.1
 - **Environment**: `homelab`
 
+> [!IMPORTANT]
+> **CRD Management**: ESO 2.4.1 CRDs are very large (~600KB). We use Kustomize patches to force `ServerSideApply=true` on these CRDs to bypass the 256KB annotation limit, ensuring stable syncs in ArgoCD.
+
 ## Architecture
 
 We use the **ClusterSecretStore** pattern, which provides a global secret provider accessible by all namespaces in the cluster. This allows applications to define `ExternalSecret` resources in their own namespaces without needing individual credentials for Infisical.
