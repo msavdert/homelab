@@ -22,3 +22,10 @@ patches:
         name: argocd-cm
       data:
         kustomize.buildOptions: --enable-helm
+        resource.exclusions: |
+          - apiGroups:
+            - cilium.io
+            kinds:
+            - CiliumIdentity
+            clusters:
+            - "*"

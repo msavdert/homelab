@@ -1,6 +1,10 @@
 ipam:
   mode: kubernetes
 
+# ArgoCD Best Practice: Ignore extraneous differences for non-idempotent resources (e.g. Hubble certs)
+nonIdempotentAnnotations:
+  argocd.argoproj.io/compare-options: IgnoreExtraneous
+
 kubeProxyReplacement: true
 
 securityContext:
