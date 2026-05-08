@@ -1,0 +1,22 @@
+# Tailscale Operator Configuration
+# The operator will look for a secret named 'operator-oauth' by default
+# since we don't provide clientId/clientSecret here.
+
+installCRDs: true
+
+operatorConfig:
+  hostname: "tailscale-operator"
+  defaultTags:
+    - "tag:k8s-operator"
+
+proxyConfig:
+  defaultTags: "tag:k8s"
+
+ingressClass:
+  name: "tailscale"
+  enabled: true
+
+# API Server Proxy allows accessing the K8s API via Tailscale
+apiServerProxyConfig:
+  mode: "true"
+  allowImpersonation: "true"

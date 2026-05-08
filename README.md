@@ -2,13 +2,17 @@
 
 This repository contains the Infrastructure-as-Code (Terraform) and Kubernetes manifests for a modern homelab hosted on a Hetzner dedicated server.
 
-## Architecture
+## Tech Stack & Architecture
 
-- **Hypervisor**: Proxmox VE 9.x (Level 0)
-- **OS**: Talos Linux (Level 1)
-- **Networking**: Cilium (CNI, LoadBalancer, Ingress)
-- **GitOps**: ArgoCD (Level 2)
-- **Storage**: Longhorn (Level 3)
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| **Hypervisor** | Proxmox VE | Virtualization & ZFS Storage Management |
+| **OS** | Talos OS | Hardened, API-managed, Immutable Linux for K8s |
+| **CNI** | Cilium | eBPF-based networking (Kube-proxy replacement) |
+| **Storage** | Longhorn | Distributed block storage (Replica: 1 for HomeOps) |
+| **GitOps** | Argo CD | Declarative Continuous Delivery (App of AppSets) |
+| **Secrets** | Infisical Cloud | Centralized Machine Identity & ESO Management |
+| **VPN/Ingress** | Tailscale | Identity-aware private networking & automated TLS |
 
 ---
 
@@ -24,8 +28,8 @@ This repository contains the Infrastructure-as-Code (Terraform) and Kubernetes m
     ├── core/                  # 3. Infrastructure services (System)
     │   ├── cilium/            # Networking & Ingress (Helm + Kustomize)
     │   ├── longhorn/          # Storage
-    │   ├── external-secrets/  # Secret Management (1Password)
-    │   └── tailscale/         # VPN Ingress
+    │   ├── external-secrets/  # Secret Management (Infisical Cloud)
+    │   └── tailscale/         # VPN Ingress & Identity Proxy
     └── apps/                  # 4. User projects and services
         └── homelab-dashboard/
 ```
