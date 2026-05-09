@@ -206,7 +206,19 @@ This deployment has `apiServerProxyConfig` enabled. It allows you to access your
 
 ---
 
-## 🔍 Verification & Troubleshooting
+## 🔍 Troubleshooting & Common Issues
+
+For detailed information on solving issues related to:
+- Cilium Socket LB conflicts (Connection Reset)
+- DNS and MagicDNS resolution issues
+- TLS certificate provisioning (SNI errors)
+- Bootstrap process and circular dependencies
+
+See the **[Troubleshooting Guide](./TROUBLESHOOTING.md)**.
+
+---
+
+## 🔍 Verification & Sync Status
 
 ### Check Synchronization
 ```bash
