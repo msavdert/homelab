@@ -1,0 +1,32 @@
+# Metrics Server configuration for Talos/Bare-metal
+args:
+  - --kubelet-insecure-tls
+  - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+
+# High availability
+replicas: 2
+
+# Resource limits (best practice)
+resources:
+  requests:
+    cpu: 100m
+    memory: 200Mi
+  limits:
+    cpu: 500m
+    memory: 500Mi
+
+# Pod Security Standards (Restricted Profile)
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
