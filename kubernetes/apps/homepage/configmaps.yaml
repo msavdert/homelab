@@ -11,6 +11,13 @@ data:
     cardBlur: sm
     headerStyle: boxed
     showDockerStats: false
+    layout:
+      Infrastructure:
+        style: list
+        columns: 3
+      Applications:
+        style: list
+        columns: 3
     search:
       provider: google
       focus: true
@@ -70,7 +77,12 @@ data:
           cpu: true
           memory: true
           showLabel: true
-          label: "Nodes Status"
+          label: "Cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
   kubernetes.yaml: |
     mode: cluster
   docker.yaml: ""
