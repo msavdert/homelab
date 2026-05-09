@@ -9,6 +9,8 @@ resources:
   - l2-announcements.yaml
   # 3. Shared Gateway API Gateway
   - gateway.yaml
+  # 4. Tailscale Ingress for Hubble UI
+  - hubble-ingress.yaml
 
 helmCharts:
   - name: cilium

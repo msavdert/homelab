@@ -37,6 +37,10 @@ data:
             icon: tailscale
             href: https://login.tailscale.com
             description: Zero Trust Networking
+        - Hubble:
+            icon: cilium
+            href: https://hubble.tail70417b.ts.net
+            description: Network Observability
     - Applications:
         - Hello World:
             icon: homeassistant
