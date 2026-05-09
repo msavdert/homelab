@@ -59,3 +59,7 @@ l2announcements:
 k8sClientRateLimit:
   qps: 50
   burst: 100
+
+# Fix for Tailscale Proxy compatibility when kubeProxyReplacement is true
+socketLB:
+  hostNamespaceOnly: true
