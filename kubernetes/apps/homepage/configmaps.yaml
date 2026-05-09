@@ -7,26 +7,25 @@ data:
   settings.yaml: |
     title: Homelab Dashboard
     theme: dark
-    layout:
-      Infrastructure:
-        style: list
-        columns: 3
-      Services:
-        style: list
-        columns: 3
+    background: https://images.unsplash.com/photo-1506318137071-a8e063b4b611?auto=format&fit=crop&w=1920&q=80
+    cardBlur: sm
     headerStyle: boxed
     showDockerStats: false
+    search:
+      provider: google
+      focus: true
+      target: _blank
   bookmarks.yaml: |
     - Infrastructure:
         - Proxmox:
             - icon: proxmox
-              href: https://192.168.1.10:8006 # Placeholder, update as needed
+              href: https://192.168.1.10:8006
         - Tailscale Admin:
             - icon: tailscale
               href: https://login.tailscale.com/admin/machines
         - Github Repo:
             - icon: github
-              href: https://github.com/melihsavdert/homelab # Based on username
+              href: https://github.com/melihsavdert/homelab
   services.yaml: |
     - Infrastructure:
         - ArgoCD:
@@ -51,24 +50,27 @@ data:
             href: https://hello.tail70417b.ts.net
             description: Test Application
   widgets.yaml: |
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-          label: "cluster"
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
     - datetime:
         text_size: xl
         format:
           timeStyle: short
           dateStyle: long
           hour12: false
+    - resources:
+        cpu: true
+        memory: true
+        label: Cluster Resources
+    - weather:
+        location: Istanbul, TR
+        units: metric
+        cache: 15
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "Nodes Status"
   kubernetes.yaml: |
     mode: cluster
   docker.yaml: ""
