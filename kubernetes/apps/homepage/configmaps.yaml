@@ -24,15 +24,12 @@ data:
       target: _blank
   bookmarks.yaml: |
     - Infrastructure:
-        - Proxmox:
-            - icon: proxmox
-              href: https://192.168.1.10:8006
         - Tailscale Admin:
             - icon: tailscale
               href: https://login.tailscale.com/admin/machines
         - Github Repo:
             - icon: github
-              href: https://github.com/melihsavdert/homelab
+              href: https://github.com/msavdert/homelab
   services.yaml: |
     - Infrastructure:
         - ArgoCD:
