@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: Homelab Dashboard
+    theme: dark
+    layout:
+      Infrastructure:
+        style: list
+        columns: 3
+      Services:
+        style: list
+        columns: 3
+    headerStyle: boxed
+    showDockerStats: false
+  bookmarks.yaml: |
+    - Infrastructure:
+        - Proxmox:
+            - icon: proxmox
+              href: https://192.168.1.10:8006 # Placeholder, update as needed
+        - Tailscale Admin:
+            - icon: tailscale
+              href: https://login.tailscale.com/admin/machines
+        - Github Repo:
+            - icon: github
+              href: https://github.com/melihsavdert/homelab # Based on username
+  services.yaml: |
+    - Infrastructure:
+        - ArgoCD:
+            icon: argocd
+            href: https://argocd
+            description: GitOps Continuous Delivery
+        - Tailscale:
+            icon: tailscale
+            href: https://login.tailscale.com
+            description: Zero Trust Networking
+    - Applications:
+        - Hello World:
+            icon: homeassistant # Just a generic icon for now
+            href: https://hello
+            description: Test Application
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: long
+          hour12: false
+  kubernetes.yaml: |
+    mode: cluster
