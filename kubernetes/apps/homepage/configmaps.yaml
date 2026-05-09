@@ -31,7 +31,7 @@ data:
     - Infrastructure:
         - ArgoCD:
             icon: argocd
-            href: https://argocd
+            href: https://argocd.tail70417b.ts.net
             description: GitOps Continuous Delivery
         - Tailscale:
             icon: tailscale
@@ -39,8 +39,8 @@ data:
             description: Zero Trust Networking
     - Applications:
         - Hello World:
-            icon: homeassistant # Just a generic icon for now
-            href: https://hello
+            icon: homeassistant
+            href: https://hello.tail70417b.ts.net
             description: Test Application
   widgets.yaml: |
     - kubernetes:
