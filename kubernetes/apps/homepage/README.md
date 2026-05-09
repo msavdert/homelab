@@ -41,6 +41,15 @@ If you see an "API Error" in the Kubernetes widget, it is likely because `metric
 ### Host Validation Failed
 Homepage has a security feature that validates the incoming `Host` header. Ensure that any domain used to access the dashboard is included in the `HOMEPAGE_ALLOWED_HOSTS` environment variable in `deployment.yaml`.
 
+## Security
+
+### Pod Security Standards (PSS)
+This deployment is configured to comply with the Kubernetes **Restricted** pod security profile. This is essential for hardened clusters (like Talos OS) to ensure safe execution:
+- **Non-root execution**: The container runs as UID 1000.
+- **Privilege Escalation**: Explicitly disabled.
+- **Capabilities**: All Linux capabilities are dropped.
+- **Seccomp**: Uses the `RuntimeDefault` profile.
+
 ## References
 - [Official Documentation](https://gethomepage.dev/)
 - [Kubernetes Installation Guide](https://gethomepage.dev/installation/k8s/)
