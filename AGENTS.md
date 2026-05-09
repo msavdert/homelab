@@ -19,10 +19,15 @@ syncPolicy:
     prune: true
     selfHeal: true
   syncOptions:
-    - CreateNamespace=true
-    - ServerSideApply=true # MANDATORY for CRDs
+    - CreateNamespace: true
+    - ServerSideApply: true # MANDATORY for CRDs
 
 ## 3. Secret Management Rule
 - **Backend:** Infisical Cloud via Universal Auth (Machine Identities).
 - **Tool:** External Secrets Operator (ESO) using `ClusterSecretStore` (Provider: `infisical`).
 - **Strict Rule:** DO NOT use the native Infisical Operator. ALWAYS use ESO `ExternalSecret` manifests referencing the `infisical-backend` ClusterSecretStore.
+
+## 4. Image Management & Renovate
+- **Strict Rule:** NEVER use `:latest` or `:stable` tags for container images.
+- **Reasoning:** This repository uses Renovate for automated dependency management. Renovate requires specific version tags (e.g., `v1.2.3` or `1.2.3`) to detect and propose updates.
+- **Action:** Always pin images to a specific semantic version.
