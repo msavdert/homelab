@@ -41,6 +41,10 @@ data:
             icon: cilium
             href: https://hubble.tail70417b.ts.net
             description: Network Observability
+        - Proxmox:
+            icon: proxmox
+            href: https://pve:8006/
+            description: Hypervisor Management
     - Applications:
         - Hello World:
             icon: nginx
