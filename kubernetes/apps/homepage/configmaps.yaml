@@ -30,7 +30,7 @@ data:
   services.yaml: |
     - Infrastructure:
         - ArgoCD:
-            icon: argocd
+            icon: argo-cd
             href: https://argocd.tail70417b.ts.net
             description: GitOps Continuous Delivery
         - Tailscale:
