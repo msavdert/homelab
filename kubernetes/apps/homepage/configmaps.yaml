@@ -71,3 +71,6 @@ data:
           hour12: false
   kubernetes.yaml: |
     mode: cluster
+  docker.yaml: ""
+  custom.css: ""
+  custom.js: ""
