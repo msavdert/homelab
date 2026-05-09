@@ -74,3 +74,4 @@ data:
   docker.yaml: ""
   custom.css: ""
   custom.js: ""
+  proxmox.yaml: ""

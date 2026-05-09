@@ -44,29 +44,7 @@ spec:
               value: "$(MY_POD_IP):3000,home,home.tail70417b.ts.net" # Allowing pod IP for probes and full Tailnet FQDN
           volumeMounts:
             - name: config
-              mountPath: /app/config/settings.yaml
-              subPath: settings.yaml
-            - name: config
-              mountPath: /app/config/bookmarks.yaml
-              subPath: bookmarks.yaml
-            - name: config
-              mountPath: /app/config/services.yaml
-              subPath: services.yaml
-            - name: config
-              mountPath: /app/config/widgets.yaml
-              subPath: widgets.yaml
-            - name: config
-              mountPath: /app/config/kubernetes.yaml
-              subPath: kubernetes.yaml
-            - name: config
-              mountPath: /app/config/docker.yaml
-              subPath: docker.yaml
-            - name: config
-              mountPath: /app/config/custom.css
-              subPath: custom.css
-            - name: config
-              mountPath: /app/config/custom.js
-              subPath: custom.js
+              mountPath: /app/config
             - name: logs
               mountPath: /app/config/logs
       volumes:
