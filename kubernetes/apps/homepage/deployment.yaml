@@ -58,7 +58,11 @@ spec:
             - name: config
               mountPath: /app/config/kubernetes.yaml
               subPath: kubernetes.yaml
+            - name: logs
+              mountPath: /app/config/logs
       volumes:
         - name: config
           configMap:
             name: homepage-config
+        - name: logs
+          emptyDir: {}
