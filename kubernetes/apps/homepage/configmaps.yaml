@@ -43,7 +43,7 @@ data:
             description: Network Observability
     - Applications:
         - Hello World:
-            icon: homeassistant
+            icon: nginx
             href: https://hello.tail70417b.ts.net
             description: Test Application
   widgets.yaml: |
