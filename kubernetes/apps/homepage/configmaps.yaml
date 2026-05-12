@@ -48,6 +48,10 @@ data:
             icon: proxmox
             href: https://pve:8006/
             description: Hypervisor Management
+        - Dokploy:
+            icon: dokploy
+            href: http://oci-aysesmenn-us-devenv:3000/dashboard/home
+            description: Multi-Server Deployment Platform
     - Applications:
         - Hello World:
             icon: nginx
