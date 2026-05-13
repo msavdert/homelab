@@ -4,7 +4,10 @@
 defaultSettings:
   defaultReplicaCount: 1
   defaultDataLocality: disabled
-  createDefaultDiskLabeledNodes: true
+  # Set to false to automatically initialize disks on joining nodes without manual labeling
+  createDefaultDiskLabeledNodes: false
+  # Path where our dedicated 200GB disk is mounted in Talos
+  defaultDataPath: /var/lib/longhorn
 
 # Pre-upgrade checker often fails in GitOps flows because it expects an interactive helm upgrade
 preUpgradeChecker:
