@@ -2,8 +2,9 @@
 # Using official OCI chart from ghcr.io/grafana/helm-charts/grafana-operator
 
 # The operator is lightweight and manages Grafana CRDs.
-# It doesn't need much customization at the operator level.
-# Most config will be in the Grafana CRD later.
+# We must explicitly enable CRD deployment for the operator to start correctly.
+crds:
+  deploy: true
 
 resources:
   requests:
