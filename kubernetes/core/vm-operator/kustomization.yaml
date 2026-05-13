@@ -11,6 +11,3 @@ helmCharts:
     releaseName: vm-operator
     namespace: monitoring
     valuesFile: values.yaml
-
-commonAnnotations:
-  argocd.argoproj.io/sync-options: ServerSideApply=true

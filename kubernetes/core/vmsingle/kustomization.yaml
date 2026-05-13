@@ -5,6 +5,3 @@ resources:
   - vmsingle.yaml
   - vmagent.yaml
   - vmalert.yaml
-
-commonAnnotations:
-  argocd.argoproj.io/sync-options: ServerSideApply=true
