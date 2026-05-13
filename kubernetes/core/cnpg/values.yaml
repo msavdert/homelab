@@ -1,0 +1,11 @@
+# CloudNativePG Operator values
+# Ref: https://cloudnative-pg.github.io/charts/
+
+# The operator is installed globally by default
+# We enable monitoring for Prometheus/VictoriaMetrics
+monitoring:
+  podMonitorEnabled: true
+
+# Enable CRD management via Helm
+crds:
+  create: true

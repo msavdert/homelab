@@ -1,0 +1,31 @@
+# Longhorn values for Talos Linux (Single Node)
+# Enforcing replicaCount: 1 and dataLocality: disabled per AGENTS.md
+
+defaultSettings:
+  defaultReplicaCount: 1
+  defaultDataLocality: disabled
+  createDefaultDiskLabeledNodes: true
+
+# Pre-upgrade checker often fails in GitOps flows because it expects an interactive helm upgrade
+preUpgradeChecker:
+  jobEnabled: false
+
+# Enable Longhorn UI Service
+service:
+  ui:
+    type: ClusterIP
+    port: 80
+
+# Configure Ingress (Gateway API can be configured later, or standard Ingress)
+ingress:
+  enabled: false
+
+# CSI configuration (Talos defaults to /var/lib/kubelet)
+csi:
+  kubeletRootDir: /var/lib/kubelet
+
+# Persistence (Defaulting to the host path configured in Talos extraMounts)
+persistence:
+  defaultClassReplicaCount: 1
+  defaultClass: true
+  reclaimPolicy: Retain

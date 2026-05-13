@@ -8,11 +8,13 @@ spec:
     - git:
         repoURL: 'https://github.com/msavdert/homelab.git'
         revision: HEAD
-        directories:
-          - path: kubernetes/core/*
+        files:
+          - path: "kubernetes/core/*/metadata.json"
   template:
     metadata:
       name: 'core-{{path.basename}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
     spec:
       project: default
       source:
