@@ -8,6 +8,9 @@ metadata:
     tailscale.com/hostname: "longhorn"
 spec:
   ingressClassName: tailscale
+  tls:
+    - hosts:
+        - "longhorn"
   rules:
     -  http:
         paths:
