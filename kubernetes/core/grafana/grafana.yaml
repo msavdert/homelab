@@ -6,13 +6,14 @@ metadata:
   labels:
     dashboards: "grafana-shared"
 spec:
-  # Using custom admin credentials
+  # Important: This field belongs directly under spec
+  disableDefaultAdminSecret: true
+
+  # Grafana configuration (maps to grafana.ini)
   config:
     log:
       mode: "console"
       level: "info"
-    # Important: Disable the default admin secret to use our own via env vars
-    disableDefaultAdminSecret: true
 
   # Injecting credentials from our ESO Secret
   deployment:
