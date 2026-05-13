@@ -1,0 +1,30 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: vm-shared
+  namespace: monitoring
+spec:
+  # High performance database storage
+  storage:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: longhorn-db
+
+  # Data retention policy
+  retentionPeriod: "30d"
+
+  # Performance Tuning
+  extraArgs:
+    dedup.minScrapeInterval: "15s"
+  
+  # Resource Management (Best Practice 2026: requests = limits for stateful components)
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
