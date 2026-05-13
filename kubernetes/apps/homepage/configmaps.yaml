@@ -57,6 +57,10 @@ data:
             icon: nginx
             href: https://hello.tail70417b.ts.net
             description: Test Application
+        - Documentum:
+            icon: ubuntu
+            href: http://oci-aysesmenn-us-devenv:7681
+            description: Remote Terminal
   widgets.yaml: |
     - datetime:
         text_size: xl
