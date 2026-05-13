@@ -58,6 +58,10 @@ patches:
             - .metadata.annotations."controller-gen.kubebuilder.io/version"
             - .spec.conversion
             - .spec.preserveUnknownFields
+        resource.customizations.ignoreDifferences.postgresql.cnpg.io_Cluster: |
+          jqPathExpressions:
+            - .status
+            - .metadata.annotations."postgresql.cnpg.io/hash"
         resource.exclusions: |
           - apiGroups:
             - cilium.io

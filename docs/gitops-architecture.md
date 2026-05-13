@@ -56,7 +56,16 @@ Common drift-heavy fields are ignored globally to maintain a "Green" dashboard:
 - StatefulSet `volumeClaimTemplates`
 - CustomResourceDefinition `labels` and `conversion`
 
-## 4. Best Practices for New Apps
+## 4. Database & Storage Best Practices
+
+For database workloads (e.g., CloudNativePG), we follow high-performance storage patterns to avoid write amplification on Longhorn:
+
+- **Dedicated StorageClass (`longhorn-db`)**: 
+  - `replicaCount: 1`: Since databases like CNPG handle their own replication at the application level, we reduce storage replication to 1.
+  - `dataLocality: strict-local`: Ensures that the volume's data always resides on the same node as the Pod for minimum latency.
+- **ArgoCD `RespectIgnoreDifferences`**: Enabled globally to allow the CNPG operator to manage status fields and certificates without triggering ArgoCD sync loops.
+
+## 5. Best Practices for New Apps
 
 When adding a new core component:
 1. Create the folder in `kubernetes/core/<name>`.
