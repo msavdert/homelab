@@ -2,10 +2,7 @@
 # Using official OCI chart from ghcr.io/grafana/helm-charts/grafana-operator
 
 # The operator is lightweight and manages Grafana CRDs.
-# We must explicitly enable CRD deployment for the operator to start correctly.
-crds:
-  deploy: true
-
+# We manage CRDs via kustomization resources for better GitOps reliability.
 resources:
   requests:
     cpu: 100m
