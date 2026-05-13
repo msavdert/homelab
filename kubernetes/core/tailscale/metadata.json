@@ -1,3 +1,4 @@
 {
-  "wave": "2"
+  "wave": "2",
+  "namespace": "tailscale"
 }

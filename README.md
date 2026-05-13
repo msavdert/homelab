@@ -118,6 +118,7 @@ We use **Renovate Bot** to automate dependency updates across the entire stack.
 
 ## References
 
+- [GitOps Architecture & Sync Strategy](docs/gitops-architecture.md)
 - [Proxmox Setup Guide](docs/proxmox-setup.md)
 - [Project Roadmap](docs/ROADMAP.md)
 - [ArgoCD Documentation](https://argo-cd.readthedocs.io/en/stable/)
