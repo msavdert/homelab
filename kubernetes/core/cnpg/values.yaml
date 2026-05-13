@@ -4,7 +4,7 @@
 # The operator is installed globally by default
 # We enable monitoring for Prometheus/VictoriaMetrics
 monitoring:
-  podMonitorEnabled: true
+  podMonitorEnabled: false
 
 # Enable CRD management via Helm
 crds:
