@@ -1,0 +1,18 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: victoriametrics-datasource
+  namespace: monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana-shared"
+  datasource:
+    name: VictoriaMetrics
+    type: prometheus
+    url: http://vmsingle-vm-shared.monitoring.svc:8429
+    access: proxy
+    isDefault: true
+    jsonData:
+      prometheusType: Prometheus
+      prometheusVersion: 2.45.0

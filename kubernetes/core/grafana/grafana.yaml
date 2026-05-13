@@ -1,0 +1,34 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana-shared
+  namespace: monitoring
+  labels:
+    dashboards: "grafana-shared"
+spec:
+  # Using the secret created by ESO
+  config:
+    security:
+      admin_user:
+        secretKeyRef:
+          name: grafana-admin-credentials
+          key: admin-user
+      admin_password:
+        secretKeyRef:
+          name: grafana-admin-credentials
+          key: admin-password
+
+  # Persistent storage via Longhorn
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: longhorn-db
+
+  # Integration with other resources
+  dashboardLabelSelector:
+    - matchLabels:
+        grafana_dashboard: "true"

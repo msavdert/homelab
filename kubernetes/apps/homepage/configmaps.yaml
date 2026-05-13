@@ -52,6 +52,14 @@ data:
             icon: dokploy
             href: http://oci-aysesmenn-us-devenv:3000/dashboard/home
             description: Multi-Server Deployment Platform
+        - Longhorn:
+            icon: longhorn
+            href: https://longhorn.tail70417b.ts.net
+            description: Distributed Block Storage
+        - Grafana:
+            icon: grafana
+            href: https://grafana.tail70417b.ts.net
+            description: Monitoring Dashboards
     - Applications:
         - Hello World:
             icon: nginx
