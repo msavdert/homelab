@@ -67,5 +67,11 @@
       groupName: 'talos os updates',
       automerge: false,
     },
+    {
+      matchPackageNames: [
+        'ghcr.io/grafana/helm-charts/grafana-operator',
+      ],
+      pinDigests: false,
+    },
   ],
 }
