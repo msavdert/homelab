@@ -1,4 +1,4 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: otel-agent
@@ -104,8 +104,6 @@ spec:
             - k8s.cronjob.name
             - k8s.job.name
             - k8s.node.name
-            - container.name
-            - container.id
 
       resource:
         attributes:

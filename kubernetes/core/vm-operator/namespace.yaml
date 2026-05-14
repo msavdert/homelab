@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: monitoring
   labels:
-    # Standard labels for monitoring namespace
+    pod-security.kubernetes.io/enforce: privileged
     kubernetes.io/metadata.name: monitoring

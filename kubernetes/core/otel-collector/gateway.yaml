@@ -1,4 +1,4 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: otel-gateway
@@ -47,7 +47,7 @@ spec:
           cluster: talos-homelab
 
       # Logging and Tracing (Loki/Tempo/ClickHouse to be added later)
-      logging:
+      debug:
         verbosity: normal
 
     service:
