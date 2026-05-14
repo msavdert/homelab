@@ -9,16 +9,6 @@ spec:
   hostNetwork: true
   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.113.0
 
-  # Target Allocator enables dynamic discovery of ServiceMonitors/PodMonitors
-  targetAllocator:
-    enabled: true
-    image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.113.0
-    serviceAccount: otel-collector
-    prometheusCR:
-      enabled: true
-      serviceMonitorSelector: {} # Match all ServiceMonitors
-      podMonitorSelector: {}     # Match all PodMonitors
-
   env:
     - name: K8S_NODE_NAME
       valueFrom:
@@ -58,19 +48,6 @@ spec:
                 - ^(autofs|binfmt_misc|bpf|cgroup2|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|pstore|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
           network: {}
           load: {}
-
-      # This receiver now uses the Target Allocator for dynamic discovery
-      prometheus:
-        config:
-          scrape_configs:
-            - job_name: 'otel-collector'
-              scrape_interval: 20s
-              static_configs:
-                - targets: ['0.0.0.0:8888']
-        target_allocator:
-          endpoint: http://otel-agent-targetallocator:80
-          interval: 30s
-          collector_id: ${env:K8S_NODE_NAME}
 
     processors:
       memory_limiter:
@@ -113,7 +90,7 @@ spec:
     service:
       pipelines:
         metrics:
-          receivers: [otlp, kubeletstats, hostmetrics, prometheus]
+          receivers: [otlp, kubeletstats, hostmetrics]
           processors: [memory_limiter, k8sattributes, resource, batch]
           exporters: [otlp/gateway]
 

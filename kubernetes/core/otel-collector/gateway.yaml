@@ -9,6 +9,16 @@ spec:
   serviceAccount: otel-collector
   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.113.0
 
+  # Target Allocator for dynamic discovery on Gateway
+  targetAllocator:
+    enabled: true
+    image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.113.0
+    serviceAccount: otel-collector
+    prometheusCR:
+      enabled: true
+      serviceMonitorSelector: {}
+      podMonitorSelector: {}
+
   config:
     receivers:
       otlp:
@@ -17,6 +27,18 @@ spec:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
+
+      # Gateway now handles dynamic scraping
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otel-collector'
+              scrape_interval: 20s
+              static_configs:
+                - targets: ['0.0.0.0:8888']
+        target_allocator:
+          endpoint: http://otel-gateway-targetallocator:80
+          interval: 30s
 
     processors:
       memory_limiter:
@@ -46,14 +68,13 @@ spec:
         external_labels:
           cluster: talos-homelab
 
-      # Logging and Tracing (Loki/Tempo/ClickHouse to be added later)
       debug:
         verbosity: normal
 
     service:
       pipelines:
         metrics:
-          receivers: [otlp]
+          receivers: [otlp, prometheus]
           processors: [memory_limiter, resource, batch]
           exporters: [prometheusremotewrite/victoriametrics]
 
