@@ -7,7 +7,7 @@ spec:
   mode: daemonset
   serviceAccount: otel-collector
   hostNetwork: true
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.113.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.152.0@sha256:f41d7995565df3733b7568702073a9c490792f9c6ac60684fe6a4da21a313f8d
 
   env:
     - name: K8S_NODE_NAME
