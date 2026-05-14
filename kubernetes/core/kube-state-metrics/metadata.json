@@ -1,0 +1,6 @@
+{
+  "name": "kube-state-metrics",
+  "namespace": "monitoring",
+  "description": "Standard K8s object state metrics exporter",
+  "group": "core"
+}

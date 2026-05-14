@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - servicemonitor.yaml
+
+helmCharts:
+  - name: kube-state-metrics
+    releaseName: kube-state-metrics
+    version: 5.27.0
+    repo: https://prometheus-community.github.io/helm-charts
+    namespace: monitoring
+    valuesInline:
+      rbac:
+        create: true
+      podSecurityPolicy:
+        enabled: false
+      containerSecurityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65534
+        capabilities:
+          drop:
+            - ALL
+      prometheus:
+        monitor:
+          enabled: false # We will scrape it via OTel Target Allocator

@@ -9,6 +9,16 @@ spec:
   hostNetwork: true
   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.113.0
 
+  # Target Allocator enables dynamic discovery of ServiceMonitors/PodMonitors
+  targetAllocator:
+    enabled: true
+    image: ghcr.io/open-telemetry/opentelemetry-operator/target-allocator:0.113.0
+    serviceAccount: otel-collector
+    prometheusCR:
+      enabled: true
+      serviceMonitorSelector: {} # Match all ServiceMonitors
+      podMonitorSelector: {}     # Match all PodMonitors
+
   env:
     - name: K8S_NODE_NAME
       valueFrom:
@@ -49,6 +59,7 @@ spec:
           network: {}
           load: {}
 
+      # This receiver now uses the Target Allocator for dynamic discovery
       prometheus:
         config:
           scrape_configs:
@@ -56,10 +67,10 @@ spec:
               scrape_interval: 20s
               static_configs:
                 - targets: ['0.0.0.0:8888']
-            - job_name: 'victoriametrics'
-              scrape_interval: 20s
-              static_configs:
-                - targets: ['vmsingle-vm-shared:8428', 'vmalert-vm-alert:8880']
+        target_allocator:
+          endpoint: http://otel-agent-targetallocator:80
+          interval: 30s
+          collector_id: ${env:K8S_NODE_NAME}
 
     processors:
       memory_limiter:
