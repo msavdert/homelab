@@ -15,7 +15,7 @@ spec:
         fieldRef:
           fieldPath: spec.nodeName
 
-  config: |
+  config:
     receivers:
       otlp:
         protocols:
@@ -127,11 +127,7 @@ spec:
           receivers: [otlp, kubeletstats, hostmetrics, prometheus]
           processors: [memory_limiter, k8sattributes, resource, batch]
           exporters: [otlp/gateway]
-        # Logs and Traces will be added once Gateway is ready
-        # logs: ...
-        # traces: ...
 
-  # Resources and Mounts for hostmetrics and logging
   volumeMounts:
     - name: hostfs
       mountPath: /hostfs
