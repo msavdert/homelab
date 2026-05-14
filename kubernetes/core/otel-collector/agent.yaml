@@ -39,35 +39,13 @@ spec:
           disk: {}
           filesystem:
             exclude_mount_points:
+              match_type: regexp
               mount_points:
-                - /dev/*
-                - /proc/*
-                - /sys/*
-                - /var/lib/docker/*
-                - /var/lib/kubelet/*
+                - ^/(dev|proc|sys|var/lib/docker|var/lib/kubelet).*
             exclude_fs_types:
+              match_type: regexp
               fs_types:
-                - autofs
-                - binfmt_misc
-                - bpf
-                - cgroup2
-                - configfs
-                - debugfs
-                - devpts
-                - devtmpfs
-                - fusectl
-                - hugetlbfs
-                - iso9660
-                - mqueue
-                - nsfs
-                - overlay
-                - proc
-                - pstore
-                - securityfs
-                - selinuxfs
-                - squashfs
-                - sysfs
-                - tracefs
+                - ^(autofs|binfmt_misc|bpf|cgroup2|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|pstore|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
           network: {}
           load: {}
 
