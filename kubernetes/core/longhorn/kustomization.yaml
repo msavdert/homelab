@@ -9,7 +9,7 @@ resources:
 helmCharts:
   - name: longhorn
     repo: https://charts.longhorn.io
-    version: 1.7.2 # Using latest stable 1.7.x for production reliability
+    version: 1.11.2 # Using latest stable 1.7.x for production reliability
     releaseName: longhorn
     namespace: longhorn-system
     valuesFile: values.yaml
