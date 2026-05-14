@@ -7,7 +7,7 @@ resources:
 helmCharts:
   - name: kube-state-metrics
     releaseName: kube-state-metrics
-    version: 5.27.0
+    version: 7.3.0
     repo: https://prometheus-community.github.io/helm-charts
     namespace: monitoring
     valuesInline:
