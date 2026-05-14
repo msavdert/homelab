@@ -1,0 +1,159 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-agent
+  namespace: monitoring
+spec:
+  mode: daemonset
+  serviceAccount: otel-collector
+  hostNetwork: true
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.113.0
+
+  env:
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      kubeletstats:
+        collection_interval: 20s
+        endpoint: "https://${env:K8S_NODE_NAME}:10250"
+        insecure_skip_verify: true
+        auth_type: "serviceAccount"
+
+      hostmetrics:
+        collection_interval: 20s
+        root_path: /hostfs
+        scrapers:
+          cpu:
+          memory:
+          disk:
+          filesystem:
+            exclude_mount_points:
+              mount_points:
+                - /dev/*
+                - /proc/*
+                - /sys/*
+                - /var/lib/docker/*
+                - /var/lib/kubelet/*
+            exclude_fs_types:
+              fs_types:
+                - autofs
+                - binfmt_misc
+                - bpf
+                - cgroup2
+                - configfs
+                - debugfs
+                - devpts
+                - devtmpfs
+                - fusectl
+                - hugetlbfs
+                - iso9660
+                - mqueue
+                - nsfs
+                - overlay
+                - proc
+                - pstore
+                - securityfs
+                - selinuxfs
+                - squashfs
+                - sysfs
+                - tracefs
+          network:
+          load:
+
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otel-collector'
+              scrape_interval: 20s
+              static_configs:
+                - targets: ['0.0.0.0:8888']
+            - job_name: 'victoriametrics'
+              scrape_interval: 20s
+              static_configs:
+                - targets: ['vmsingle-vm-shared:8428', 'vmalert-vm-alert:8880']
+
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+
+      k8sattributes:
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.statefulset.name
+            - k8s.daemonset.name
+            - k8s.cronjob.name
+            - k8s.job.name
+            - k8s.node.name
+            - container.name
+            - container.id
+
+      resource:
+        attributes:
+          - key: cluster.name
+            value: "talos-homelab"
+            action: upsert
+
+      batch:
+        send_batch_size: 1000
+        timeout: 10s
+
+    exporters:
+      otlp/gateway:
+        endpoint: "otel-gateway:4317"
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp, kubeletstats, hostmetrics, prometheus]
+          processors: [memory_limiter, k8sattributes, resource, batch]
+          exporters: [otlp/gateway]
+        # Logs and Traces will be added once Gateway is ready
+        # logs: ...
+        # traces: ...
+
+  # Resources and Mounts for hostmetrics and logging
+  volumeMounts:
+    - name: hostfs
+      mountPath: /hostfs
+      readOnly: true
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+
+  volumes:
+    - name: hostfs
+      hostPath:
+        path: /
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
+
+  resources:
+    limits:
+      cpu: 256m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

@@ -1,0 +1,5 @@
+{
+  "name": "otel-collector",
+  "namespace": "monitoring",
+  "wave": "9"
+}
