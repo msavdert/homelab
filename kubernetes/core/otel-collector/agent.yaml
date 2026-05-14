@@ -34,9 +34,9 @@ spec:
         collection_interval: 20s
         root_path: /hostfs
         scrapers:
-          cpu:
-          memory:
-          disk:
+          cpu: {}
+          memory: {}
+          disk: {}
           filesystem:
             exclude_mount_points:
               mount_points:
@@ -68,8 +68,8 @@ spec:
                 - squashfs
                 - sysfs
                 - tracefs
-          network:
-          load:
+          network: {}
+          load: {}
 
       prometheus:
         config:
