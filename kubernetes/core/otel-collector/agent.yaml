@@ -95,7 +95,7 @@ spec:
 
     exporters:
       otlp/gateway:
-        endpoint: "otel-gateway:4317"
+        endpoint: "otel-gateway-collector:4317"
         tls:
           insecure: true
 

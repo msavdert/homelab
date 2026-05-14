@@ -48,14 +48,14 @@ spec:
 
       # Logging and Tracing (Loki/Tempo/ClickHouse to be added later)
       debug:
-        verbosity: normal
+        verbosity: detailed
 
     service:
       pipelines:
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, resource, batch]
-          exporters: [prometheusremotewrite/victoriametrics]
+          exporters: [prometheusremotewrite/victoriametrics, debug]
 
   resources:
     limits:
