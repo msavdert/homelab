@@ -16,8 +16,12 @@ spec:
     serviceAccount: otel-collector
     prometheusCR:
       enabled: true
-      serviceMonitorSelector: {}
-      podMonitorSelector: {}
+      serviceMonitorSelector:
+        matchLabels:
+          app.kubernetes.io/name: kube-state-metrics
+      podMonitorSelector:
+        matchLabels:
+          app.kubernetes.io/name: kube-state-metrics
 
   config:
     receivers:
