@@ -11,7 +11,7 @@ metadata:
 rules:
   # Permissions for k8sattributes processor and Target Allocator discovery
   - apiGroups: [""]
-    resources: ["pods", "namespaces", "nodes", "services", "endpoints"]
+    resources: ["pods", "namespaces", "nodes", "services", "endpoints", "configmaps"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["apps"]
     resources: ["replicasets", "deployments", "statefulsets", "daemonsets"]
@@ -19,14 +19,20 @@ rules:
   - apiGroups: ["discovery.k8s.io"]
     resources: ["endpointslices"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
   # Permissions for kubeletstats receiver
   - apiGroups: [""]
     resources: ["nodes/stats", "nodes/proxy", "nodes/metrics"]
     verbs: ["get"]
   # Permissions for Target Allocator (Prometheus Operator CRDs)
   - apiGroups: ["monitoring.coreos.com"]
-    resources: ["servicemonitors", "podmonitors"]
+    resources: ["servicemonitors", "podmonitors", "probes", "scrapeconfigs"]
     verbs: ["get", "list", "watch"]
+  # Permissions for metrics scraping
+  - nonResourceURLs: ["/metrics", "/api", "/api/*", "/apis", "/apis/*"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
