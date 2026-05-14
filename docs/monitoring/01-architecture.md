@@ -24,9 +24,13 @@ that complexity explicitly.
 ### Metrics
 
 ```
-kubeletstats receiver  ─┐
-hostmetrics receiver   ─┤─► k8sattributes ─► resourcedetection ─► batch ─► Gateway
-OTLP receiver (apps)   ─┘
+kubeletstats receiver   ─┐
+hostmetrics receiver    ─┤─► k8sattributes ─► resourcedetection ─► batch ─► Gateway
+Kube-State-Metrics (KSM)─┤
+OTLP receiver (apps)    ─┘
+
+**Dynamic Discovery:**
+OTel Target Allocator   ─► ServiceMonitor/PodMonitor ─► prometheus receiver (Agent)
 
 Gateway:
   metrics pipeline         ─► prometheusremotewrite ─► VictoriaMetrics
@@ -43,6 +47,10 @@ and process counts. This covers Talos-level metrics that kubeletstats doesn't ex
 
 **OTLP receiver** accepts metrics from instrumented applications and from Beyla. Beyla
 sends RED metrics (request rate, error rate, duration) for all HTTP/gRPC/SQL services.
+
+**Kube-State-Metrics (KSM)** provides the "Cluster State" metrics (e.g., pod status, 
+deployment replicas, node readiness). It is scraped by the OTel Agent via the 
+prometheus receiver, which is dynamically configured by the Target Allocator.
 
 ### Logs
 
@@ -99,6 +107,7 @@ One pod per node. Responsibilities:
 - Scrape OS metrics via hostmetrics
 - Tail pod log files via filelog
 - Receive OTLP from applications and Beyla on the same node
+- **Discover and scrape Prometheus targets via Target Allocator integration**
 - Enrich all signals with Kubernetes metadata via k8sattributes
 - Forward everything to the Gateway via OTLP/gRPC
 
@@ -133,6 +142,15 @@ Beyla produces:
 Beyla sends OTLP directly to the Gateway (not the Agent). This is intentional: Beyla
 runs with `hostPID: true` and elevated capabilities, and its data is already enriched
 with process-level metadata. The Gateway applies k8sattributes to add pod-level metadata.
+
+### Kube-State-Metrics (KSM)
+
+**Role:** Export Kubernetes object state as metrics.
+
+KSM listens to the Kubernetes API server and generates metrics about the state of the 
+objects: node status, pod status, deployment readiness, resource limits/requests, etc. 
+It does not consume host resources directly but provides the "logical" view of the 
+cluster.
 
 ### OTel Operator
 

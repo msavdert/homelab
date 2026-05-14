@@ -8,7 +8,10 @@ or make any backend decisions.
 
 `apps/base/observability/otel-agent.yaml` — `OpenTelemetryCollector` CRD, mode: `daemonset`.
 
-## Receivers
+## Components
+
+- **OTel Collector (DaemonSet):** The core agent collecting and forwarding signals.
+- **Target Allocator:** A sidecar/deployment that discovers scrape targets from `ServiceMonitor` and `PodMonitor` CRDs.
 
 ### kubeletstats
 
@@ -159,6 +162,31 @@ indexed by backends (Loki uses them as stream labels, ClickHouse stores them in
 Removes intermediate attributes (`namespace`, `pod_name`, `uid`, `container_name`,
 `restart_count`, `time`, `stream`, `logtag`) that were only needed for parsing.
 
+### prometheus
+
+The prometheus receiver is dynamically configured by the Target Allocator to scrape 
+targets defined via `ServiceMonitor` and `PodMonitor` CRDs.
+
+```yaml
+prometheus:
+  config:
+    scrape_configs:
+      - job_name: 'otel-collector'
+        scrape_interval: 20s
+        static_configs:
+          - targets: ['0.0.0.0:8888']
+  target_allocator:
+    endpoint: http://otel-agent-targetallocator:80
+    interval: 30s
+    collector_id: ${env:K8S_NODE_NAME}
+```
+
+This setup enables:
+- **Zero-touch discovery:** Add a `ServiceMonitor`, and OTel starts scraping it.
+- **Kube-State-Metrics integration:** Automatically scrapes KSM via its ServiceMonitor.
+- **Shard-aware scraping:** The Target Allocator ensures targets are distributed across 
+  all Agent pods.
+
 ### OTLP Receiver
 
 Accepts OTLP from applications and Beyla running on the same node.
@@ -270,7 +298,7 @@ should not buffer data for long.
 ```yaml
 pipelines:
   metrics:
-    receivers: [kubeletstats, hostmetrics, otlp]
+    receivers: [kubeletstats, hostmetrics, prometheus, otlp]
     processors: [memory_limiter, k8sattributes, resourcedetection, batch]
     exporters: [otlp/gateway]
 
@@ -293,10 +321,11 @@ The Agent ServiceAccount needs cluster-wide read access:
 
 | Resource | Verbs | Reason |
 |----------|-------|--------|
-| pods, namespaces, nodes | get, list, watch | k8sattributes lookup |
-| nodes/stats | get | kubeletstats scraping |
+| pods, namespaces, nodes, services, endpoints | get, list, watch | k8sattributes lookup & Target Allocator discovery |
+| endpointslices | get, list, watch | Target Allocator discovery (modern API) |
+| nodes/stats, nodes/proxy, nodes/metrics | get | kubeletstats & prometheus scraping |
 | replicasets, deployments, statefulsets, daemonsets | get, list, watch | deployment name resolution |
-| jobs, cronjobs | get, list, watch | job name resolution |
+| servicemonitors, podmonitors | get, list, watch | Target Allocator CRD discovery |
 
 ## Host Mounts
 
