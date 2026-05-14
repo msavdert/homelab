@@ -1,0 +1,12 @@
+# Grafana Operator Configuration
+# Using official OCI chart from ghcr.io/grafana/helm-charts/grafana-operator
+
+# The operator is lightweight and manages Grafana CRDs.
+# We manage CRDs via kustomization resources for better GitOps reliability.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

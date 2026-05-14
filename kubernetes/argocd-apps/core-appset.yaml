@@ -8,11 +8,13 @@ spec:
     - git:
         repoURL: 'https://github.com/msavdert/homelab.git'
         revision: HEAD
-        directories:
-          - path: kubernetes/core/*
+        files:
+          - path: "kubernetes/core/*/metadata.json"
   template:
     metadata:
       name: 'core-{{path.basename}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
     spec:
       project: default
       source:
@@ -22,7 +24,7 @@ spec:
         kustomize: {}
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: '{{path.basename}}'
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           prune: true
@@ -30,3 +32,4 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - RespectIgnoreDifferences=true

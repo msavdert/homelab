@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - ingress.yaml
+  - sc-db.yaml
+
+helmCharts:
+  - name: longhorn
+    repo: https://charts.longhorn.io
+    version: 1.11.2 # Final step: 1.10 -> 1.11 (Latest stable)
+    releaseName: longhorn
+    namespace: longhorn-system
+    valuesFile: values.yaml
+    includeCRDs: true

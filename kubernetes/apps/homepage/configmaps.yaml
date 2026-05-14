@@ -7,26 +7,29 @@ data:
   settings.yaml: |
     title: Homelab Dashboard
     theme: dark
+    background: https://images.unsplash.com/photo-1506318137071-a8e063b4b611?auto=format&fit=crop&w=1920&q=80
+    cardBlur: sm
+    headerStyle: boxed
+    showDockerStats: false
     layout:
       Infrastructure:
         style: list
         columns: 3
-      Services:
+      Applications:
         style: list
         columns: 3
-    headerStyle: boxed
-    showDockerStats: false
+    search:
+      provider: google
+      focus: true
+      target: _blank
   bookmarks.yaml: |
     - Infrastructure:
-        - Proxmox:
-            - icon: proxmox
-              href: https://192.168.1.10:8006 # Placeholder, update as needed
         - Tailscale Admin:
             - icon: tailscale
               href: https://login.tailscale.com/admin/machines
         - Github Repo:
             - icon: github
-              href: https://github.com/melihsavdert/homelab # Based on username
+              href: https://github.com/msavdert/homelab
   services.yaml: |
     - Infrastructure:
         - ArgoCD:
@@ -45,30 +48,54 @@ data:
             icon: proxmox
             href: https://pve:8006/
             description: Hypervisor Management
+        - Dokploy:
+            icon: dokploy
+            href: http://oci-aysesmenn-us-devenv:3000/dashboard/home
+            description: Multi-Server Deployment Platform
+        - Longhorn:
+            icon: longhorn
+            href: https://longhorn.tail70417b.ts.net
+            description: Distributed Block Storage
+        - Grafana:
+            icon: grafana
+            href: https://grafana.tail70417b.ts.net
+            description: Monitoring Dashboards
     - Applications:
         - Hello World:
             icon: nginx
             href: https://hello.tail70417b.ts.net
             description: Test Application
+        - Terminal:
+            icon: sh-ubuntu
+            href: http://oci-aysesmenn-us-devenv:7681
+            description: Remote Terminal
   widgets.yaml: |
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
-          label: "cluster"
-        nodes:
-          show: true
-          cpu: true
-          memory: true
-          showLabel: true
     - datetime:
         text_size: xl
         format:
           timeStyle: short
           dateStyle: long
           hour12: false
+    - resources:
+        cpu: true
+        memory: true
+        label: Cluster Resources
+    - weather:
+        location: Istanbul, TR
+        units: metric
+        cache: 15
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "Cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
   kubernetes.yaml: |
     mode: cluster
   docker.yaml: ""

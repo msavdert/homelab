@@ -1,0 +1,21 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: vm-alert
+  namespace: monitoring
+spec:
+  # Query the VMSingle instance for rule evaluation
+  datasource:
+    url: "http://vmsingle-vm-shared.monitoring.svc:8429"
+  
+  # Search for alerting rules in all namespaces
+  selectAllByDefault: true
+
+  # Evaluation interval
+  evaluationInterval: "1m"
+
+  # Resource Management
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi

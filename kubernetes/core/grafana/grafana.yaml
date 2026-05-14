@@ -1,0 +1,45 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana-shared
+  namespace: monitoring
+  labels:
+    dashboards: "grafana-shared"
+spec:
+  # Important: This field belongs directly under spec
+  disableDefaultAdminSecret: true
+
+  # Grafana configuration (maps to grafana.ini)
+  config:
+    log:
+      mode: "console"
+      level: "info"
+
+  # Injecting credentials from our ESO Secret
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: grafana
+              env:
+                - name: GF_SECURITY_ADMIN_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-credentials
+                      key: admin-user
+                - name: GF_SECURITY_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-admin-credentials
+                      key: admin-password
+
+  # Persistent storage via Longhorn
+  persistentVolumeClaim:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: longhorn-db

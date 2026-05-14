@@ -1,0 +1,26 @@
+# VictoriaMetrics Operator Configuration
+# Optimized for Homelab + ArgoCD 3.x
+
+# Reference: https://docs.victoriametrics.com/helm/victoria-metrics-operator/
+# Rationale: Using v0.69.0 (Chart 0.62.1) as it is the current stable release.
+
+# Enable ArgoCD compatibility and ServerSideApply
+serviceAccount:
+  create: true
+
+# Important: VictoriaMetrics Operator manages CRDs
+# To avoid ArgoCD sync issues, we use ServerSideApply and explicit management.
+admissionWebhooks:
+  enabled: false # Disabled for simplicity in homelab, can be enabled with cert-manager if needed
+
+# Best Practice: Enable converter to support Prometheus CRDs (ServiceMonitor, etc.)
+# This allows migrating from kube-prometheus-stack easily.
+rbac:
+  create: true
+
+operator:
+  # Ensure the operator converts Prometheus CRDs to VictoriaMetrics CRDs
+  enable_prometheus_converter: true
+  # Add labels to converted objects so ArgoCD can track them if needed
+  prometheus_converter_add_labels:
+    managed-by: vm-operator

@@ -1,0 +1,23 @@
+# OpenTelemetry Operator Configuration
+
+# Admission webhooks are required for automatic instrumentation
+admissionWebhooks:
+  certManager:
+    enabled: true
+    # Use our cert-manager for webhook certificates
+    issuerRef:
+      name: selfsigned-issuer
+      kind: ClusterIssuer
+
+# Manager configuration
+manager:
+  collectorImage:
+    repository: otel/opentelemetry-collector-k8s
+  # Resource Management
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

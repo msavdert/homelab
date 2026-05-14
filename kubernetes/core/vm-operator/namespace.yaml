@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    # Standard labels for monitoring namespace
+    kubernetes.io/metadata.name: monitoring

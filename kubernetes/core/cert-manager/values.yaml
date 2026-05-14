@@ -1,0 +1,36 @@
+# Default values for cert-manager.
+installCRDs: true # Using Helm to manage CRDs
+
+replicaCount: 1
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false # We will enable this once Prometheus Operator is installed
+
+webhook:
+  timeoutSeconds: 10
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+
+cainjector:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
