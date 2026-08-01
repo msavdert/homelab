@@ -2,18 +2,14 @@
 
 Terraform against the Proxmox API (`bpg/proxmox` provider), implementing
 Phase 0 of [`docs/PLAN.md`](../../docs/PLAN.md): a code-provisioned Debian
-12 cloud-init VM template. Design decisions: [ADR-0002](../../docs/decisions/0002-cloud-init-vm-template.md)
-(image/template strategy) and [ADR-0003](../../docs/decisions/0003-sops-age-secrets.md)
-(SOPS + age secrets).
+12 cloud-init VM template, fully automated end to end. Design decisions:
+[ADR-0002](../../docs/decisions/0002-cloud-init-vm-template.md)
+(image/template strategy), [ADR-0003](../../docs/decisions/0003-sops-age-secrets.md)
+(SOPS + age secrets), and [ADR-0004](../../docs/decisions/0004-root-pam-terraform-token.md)
+(why Terraform authenticates as `root@pam`).
 
 Workload VMs (Terraform clones of the template) are **not** built here yet
 — this module only creates the template itself.
-
-**Note:** the base cloud image is staged onto Proxmox storage with a manual
-`wget` run as root, not downloaded by Terraform — the Proxmox API's
-URL-download endpoints reject API-token auth even with correct permissions.
-See the comment at the top of `image.tf` and the ADR-0002 addendum for the
-full explanation and the exact command.
 
 ## What's here
 
@@ -22,7 +18,7 @@ full explanation and the exact command.
 | `versions.tf`   | Provider/Terraform version pins                                  |
 | `providers.tf`  | Proxmox provider configuration                                   |
 | `variables.tf`  | Inputs, with defaults matching the live `pve` host                |
-| `image.tf`      | References the Debian 12 cloud qcow2 staged on Proxmox storage `local` (see note below) |
+| `image.tf`      | Downloads the Debian 12 cloud qcow2 into Proxmox storage `local`  |
 | `template.tf`   | Builds the cloud-init VM template on storage `local-zfs`          |
 | `outputs.tf`    | Exposes the template VM ID/name for later modules to clone from   |
 | `secrets.sops.tfvars.json` | SOPS-encrypted Proxmox API token + endpoint (committed, encrypted) |
@@ -53,43 +49,44 @@ to decrypt without it; ask the operator to transfer `keys.txt` out of band
 
 ## Proxmox API token bootstrap (already done once, documented here for reference)
 
-Terraform authenticates as a dedicated, least-privilege Proxmox user, not
-`root@pam`. This was provisioned once, directly on the host over
-`ssh root@pve`:
+Terraform authenticates as `root@pam` — see
+[ADR-0004](../../docs/decisions/0004-root-pam-terraform-token.md) for why a
+least-privilege `terraform@pve` user was tried first and abandoned: Proxmox
+VE 9.2.5's `query-url-metadata`/`download-url` endpoints (needed for
+`proxmox_download_file`) reject any non-`root@pam` identity with a bare
+"Permission check failed" regardless of granted ACLs. This was provisioned
+once, directly on the host over `ssh root@pve`:
 
 ```sh
-pveum role add TerraformProv -privs \
-  'VM.Allocate,VM.Clone,VM.Config.CDROM,VM.Config.Cloudinit,VM.Config.CPU,VM.Config.Disk,VM.Config.HWType,VM.Config.Memory,VM.Config.Network,VM.Config.Options,VM.Audit,VM.PowerMgmt,Datastore.AllocateSpace,Datastore.Audit,Datastore.AllocateTemplate,SDN.Use'
-
-pveum user add terraform@pve --comment 'Terraform provisioning (bpg/proxmox provider) - homelab repo'
-pveum acl modify / -user terraform@pve -role TerraformProv
-pveum user token add terraform@pve provider --privsep 0 \
-  --comment 'infrastructure/terraform bpg/proxmox provider token'
+pveum user token add root@pam terraform-provider --privsep 0 \
+  --comment 'infrastructure/terraform bpg/proxmox provider token (ADR-0004)'
 ```
 
-- **User**: `terraform@pve` (PVE realm, not PAM — no login shell, API-only).
-- **Role**: `TerraformProv`, a custom role scoped to VM lifecycle and
-  datastore access needed to download images and clone/build VMs. Explicitly
-  excludes `Sys.Modify`, `Realm.Allocate`, `Permissions.Modify`, and any
-  other cluster/host-admin privileges — this token cannot touch anything
-  outside VM/CT lifecycle and the two datastores in use.
-- **Token**: `terraform@pve!provider`, `--privsep 0` (token inherits the
-  user's own ACLs rather than needing separate permissions granted to the
-  token itself — simpler for a single-purpose automation user). The token
+- **User**: `root@pam` — required for Proxmox's hardcoded permission-check
+  bypass (`check_api2_permissions` in `PVE::RPCEnvironment`) to apply at
+  all; no scoped-role alternative was found to work for the image-download
+  endpoints in this PVE version.
+- **`--privsep 0` is required, not optional**: the `pveum` default
+  (`--privsep 1`) still fails, because Proxmox resolves a privsep-enabled
+  token to its own token-scoped identity (`root@pam!tokenid`) for
+  permission purposes, which does not match the hardcoded `eq 'root@pam'`
+  check. Only `--privsep 0` (token inherits the user's identity directly)
+  makes the bypass apply.
+- This trades defense-in-depth for full automation — see ADR-0004's
+  Consequences section for the reasoning and the accepted risk. The token
   secret is shown exactly once at creation time; it was captured
   immediately and encrypted (see below), never stored in shell history or
   plaintext on disk.
 
 If this ever needs to be redone (token rotated, host rebuilt), regenerate
-the token with `pveum user token add terraform@pve provider --privsep 0` and
-re-encrypt as described next.
+with the same command and re-encrypt as described next.
 
 ### Encrypting the token
 
 ```sh
 cat > /tmp/secrets_plain.json <<'EOF'
 {
-  "proxmox_api_token": "terraform@pve!provider=<token-secret>",
+  "proxmox_api_token": "root@pam!terraform-provider=<token-secret>",
   "proxmox_endpoint": "https://pve:8006/"
 }
 EOF
@@ -115,8 +112,7 @@ terraform init
 
 eval "$(sops -d --output-type dotenv secrets.sops.tfvars.json | sed 's/^/export TF_VAR_/')"
 terraform plan
-# review the plan, then, once ready:
-# terraform apply
+terraform apply
 unset TF_VAR_proxmox_api_token TF_VAR_proxmox_endpoint
 ```
 
@@ -124,6 +120,3 @@ unset TF_VAR_proxmox_api_token TF_VAR_proxmox_endpoint
 because the `pve` node currently serves its self-signed PVE cluster CA
 certificate, which this machine doesn't trust. Revisit once/if the Proxmox
 API gets a certificate from a trusted CA.
-
-Do not run `terraform apply` without explicit operator confirmation —
-creating the template touches the live host.

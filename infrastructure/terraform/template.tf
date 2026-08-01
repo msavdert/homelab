@@ -27,7 +27,7 @@ resource "proxmox_virtual_environment_vm" "debian_12_template" {
   disk {
     datastore_id = var.disk_storage
     interface    = "scsi0"
-    import_from  = local.debian_image_volume_id
+    import_from  = proxmox_download_file.debian_12_cloudimg.id
     size         = var.template_disk_size
     file_format  = "raw"
   }
