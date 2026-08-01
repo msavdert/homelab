@@ -1,0 +1,7 @@
+creation_rules:
+  # Matches both `.sops.yaml` and the `*.sops.tfvars.json` convention used
+  # for encrypted Terraform variable files (see ADR-0003).
+  - path_regex: \.sops\.(yaml|json|tfvars\.json)$
+    key_groups:
+      - age:
+          - age1k875glhtpwxyqewspu0v02ln6etpk9a2jdnddvtxpwtanrha7e3syez3fa

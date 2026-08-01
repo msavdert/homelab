@@ -23,12 +23,14 @@ Goal: a clean, code-provisioned base to build on.
 - [x] Tailscale mesh between operator machines and the Proxmox host
 - [x] Wiped all leftover test VMs/CTs (CKA cluster, k3s cluster, Oracle
       DB/GoldenGate VMs, hermes-agent LXC) — clean slate, 2026-08-01
-- [ ] `infrastructure/terraform/` — Proxmox provider, VM/CT provisioning as
-      code
-- [ ] Base OS image/template strategy (cloud-init image vs. packer-built
-      template) — needs an ADR
-- [ ] Secrets management backend chosen and wired in before anything needs
-      a credential — needs an ADR
+- [x] `infrastructure/terraform/` — Proxmox provider, VM/CT provisioning as
+      code. Debian 12 cloud-init template applied to the live host
+      (VM ID 9000, node `pve`) — see ADR-0002 addendum for a Proxmox API
+      token limitation worked around during apply
+- [x] Base OS image/template strategy — [ADR-0002](decisions/0002-cloud-init-vm-template.md):
+      Debian 12 cloud-init image, cloned per VM
+- [x] Secrets management backend chosen — [ADR-0003](decisions/0003-sops-age-secrets.md):
+      SOPS + age
 
 ## Phase 1 — Kubernetes platform (secondary learning goal)
 

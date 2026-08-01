@@ -5,6 +5,9 @@
 *.tfvars
 *.tfvars.json
 !*.tfvars.example
+# SOPS-encrypted tfvars ARE tracked despite the blanket rule above -
+# see docs/decisions/0003-sops-age-secrets.md
+!*.sops.tfvars.json
 override.tf
 override.tf.json
 *_override.tf
