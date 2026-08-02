@@ -9,7 +9,7 @@ Check off items as they land, and open an ADR in
 [`decisions/`](decisions/) for any non-trivial choice made along the way —
 this file tracks *what's done*, ADRs track *why it was done that way*.
 
-## Status: Phase 0 in progress
+## Status: Phase 1 in progress
 
 Last updated: 2026-08-01.
 
@@ -44,7 +44,8 @@ Goal: a working, GitOps-managed cluster to run database workloads on. Look
 at patterns from popular starred OSS homelab repos before locking in
 choices; this phase is deliberately a learning track, not just plumbing.
 
-- [ ] Cluster distribution decision (Talos / k3s / kubeadm) — needs an ADR
+- [x] Cluster distribution decision (Talos / k3s / kubeadm) — [ADR-0005](decisions/0005-k3s-cluster-distribution.md):
+      k3s on Debian 12 VMs
 - [ ] CNI choice
 - [ ] GitOps tool + sync strategy (ArgoCD ApplicationSets vs. Flux, etc.)
 - [ ] Ingress + TLS
