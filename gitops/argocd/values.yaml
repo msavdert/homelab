@@ -7,6 +7,13 @@
 # No ingress/TLS config here yet — that's a separate pending Phase 1 item
 # (see docs/PLAN.md). Until it lands, reach the UI/API via
 # `kubectl -n argocd port-forward svc/argocd-server 8080:443`.
+#
+# repoServer.* and configs.cm.* below wire in KSOPS (ADR-0009) so
+# SOPS-encrypted manifests can be decrypted at sync time: an init container
+# installs the ksops/kustomize binaries built into the viaductoss/ksops
+# image onto the repo-server, and the age private key is mounted from a
+# `sops-age` Secret (key: key.txt) that pre-exists in the argocd namespace —
+# created imperatively per ADR-0009, never committed to git.
 
 crds:
   install: true
@@ -22,8 +29,42 @@ server:
   service:
     type: ClusterIP
 
+configs:
+  cm:
+    # Required for ArgoCD to invoke kustomize's ksops exec plugin.
+    kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+
 repoServer:
   replicas: 1
+  env:
+    - name: SOPS_AGE_KEY_FILE
+      value: /.config/sops/age/keys.txt
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+    - name: sops-age
+      secret:
+        secretName: sops-age
+        items:
+          - key: key.txt
+            path: keys.txt
+  initContainers:
+    - name: install-ksops
+      image: viaductoss/ksops:v4.5.1
+      command: ["/usr/local/bin/ksops", "install", "--with-kustomize", "/custom-tools"]
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+  volumeMounts:
+    - mountPath: /usr/local/bin/kustomize
+      name: custom-tools
+      subPath: kustomize
+    - mountPath: /usr/local/bin/ksops
+      name: custom-tools
+      subPath: ksops
+    - mountPath: /.config/sops/age
+      name: sops-age
+      readOnly: true
 
 applicationSet:
   enabled: true
