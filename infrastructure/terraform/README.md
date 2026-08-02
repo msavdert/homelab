@@ -25,11 +25,11 @@ Workload VMs (Terraform clones of the template) are **not** built here yet
 
 ## One-time local bootstrap
 
-Install the tools this module needs:
+This module needs `terraform`, `sops`, and `age`, pinned in the repo root's
+[`.mise.toml`](../../.mise.toml). Install them with [mise](https://mise.jdx.dev/):
 
 ```sh
-brew tap hashicorp/tap
-brew install hashicorp/tap/terraform age sops
+mise install
 ```
 
 Generate a local age keypair if you don't already have one (the private key
