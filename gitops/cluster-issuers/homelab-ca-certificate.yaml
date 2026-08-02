@@ -1,0 +1,20 @@
+# The cluster's private root CA. Signed by the bootstrap Issuer; its key
+# material is generated in-cluster and lands in the `homelab-ca` Secret —
+# never sourced from or committed to git. See ADR-0010.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: homelab-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: homelab-ca
+  secretName: homelab-ca
+  duration: 87600h # 10 years — a homelab root CA, rotated manually if ever
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-bootstrap
+    kind: Issuer
+    group: cert-manager.io

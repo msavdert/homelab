@@ -1,0 +1,11 @@
+# Cluster-wide issuer every in-cluster Ingress/Certificate should use from
+# here on: `cert-manager.io/cluster-issuer: homelab-ca-issuer`. Backed by
+# the `homelab-ca` Secret created by the Certificate in this same
+# directory. See ADR-0010.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: homelab-ca-issuer
+spec:
+  ca:
+    secretName: homelab-ca

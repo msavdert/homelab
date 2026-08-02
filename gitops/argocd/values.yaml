@@ -14,6 +14,14 @@
 # image onto the repo-server, and the age private key is mounted from a
 # `sops-age` Secret (key: key.txt) that pre-exists in the argocd namespace —
 # created imperatively per ADR-0009, never committed to git.
+#
+# server.ingress.* + configs.params below wire in Ingress+TLS (ADR-0010):
+# the server runs in `insecure` (plain HTTP) mode internally, and TLS is
+# terminated at the Cilium Ingress using a cert-manager-issued certificate
+# from the cluster's private CA (`homelab-ca-issuer`). Reach the UI at
+# https://argocd.homelab.internal — requires a local `/etc/hosts` entry
+# pointing that name at k3s-node-01 (10.0.1.10) and trusting `homelab-ca`
+# once, since there's no tailnet-wide DNS or public CA yet.
 
 crds:
   install: true
@@ -28,11 +36,22 @@ server:
   replicas: 1
   service:
     type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: cilium
+    hostname: argocd.homelab.internal
+    tls: true
+    annotations:
+      cert-manager.io/cluster-issuer: homelab-ca-issuer
 
 configs:
   cm:
     # Required for ArgoCD to invoke kustomize's ksops exec plugin.
     kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+  params:
+    # TLS is terminated at the Ingress (cert-manager cert), so the server
+    # itself serves plain HTTP/gRPC internally.
+    server.insecure: true
 
 repoServer:
   replicas: 1

@@ -1,0 +1,35 @@
+# Private CA bootstrap chain (selfsigned Issuer -> CA Certificate ->
+# ClusterIssuer), plain cert-manager custom resources, not a Helm chart.
+# See ADR-0010. Synced after cert-manager.yaml (sync-wave "1"): the
+# cert-manager CRDs/webhook must exist first, and syncPolicy.retry below
+# rides out the race if this Application's own sync starts before that.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-issuers
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/msavdert/homelab
+    targetRevision: main
+    path: gitops/cluster-issuers
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

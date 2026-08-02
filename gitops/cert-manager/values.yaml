@@ -1,0 +1,21 @@
+# Helm values for the jetstack/cert-manager chart, version v1.21.1.
+#
+# Installed as a GitOps-managed ArgoCD Application from day one (unlike
+# Cilium/ArgoCD itself, cert-manager has no chicken-and-egg bootstrap
+# problem — see ADR-0010).
+#
+# Nothing exotic here: single replica (single-node cluster, matches the
+# operator.replicas=1 / controller.replicas=1 pattern already used for
+# Cilium/ArgoCD), CRDs installed and kept on chart uninstall.
+
+crds:
+  enabled: true
+  keep: true
+
+replicaCount: 1
+
+webhook:
+  replicaCount: 1
+
+cainjector:
+  replicaCount: 1

@@ -1,0 +1,35 @@
+# cert-manager, GitOps-managed from install (ADR-0010) — no bootstrap
+# chicken-and-egg problem like Cilium/ArgoCD had, so it never needs a
+# manual day-0 Helm step.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    # Must exist (CRDs + running webhook) before cluster-issuers.yaml's
+    # Issuer/Certificate/ClusterIssuer can sync. See ADR-0010.
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: v1.21.1
+      helm:
+        valueFiles:
+          - $values/gitops/cert-manager/values.yaml
+    - repoURL: https://github.com/msavdert/homelab
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
