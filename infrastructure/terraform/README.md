@@ -1,8 +1,8 @@
 # infrastructure/terraform
 
-Terraform against the Proxmox API (`bpg/proxmox` provider), implementing
-Phase 0 of [`docs/PLAN.md`](../../docs/PLAN.md): a code-provisioned Debian
-12 cloud-init VM template, fully automated end to end. Design decisions:
+Terraform against the Proxmox API (`bpg/proxmox` provider). Phase 0's
+code-provisioned Debian 12 cloud-init VM template plus Phase 1's k3s
+cluster VM, fully automated end to end. Design decisions:
 [ADR-0002](../../docs/decisions/0002-cloud-init-vm-template.md)
 (image/template strategy), [ADR-0003](../../docs/decisions/0003-sops-age-secrets.md)
 (SOPS + age secrets), [ADR-0004](../../docs/decisions/0004-root-pam-terraform-token.md)
@@ -10,20 +10,18 @@ Phase 0 of [`docs/PLAN.md`](../../docs/PLAN.md): a code-provisioned Debian
 [ADR-0008](../../docs/decisions/0008-k3snet-private-sdn-network.md) (the
 private, NAT-isolated `k3snet` SDN network cluster VMs attach to).
 
-Workload VMs (Terraform clones of the template) are **not** built here yet
-— this module only creates the template itself.
-
 ## What's here
 
-| File            | Purpose                                                         |
-| --------------- | ---------------------------------------------------------------- |
-| `versions.tf`   | Provider/Terraform version pins                                  |
-| `providers.tf`  | Proxmox provider configuration                                   |
-| `variables.tf`  | Inputs, with defaults matching the live `pve` host                |
-| `image.tf`      | Downloads the Debian 12 cloud qcow2 into Proxmox storage `local`  |
-| `template.tf`   | Builds the cloud-init VM template on storage `local-zfs`          |
-| `network.tf`    | The `localnat` SDN zone + `k3snet` VNet/subnet cluster VMs attach to (ADR-0008) |
-| `outputs.tf`    | Exposes the template VM ID/name for later modules to clone from   |
+| File              | Purpose                                                         |
+| ----------------- | ---------------------------------------------------------------- |
+| `versions.tf`     | Provider/Terraform version pins                                  |
+| `providers.tf`    | Proxmox provider configuration                                   |
+| `variables.tf`    | Inputs, with defaults matching the live `pve` host                |
+| `image.tf`        | Downloads the Debian 12 cloud qcow2 into Proxmox storage `local`  |
+| `template.tf`     | Builds the cloud-init VM template on storage `local-zfs`          |
+| `network.tf`      | The `localnat` SDN zone + `k3snet` VNet/subnet cluster VMs attach to (ADR-0008) |
+| `k3s_node.tf`      | The single k3s cluster node — a full clone of the template, attached to `k3snet` |
+| `outputs.tf`      | Exposes the template VM ID/name for later modules to clone from   |
 | `secrets.sops.tfvars.json` | SOPS-encrypted Proxmox API token + endpoint (committed, encrypted) |
 
 ## One-time local bootstrap
@@ -108,6 +106,62 @@ rm -f /tmp/secrets_plain.json
 `.sops.yaml` is filename-pattern based, and the plaintext source file here
 lives outside that pattern.)
 
+## Cloud-init snippet bootstrap (already done once, documented here for reference)
+
+`k3s_node.tf`'s `initialization.user_data_file_id` points at
+`local:snippets/k3s-node-cloud-init.yaml` on the `pve` host — a file placed
+manually rather than through `proxmox_virtual_environment_file`. That
+resource uploads snippet content over a raw SSH connection to the node's
+*public* IP using Go's SSH client, which needs a locally-loaded key/agent
+this environment doesn't have (the `ssh root@pve` access used everywhere
+else in this repo goes through Tailscale, a separate mechanism the
+provider's uploader doesn't use). Provisioned once, directly on the host:
+
+```sh
+mkdir -p /var/lib/vz/snippets
+cat > /var/lib/vz/snippets/k3s-node-cloud-init.yaml <<'EOF'
+#cloud-config
+hostname: k3s-node-01
+manage_etc_hosts: true
+users:
+  - name: k3sadmin
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - <var.k3s_ssh_public_key value, from variables.tf>
+packages:
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+EOF
+```
+
+Also required once, host-side: the `local` storage's content types didn't
+include `snippets` by default —
+`pvesm set local --content iso,vztmpl,backup,import,snippets`.
+
+- **The admin user/SSH key/sudo grant live in this file, not in
+  `initialization.user_account`.** Proxmox's `--cicustom user=...` (which
+  `user_data_file_id` sets) *replaces* cloud-init's user-data wholesale —
+  it does not merge with `ciuser`/`sshkeys`, so a `user_account` block in
+  `k3s_node.tf` would be silently ignored. This matches the pattern the
+  operator had already worked out in a prior project
+  ([`msavdert/k3s-proxmox`](https://github.com/msavdert/k3s-proxmox),
+  `docs/01-vm-provisioning.md`).
+- **Why a snippet at all**: the Debian 12 genericcloud image (ADR-0002)
+  doesn't ship `qemu-guest-agent`. Without it, Terraform hangs waiting for
+  agent readiness on every `apply` that creates or resizes a VM (`agent {
+  enabled = true }` in `template.tf`/`k3s_node.tf`).
+- If the SSH public key (`var.k3s_ssh_public_key`) is ever rotated, this
+  file needs a matching manual update — `qm cloudinit update <vmid>` plus
+  a reboot to re-apply it to already-running VMs.
+- Two other snippet files (`cka-cloud-init.yaml`, `k3s-cloud-init.yaml`)
+  already existed in `/var/lib/vz/snippets/` from earlier, undocumented
+  experiments predating this repo's 2026-08-01 clean slate — left in place
+  for now, same as the `vnet0` SDN leftover in ADR-0008; revisit as
+  cleanup, not blocking.
+
 ## Running Terraform
 
 Decrypt the secrets into environment variables for the duration of the
@@ -128,3 +182,24 @@ unset TF_VAR_proxmox_api_token TF_VAR_proxmox_endpoint
 because the `pve` node currently serves its self-signed PVE cluster CA
 certificate, which this machine doesn't trust. Revisit once/if the Proxmox
 API gets a certificate from a trusted CA.
+
+## Accessing the k3s node
+
+`k3s-node-01` is at `10.0.1.10` on `k3snet` (ADR-0008), reachable via the
+existing `pve` Tailscale subnet router — no per-VM Tailscale needed. The
+matching SSH private key is in the **1Password `homelab` vault, item
+`homelab-k3s-ssh-key`**, same retrieval pattern as the age key above:
+
+```sh
+op item get homelab-k3s-ssh-key --vault homelab --fields private_key --reveal \
+  | grep -v '^"$' > ~/.ssh/homelab_k3s
+chmod 600 ~/.ssh/homelab_k3s
+ssh -i ~/.ssh/homelab_k3s k3sadmin@10.0.1.10
+```
+
+If your environment can't route to `10.0.1.0/24` directly (this devbox
+couldn't — its Tailscale connectivity only proxies specific peer IPs, not
+routes those peers advertise), go through `pve` as a jump host instead:
+`ssh -J root@pve -i ~/.ssh/homelab_k3s k3sadmin@10.0.1.10`, or copy the key
+onto `pve` and SSH from there. `qm terminal 100` on `pve` gives a serial
+console for boot-time debugging when SSH isn't up yet.

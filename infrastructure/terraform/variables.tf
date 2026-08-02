@@ -74,3 +74,39 @@ variable "template_disk_size" {
   type        = number
   default     = 8
 }
+
+variable "k3s_node_vm_id" {
+  description = "VM ID for the single k3s cluster node (ADR-0005/ADR-0008)."
+  type        = number
+  default     = 100
+}
+
+variable "k3s_node_cores" {
+  description = "vCPU cores for the k3s node. Single-node cluster running k3s + Cilium + ArgoCD, headroom for Phase 2 DB workloads."
+  type        = number
+  default     = 4
+}
+
+variable "k3s_node_memory" {
+  description = "Dedicated memory (MB) for the k3s node."
+  type        = number
+  default     = 8192
+}
+
+variable "k3s_node_disk_size" {
+  description = "Boot disk size (GB) for the k3s node, grown from the template's base size to fit k3s + container images + (later) DB storage."
+  type        = number
+  default     = 40
+}
+
+variable "k3s_node_ip" {
+  description = "Static IPv4 address (no /prefix) for the k3s node on k3snet (10.0.1.0/24). Kept outside the DHCP range (10.0.1.100-200, see ADR-0008) since a cluster node needs a stable address."
+  type        = string
+  default     = "10.0.1.10"
+}
+
+variable "k3s_ssh_public_key" {
+  description = "SSH public key for the k3s node's cloud-init admin user. Not sensitive (public key material); the matching private key lives in the 1Password `homelab` vault, item `homelab-k3s-ssh-key` (see infrastructure/terraform/README.md)."
+  type        = string
+  default     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMJXK3ieAAa32owSEpxgfdgPsNmEIChAjuUiNbgzr69d terraform k3s cluster access"
+}
