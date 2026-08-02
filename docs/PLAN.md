@@ -11,7 +11,7 @@ this file tracks *what's done*, ADRs track *why it was done that way*.
 
 ## Status: Phase 1 in progress
 
-Last updated: 2026-08-01.
+Last updated: 2026-08-02.
 
 ---
 
@@ -48,7 +48,8 @@ choices; this phase is deliberately a learning track, not just plumbing.
       k3s on Debian 12 VMs
 - [x] CNI choice — [ADR-0006](decisions/0006-cilium-cni.md): Cilium
       (kube-proxy replacement, Hubble observability)
-- [ ] GitOps tool + sync strategy (ArgoCD ApplicationSets vs. Flux, etc.)
+- [x] GitOps tool + sync strategy — [ADR-0007](decisions/0007-argocd-gitops.md):
+      ArgoCD, App-of-Apps to start, `ApplicationSet` deferred to Phase 2
 - [ ] Ingress + TLS
 - [ ] Base observability: Prometheus + Grafana + Loki
 
