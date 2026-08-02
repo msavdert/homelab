@@ -1,0 +1,32 @@
+# Self-managing Application: once ArgoCD is bootstrapped (day-0 manual Helm
+# install per ADR-0007), it is handed this Application so its own subsequent
+# upgrades and values changes flow through GitOps instead of manual `helm
+# upgrade` calls.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 10.2.2
+      helm:
+        valueFiles:
+          - $values/gitops/argocd/values.yaml
+    - repoURL: https://github.com/msavdert/homelab
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

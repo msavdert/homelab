@@ -1,0 +1,29 @@
+# App-of-Apps root, per ADR-0007. Applied once, manually, at bootstrap
+# (kubectl apply -f gitops/root-app.yaml against the freshly-installed
+# ArgoCD); from then on it reconciles every child Application under
+# gitops/apps/ — including this repo's own argocd.yaml self-management
+# Application — from Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/msavdert/homelab
+    targetRevision: main
+    path: gitops/apps
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

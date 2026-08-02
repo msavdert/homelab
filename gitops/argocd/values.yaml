@@ -1,0 +1,32 @@
+# Helm values for the argo/argo-cd chart, version 10.2.2 (app v3.4.6).
+#
+# Used both for the initial day-0 `helm install` bootstrap (ADR-0007) and,
+# once ArgoCD is running, by its own self-referencing Application
+# (../apps/argocd.yaml) so subsequent changes flow through GitOps.
+#
+# No ingress/TLS config here yet — that's a separate pending Phase 1 item
+# (see docs/PLAN.md). Until it lands, reach the UI/API via
+# `kubectl -n argocd port-forward svc/argocd-server 8080:443`.
+
+crds:
+  install: true
+
+redis-ha:
+  enabled: false
+
+controller:
+  replicas: 1
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+
+repoServer:
+  replicas: 1
+
+applicationSet:
+  enabled: true
+
+notifications:
+  enabled: false
