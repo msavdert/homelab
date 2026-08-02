@@ -46,7 +46,8 @@ choices; this phase is deliberately a learning track, not just plumbing.
 
 - [x] Cluster distribution decision (Talos / k3s / kubeadm) — [ADR-0005](decisions/0005-k3s-cluster-distribution.md):
       k3s on Debian 12 VMs
-- [ ] CNI choice
+- [x] CNI choice — [ADR-0006](decisions/0006-cilium-cni.md): Cilium
+      (kube-proxy replacement, Hubble observability)
 - [ ] GitOps tool + sync strategy (ArgoCD ApplicationSets vs. Flux, etc.)
 - [ ] Ingress + TLS
 - [ ] Base observability: Prometheus + Grafana + Loki
