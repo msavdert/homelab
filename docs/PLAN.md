@@ -65,8 +65,21 @@ choices; this phase is deliberately a learning track, not just plumbing.
       `hubble.ui.enabled=true`; node went `Ready` and coredns/
       local-path-provisioner/metrics-server all reached `Running`, verified
       via `cilium status` (`KubeProxyReplacement: True`, `Hubble: Ok`)
-- [ ] ArgoCD actually deployed to the cluster (ADR-0007 decided the choice;
-      installation is still pending)
+- [x] ArgoCD actually deployed to the cluster (ADR-0007) — Helm chart
+      `argo/argo-cd` `10.2.2` (app `v3.4.6`; the just-cut `v3.5.0` was still
+      RC-only at install time, so not used) installed via
+      `helm install argocd argo/argo-cd --version 10.2.2 -n argocd
+      --create-namespace -f gitops/argocd/values.yaml`; all pods
+      `Running`. App-of-Apps bootstrapped per ADR-0007: `gitops/root-app.yaml`
+      applied manually once, pointing at `gitops/apps/`, which contains
+      `argocd.yaml` — ArgoCD's own self-referencing Application (multi-source:
+      the `argo-cd` chart + this repo's `gitops/argocd/values.yaml`) — so
+      ArgoCD now manages its own subsequent upgrades via GitOps
+      ("day-0 manual, day-2 GitOps-managed"). Both `argocd` and `root-app`
+      Applications show `Synced`/`Healthy`. No ingress/TLS yet — UI reachable
+      via `kubectl -n argocd port-forward svc/argocd-server 8080:443`. KSOPS
+      CMP integration (ADR-0007 consequence) still pending, needed before any
+      SOPS-encrypted manifest can be synced.
 - [ ] Ingress + TLS
 - [ ] Base observability: Prometheus + Grafana + Loki
 
