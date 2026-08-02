@@ -5,8 +5,10 @@ Phase 0 of [`docs/PLAN.md`](../../docs/PLAN.md): a code-provisioned Debian
 12 cloud-init VM template, fully automated end to end. Design decisions:
 [ADR-0002](../../docs/decisions/0002-cloud-init-vm-template.md)
 (image/template strategy), [ADR-0003](../../docs/decisions/0003-sops-age-secrets.md)
-(SOPS + age secrets), and [ADR-0004](../../docs/decisions/0004-root-pam-terraform-token.md)
-(why Terraform authenticates as `root@pam`).
+(SOPS + age secrets), [ADR-0004](../../docs/decisions/0004-root-pam-terraform-token.md)
+(why Terraform authenticates as `root@pam`), and
+[ADR-0008](../../docs/decisions/0008-k3snet-private-sdn-network.md) (the
+private, NAT-isolated `k3snet` SDN network cluster VMs attach to).
 
 Workload VMs (Terraform clones of the template) are **not** built here yet
 — this module only creates the template itself.
@@ -20,6 +22,7 @@ Workload VMs (Terraform clones of the template) are **not** built here yet
 | `variables.tf`  | Inputs, with defaults matching the live `pve` host                |
 | `image.tf`      | Downloads the Debian 12 cloud qcow2 into Proxmox storage `local`  |
 | `template.tf`   | Builds the cloud-init VM template on storage `local-zfs`          |
+| `network.tf`    | The `localnat` SDN zone + `k3snet` VNet/subnet cluster VMs attach to (ADR-0008) |
 | `outputs.tf`    | Exposes the template VM ID/name for later modules to clone from   |
 | `secrets.sops.tfvars.json` | SOPS-encrypted Proxmox API token + endpoint (committed, encrypted) |
 
