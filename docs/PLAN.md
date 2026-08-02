@@ -55,8 +55,16 @@ choices; this phase is deliberately a learning track, not just plumbing.
       join later; Flannel/Traefik/ServiceLB disabled since Cilium and
       ArgoCD-managed ingress replace them per ADR-0006/ADR-0007) — node is
       `NotReady` until Cilium is deployed, expected with no CNI
-- [ ] Cilium CNI actually deployed to the cluster (ADR-0006 decided the
-      choice; installation is still pending)
+- [x] Cilium CNI actually deployed to the cluster (ADR-0006) — Helm v3.21.3
+      installed on `k3s-node-01`, Cilium chart `1.19.6` (latest patch of the
+      most recently matured minor line at install time, deliberately
+      avoiding the just-cut `1.20.0` for a day-0 bootstrap step) via
+      `helm install cilium cilium/cilium --version 1.19.6 -n kube-system`
+      with `kubeProxyReplacement=true`, `operator.replicas=1`,
+      `hubble.enabled=true`, `hubble.relay.enabled=true`, and
+      `hubble.ui.enabled=true`; node went `Ready` and coredns/
+      local-path-provisioner/metrics-server all reached `Running`, verified
+      via `cilium status` (`KubeProxyReplacement: True`, `Hubble: Ok`)
 - [ ] ArgoCD actually deployed to the cluster (ADR-0007 decided the choice;
       installation is still pending)
 - [ ] Ingress + TLS
