@@ -203,3 +203,51 @@ routes those peers advertise), go through `pve` as a jump host instead:
 `ssh -J root@pve -i ~/.ssh/homelab_k3s k3sadmin@10.0.1.10`, or copy the key
 onto `pve` and SSH from there. `qm terminal 100` on `pve` gives a serial
 console for boot-time debugging when SSH isn't up yet.
+
+## k3s install (already done once, documented here for reference)
+
+Installed directly on the node over the SSH access above — not through
+Terraform/cloud-init, so re-running `terraform apply` never touches it:
+
+```sh
+ssh -J root@pve -i ~/.ssh/homelab_k3s k3sadmin@10.0.1.10 \
+  'curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.36.2+k3s1 \
+   INSTALL_K3S_EXEC="server --cluster-init --flannel-backend=none \
+   --disable-network-policy --disable=traefik --disable=servicelb \
+   --node-ip=10.0.1.10 --tls-san=10.0.1.10 --write-kubeconfig-mode=644" sh -'
+```
+
+- **`--cluster-init`**: uses k3s's embedded etcd datastore instead of the
+  single-node-only SQLite default, even though this is currently a
+  one-node cluster — the operator plans to add server nodes later, and
+  etcd is the only k3s datastore that supports joining additional servers.
+  Switching datastores after the fact means rebuilding the cluster, so this
+  was decided up front.
+- **`--flannel-backend=none --disable-network-policy`**: k3s ships Flannel
+  as its default CNI; disabled because [ADR-0006](../../docs/decisions/0006-cilium-cni.md)
+  already chose Cilium, which will be installed separately (via ArgoCD, see
+  [ADR-0007](../../docs/decisions/0007-argocd-gitops.md)). Until Cilium is
+  deployed, the node stays `NotReady` and core pods (CoreDNS, etc.) stay
+  `Pending` — expected with no CNI, not a fault.
+- **`--disable=traefik --disable=servicelb`**: k3s's built-in ingress
+  controller and LoadBalancer implementation, disabled for the same
+  reason — ingress/LB strategy is a separate, still-open Phase 1 decision
+  (see `docs/PLAN.md`), not k3s's defaults.
+- **`--write-kubeconfig-mode=644`**: the generated
+  `/etc/rancher/k3s/k3s.yaml` is otherwise root-only (`600`), which blocks
+  `sudo cat` from a non-root SSH session from reading it cleanly.
+
+Fetch the kubeconfig to a local machine (swap in `10.0.1.10` for the
+in-file `127.0.0.1`, and never commit the result — it embeds a client
+certificate):
+
+```sh
+ssh -J root@pve -i ~/.ssh/homelab_k3s k3sadmin@10.0.1.10 'sudo cat /etc/rancher/k3s/k3s.yaml' \
+  | sed 's#127.0.0.1#10.0.1.10#' > ~/.kube/homelab-k3s.yaml
+chmod 600 ~/.kube/homelab-k3s.yaml
+KUBECONFIG=~/.kube/homelab-k3s.yaml kubectl get nodes
+```
+
+This devbox's Tailscale route to `10.0.1.0/24` reaches the k3s API
+(`:6443`) directly — no jump host needed for `kubectl`, even though plain
+SSH to the node needed one at the time this was written (see above).

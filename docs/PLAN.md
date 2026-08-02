@@ -50,6 +50,15 @@ choices; this phase is deliberately a learning track, not just plumbing.
       (kube-proxy replacement, Hubble observability)
 - [x] GitOps tool + sync strategy — [ADR-0007](decisions/0007-argocd-gitops.md):
       ArgoCD, App-of-Apps to start, `ApplicationSet` deferred to Phase 2
+- [x] k3s installed on `k3s-node-01` (v1.36.2+k3s1, single control-plane
+      with embedded etcd via `--cluster-init` so additional server nodes can
+      join later; Flannel/Traefik/ServiceLB disabled since Cilium and
+      ArgoCD-managed ingress replace them per ADR-0006/ADR-0007) — node is
+      `NotReady` until Cilium is deployed, expected with no CNI
+- [ ] Cilium CNI actually deployed to the cluster (ADR-0006 decided the
+      choice; installation is still pending)
+- [ ] ArgoCD actually deployed to the cluster (ADR-0007 decided the choice;
+      installation is still pending)
 - [ ] Ingress + TLS
 - [ ] Base observability: Prometheus + Grafana + Loki
 
