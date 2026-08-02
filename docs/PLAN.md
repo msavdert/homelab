@@ -11,7 +11,7 @@ this file tracks *what's done*, ADRs track *why it was done that way*.
 
 ## Status: Phase 1 in progress
 
-Last updated: 2026-08-02.
+Last updated: 2026-08-02 (KSOPS integration, ADR-0009).
 
 ---
 
@@ -77,9 +77,17 @@ choices; this phase is deliberately a learning track, not just plumbing.
       ArgoCD now manages its own subsequent upgrades via GitOps
       ("day-0 manual, day-2 GitOps-managed"). Both `argocd` and `root-app`
       Applications show `Synced`/`Healthy`. No ingress/TLS yet — UI reachable
-      via `kubectl -n argocd port-forward svc/argocd-server 8080:443`. KSOPS
-      CMP integration (ADR-0007 consequence) still pending, needed before any
-      SOPS-encrypted manifest can be synced.
+      via `kubectl -n argocd port-forward svc/argocd-server 8080:443`.
+- [x] KSOPS decryption wired into ArgoCD (ADR-0007 consequence, resolved by
+      [ADR-0009](decisions/0009-ksops-argocd-cmp.md)): repo-server
+      init-container installs `ksops`/`kustomize` (viaductoss/ksops
+      `v4.5.1`) from the upstream `argo-cd` Helm chart's documented pattern,
+      reusing the ADR-0003 age keypair via a `sops-age` Secret created
+      imperatively in the `argocd` namespace (see
+      `infrastructure/terraform/README.md`). Verified end-to-end with a
+      throwaway encrypted Secret + Application, synced and decrypted
+      correctly, then removed — real SOPS-encrypted manifests can now be
+      synced by ArgoCD.
 - [ ] Ingress + TLS
 - [ ] Base observability: Prometheus + Grafana + Loki
 

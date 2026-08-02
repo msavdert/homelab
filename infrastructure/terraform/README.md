@@ -53,6 +53,21 @@ keypair (`age-keygen -o ~/.config/sops/age/keys.txt`) and re-encrypting
 `secrets.sops.tfvars.json` under the new public key — but prefer reusing the
 vault copy so old encrypted files stay decryptable.
 
+### Same key, cluster side (ArgoCD/KSOPS bootstrap)
+
+[ADR-0009](../../docs/decisions/0009-ksops-argocd-cmp.md) reuses this same
+age keypair so ArgoCD's repo-server can decrypt SOPS-encrypted manifests via
+KSOPS. This requires a `sops-age` Secret in the `argocd` namespace,
+created imperatively (never committed to git) — if the cluster is rebuilt
+from scratch, redo this before any Application referencing encrypted
+manifests will sync clean:
+
+```sh
+op read "op://homelab/sops-age-key/private key" \
+  | sed -e 's/^"//' -e 's/"$//' \
+  | kubectl -n argocd create secret generic sops-age --from-file=key.txt=/dev/stdin
+```
+
 ## Proxmox API token bootstrap (already done once, documented here for reference)
 
 Terraform authenticates as `root@pam` — see
