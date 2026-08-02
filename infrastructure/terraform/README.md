@@ -32,20 +32,25 @@ This module needs `terraform`, `sops`, and `age`, pinned in the repo root's
 mise install
 ```
 
-Generate a local age keypair if you don't already have one (the private key
-never leaves this machine, never goes in git):
+The age private key is stored in the **1Password `homelab` vault, item
+`sops-age-key`, field `private key`** — it never leaves that vault or goes
+in git. On a new machine that already has an authenticated `op` CLI
+(service account or otherwise):
 
 ```sh
-mkdir -p ~/.config/sops/age
-age-keygen -o ~/.config/sops/age/keys.txt
+mkdir -p ~/.config/sops/age && chmod 700 ~/.config/sops/age
+op item get sops-age-key --vault homelab --fields "private key" --reveal \
+  | sed -e 's/^"//' -e 's/"$//' > ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt
 ```
 
-The repo's [`.sops.yaml`](../../.sops.yaml) at the repo root already
-references the age public key used to encrypt `secrets.sops.tfvars.json`.
-If you're setting this up on a **new** machine (not the one that originally
-encrypted the file), you need the *matching private key* — there is no way
-to decrypt without it; ask the operator to transfer `keys.txt` out of band
-(e.g. via a password manager), it is deliberately never committed.
+(The `sed` strips quoting `op` adds around multiline field values — without
+it, `sops` fails to parse the identity file.)
+
+If `op` isn't available/authenticated, fall back to generating a fresh
+keypair (`age-keygen -o ~/.config/sops/age/keys.txt`) and re-encrypting
+`secrets.sops.tfvars.json` under the new public key — but prefer reusing the
+vault copy so old encrypted files stay decryptable.
 
 ## Proxmox API token bootstrap (already done once, documented here for reference)
 

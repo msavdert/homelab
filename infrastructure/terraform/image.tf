@@ -11,4 +11,11 @@ resource "proxmox_download_file" "debian_12_cloudimg" {
   file_name    = var.debian_image_file_name
   url          = var.debian_image_url
   overwrite    = false
+
+  # `url` isn't stored server-side, so a freshly imported resource (e.g.
+  # after state loss on a new machine, see infrastructure/terraform/README.md)
+  # always shows it as a spurious forces-replacement diff on the next plan.
+  lifecycle {
+    ignore_changes = [url]
+  }
 }

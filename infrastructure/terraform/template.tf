@@ -34,6 +34,13 @@ resource "proxmox_virtual_environment_vm" "debian_12_template" {
 
   scsi_hardware = "virtio-scsi-pci"
 
+  # `disk.import_from` isn't stored server-side either, so a freshly
+  # imported resource shows a spurious in-place diff on the next plan (same
+  # cause as `url` in image.tf).
+  lifecycle {
+    ignore_changes = [disk[0].import_from]
+  }
+
   # Cloud-init drive. Left with no per-instance user-data at the template
   # level; clones supply their own hostname/SSH keys/networking.
   initialization {
