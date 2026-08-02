@@ -24,10 +24,15 @@ Goal: a clean, code-provisioned base to build on.
 - [x] Wiped all leftover test VMs/CTs (CKA cluster, k3s cluster, Oracle
       DB/GoldenGate VMs, hermes-agent LXC) — clean slate, 2026-08-01
 - [x] `infrastructure/terraform/` — Proxmox provider, VM/CT provisioning as
-      code, fully automated end to end (no manual steps). Debian 12
-      cloud-init template applied to the live host (VM ID 9000, node `pve`)
-      — see [ADR-0004](decisions/0004-root-pam-terraform-token.md) for the
-      Proxmox API token quirk this required working around
+      code, fully automated end to end (no manual steps) — see
+      [ADR-0004](decisions/0004-root-pam-terraform-token.md) for the Proxmox
+      API token quirk this required working around
+- [ ] Debian 12 cloud-init template re-applied on the live host (node
+      `pve`). Deliberately `terraform destroy`'d on 2026-08-01 as part of
+      moving the development environment from the operator's Mac to a
+      persistent VPS session (Claude Code + zellij) — trivial to rebuild
+      since Phase 0 has no other resources depending on it yet, and cleaner
+      than migrating local Terraform state across machines
 - [x] Base OS image/template strategy — [ADR-0002](decisions/0002-cloud-init-vm-template.md):
       Debian 12 cloud-init image, cloned per VM
 - [x] Secrets management backend chosen — [ADR-0003](decisions/0003-sops-age-secrets.md):
