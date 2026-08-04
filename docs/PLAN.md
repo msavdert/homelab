@@ -88,7 +88,17 @@ choices; this phase is deliberately a learning track, not just plumbing.
       throwaway encrypted Secret + Application, synced and decrypted
       correctly, then removed — real SOPS-encrypted manifests can now be
       synced by ArgoCD.
-- [ ] Ingress + TLS
+- [x] Ingress + TLS — [ADR-0010](decisions/0010-cilium-ingress-cert-manager-tls.md):
+      Cilium Ingress (`hostNetwork` mode) + cert-manager private CA
+      (`homelab-ca-issuer`). Cilium's day-0 Helm values needed three
+      additional overrides beyond `hostNetwork.enabled=true` to actually
+      bind port 443 (`loadbalancerMode=shared`,
+      `hostNetwork.sharedListenerPort=443`, Envoy `NET_BIND_SERVICE`
+      capability) — see ADR-0010's 2026-08-02 update for the exact values
+      and why each was needed; not yet captured as a checked-in values file.
+      Verified end-to-end: `https://argocd.homelab.internal` reachable with
+      `SSL certificate verify ok` after a local `/etc/hosts` entry +
+      trusting `homelab-ca` once.
 - [ ] Base observability: Prometheus + Grafana + Loki
 
 ## Phase 2 — Database reliability core (the point of this project)

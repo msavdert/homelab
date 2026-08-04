@@ -143,3 +143,46 @@ of this ADR).
   LB-IPAM/L2 instead of `hostNetwork`), tailnet-wide DNS instead of
   per-operator `/etc/hosts`, and Tailscale-native HTTPS certs instead of a
   private CA.
+
+## Update (2026-08-02): Helm values actually required for `hostNetwork` mode
+
+End-to-end verification (`/etc/hosts` entry + trusting `homelab-ca` locally,
+then `curl https://argocd.homelab.internal`) surfaced that
+`ingressController.enabled=true` +
+`ingressController.hostNetwork.enabled=true` alone, as installed at Cilium
+day-0 bootstrap time, is **not sufficient** — nothing ends up listening on
+the node's port 443. Three additional values were required, applied via
+`helm upgrade` (same manual-CLI category as the original install):
+
+1. `ingressController.loadbalancerMode=shared` — the chart's default is
+   `dedicated` (one `LoadBalancer` Service + Envoy per Ingress, via
+   LB-IPAM), which silently does nothing on a single node with no LB-IPAM
+   configured. `shared` is required for `hostNetwork` to actually bind a
+   listener.
+2. `ingressController.hostNetwork.sharedListenerPort=443` — the chart
+   default (`8080`) is an unprivileged port, deliberately chosen upstream to
+   avoid the capability issue below. Overridden to `443` so the ADR's
+   `https://argocd.homelab.internal` (no port suffix) actually works.
+3. `envoy.securityContext.capabilities.envoy` gains `NET_BIND_SERVICE`, plus
+   `envoy.securityContext.capabilities.keepCapNetBindService=true` — binding
+   port 443 needs `CAP_NET_BIND_SERVICE`, and the chart's
+   `cilium-envoy-starter` wrapper drops all capabilities from the forked
+   Envoy process unless this flag explicitly keeps that one. (Note the exact
+   key name: `keepCapNetBindService`, not `keepNetBindService` — the latter
+   is silently accepted by Helm as an unused value and does nothing, which
+   cost a debugging round-trip.)
+
+`cilium-agent`'s existing capabilities (`NET_ADMIN`, `SYS_ADMIN`) must be
+preserved when overriding `envoy.securityContext.capabilities.envoy` via
+`--set` with indexed keys — replacing the list wholesale drops them and
+crash-loops the datapath.
+
+Verified after the fix: `cilium-envoy` binds `0.0.0.0:443`,
+`curl https://argocd.homelab.internal` returns `200` with
+`SSL certificate verify ok` against the locally-trusted `homelab-ca`.
+
+This was applied imperatively (`helm upgrade --reuse-values --set ...`),
+matching how Cilium was installed in the first place — not yet captured as
+a file in this repo. Tracked as follow-up work: fold these values into a
+checked-in `values.yaml` (mirroring `gitops/argocd/values.yaml`'s pattern)
+so a from-scratch rebuild doesn't have to rediscover them by hand.
