@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, when phase 1 closed.
+Last updated: 2026-11-15, when phase 2 closed.
 
 ## How to start a session
 
@@ -27,8 +27,15 @@ Last updated: 2026-11-15, when phase 1 closed.
   10.0.6.13, created by OpenTofu from `infra/`; state is encrypted in
   bucket `homelab` under `tofu/`. How, and the gate output:
   [Nodes](guide/01-nodes.md). The VMs have no Proxmox tags (D28).
-- **Phase 2 (cluster): open.** No machine configuration has been applied;
-  the nodes wait in maintenance mode.
+- **Phase 2 (cluster): done 2026-11-15.** Kubernetes 1.36.6 (D29) on the
+  three nodes, Cilium 1.20.4 replacing kube-proxy, API at the virtual IP
+  10.0.6.10. Configuration from `talos/`, secrets in item `talos` (one
+  field, D30), installer `nocloud-installer` (D31). Cilium was installed
+  with `mise run bootstrap:cilium` from
+  `kubernetes/apps/kube-system/cilium/app/`. How, and the gate output:
+  [Cluster](guide/02-cluster.md).
+- **Phase 3 (Flux): open.** Nothing built. Renovate's `flux` manager
+  already reads `kubernetes/` (added in phase 2 for the Cilium chart).
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -72,13 +79,26 @@ raw API calls, not with OpenTofu.
   [Nodes](guide/01-nodes.md), "Check".
 - The QEMU guest agent answers in maintenance mode (Proxmox
   `agent/network-get-interfaces` on all three VMs).
+- Phase 2 proofs, on 2026-11-15: the `nocloud` image keeps its address
+  and hostname after the configuration is applied and after an upgrade;
+  the virtual IP moves on a clean reboot with no failed request and on a
+  hard stop of its holder after about 61 seconds; workload isolation does
+  not keep pods off control planes; `talosctl upgrade` to the same
+  version with the factory installer works. Details in
+  [Cluster](guide/02-cluster.md), "Check".
+- `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
+  for the whole gate without problems.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 2 on.
-- `kubectl` is pinned at the newest stable release (1.37.2). The
-  Kubernetes version of the cluster is decided in phase 2; if it is more
-  than one minor version away, move the pin then.
+- Everything marked "Prove here" in the roadmap from phase 3 on.
+- Whether Renovate detects the new pins: the kubelet image in `mise.toml`
+  (custom manager), the Cilium chart in `ocirepository.yaml` (`flux`
+  manager) and the installer tag in `talos/patches/cluster.yaml` (preset).
+  The configuration validates (renovate 44.239.1); check the "Detected
+  dependencies" of issue #6 after the merge.
+- Rebuilding the cluster from nothing (guide, "Day-two tasks") and
+  `upgrade-k8s` have not been run.
 
 ## Waiting on the owner
 
@@ -129,7 +149,15 @@ accepted:
 - The administrator token for Proxmox works from the box. Do not use it for
   anything except `infra/host/prepare.py` on the owner's request.
 - VM IDs 201 to 203 and addresses 10.0.6.11 to 10.0.6.13 are in use by the
-  nodes; 10.0.6.10 is reserved for the API virtual IP (D07).
+  nodes; 10.0.6.10 is the API virtual IP (D07).
+- Cluster access: `mise run talos:config` and `mise run talos:kubeconfig`
+  write `talosconfig` and `kubeconfig` into the clone (gitignored, D30);
+  `mise.toml` points `TALOSCONFIG` and `KUBECONFIG` at them. A shell
+  without mise's environment (such as the agent's Bash tool) has to
+  export them.
+- The machine-wide mise task `kube:homelab` (from the workbench, "pull
+  kubeconfig + talosconfig from 1Password into ~/.kube and ~/.talos") is
+  not part of this repository and is not used; D30 regenerates instead.
 - OpenTofu: `mise run infra:plan`, `infra:apply`, `infra:pool`. The token
   cannot set Proxmox tags at VM creation (D28).
 - When a phase closes: update the state table in the roadmap, write the

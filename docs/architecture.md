@@ -130,7 +130,7 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `tofu-state` | `password` (the state encryption passphrase; exists) | OpenTofu state encryption |
 | `object-storage` | `access-key`, `secret-key`, `endpoint`, `region`, `bucket` | OpenTofu state backend (exists; this key reaches every bucket of the account) |
 | `eso-service-account` | `credential` (token of the read-only account for vault `homelab-cluster`) | applied once at bootstrap for External Secrets |
-| `talos` | cluster CA, etcd CA, tokens (fields named as `talosctl gen secrets` output) | machine config rendering |
+| `talos` | `secrets` (the whole `talosctl gen secrets` file, D30) | machine config rendering |
 | `cloudflare-dns` | `credential` (token limited to DNS edit on savdert.com) | the `dns:apply` task |
 | `cloudflare-dns` (vault `homelab-cluster`) | `credential` (same token) | cert-manager |
 | `object-storage` (vault `homelab-cluster`) | as above, but a key limited to bucket `homelab` | CloudNativePG backups |
