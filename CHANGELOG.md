@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/msavdert/homelab/compare/v0.4.0...v0.5.0) (2026-11-15)
+
+
+### Features
+
+* **external-secrets:** read vault homelab-cluster with External Secrets ([#18](https://github.com/msavdert/homelab/issues/18)) ([84a84f4](https://github.com/msavdert/homelab/commit/84a84f407d97885b6e4590b075e13b37f1465413))
+
+
+### Documentation
+
+* add the secrets guide and close phase 4 ([#20](https://github.com/msavdert/homelab/issues/20)) ([d65f99c](https://github.com/msavdert/homelab/commit/d65f99cb3d3c7cd61ed78ec7a0fb7d91bf177db3))
+
 ## [0.4.0](https://github.com/msavdert/homelab/compare/v0.3.0...v0.4.0) (2026-11-15)
 
 
