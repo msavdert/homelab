@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/msavdert/homelab/compare/v0.3.0...v0.4.0) (2026-11-15)
+
+
+### Features
+
+* **cilium:** annotate the agent pods as managed by Flux ([#16](https://github.com/msavdert/homelab/issues/16)) ([671c856](https://github.com/msavdert/homelab/commit/671c856df4ec50bfec90bb1816d5361564b3e11e))
+* **flux:** reconcile the cluster from kubernetes/apps with Flux Operator ([#13](https://github.com/msavdert/homelab/issues/13)) ([519bbc0](https://github.com/msavdert/homelab/commit/519bbc07607de2ce43d8d20aa50e86ca8564c3e7))
+
+
+### Bug fixes
+
+* **flux:** stop helm-controller from appending the chart digest ([#15](https://github.com/msavdert/homelab/issues/15)) ([409e499](https://github.com/msavdert/homelab/commit/409e499ed8c729f9a45bdf2df8e63f0129a94b2e))
+
+
+### Documentation
+
+* add the Flux guide and close phase 3 ([#17](https://github.com/msavdert/homelab/issues/17)) ([59a8ea4](https://github.com/msavdert/homelab/commit/59a8ea49cd05c72396693c2729658e72de9233e8))
+
 ## [0.3.0](https://github.com/msavdert/homelab/compare/v0.2.0...v0.3.0) (2026-11-15)
 
 
