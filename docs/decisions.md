@@ -350,3 +350,30 @@ Evidence: tested 2026-11-15: the registry manifests on factory.talos.dev,
 and `talosctl upgrade` of k8s-1 with this image, after which the node
 reported platform `nocloud`, address 10.0.6.11/24 and hostname `k8s-1`
 ([Cluster](guide/02-cluster.md), "Upgrade rehearsal").
+
+## D32 Flux layout: a plain FluxInstance at an exact version, values kept in a values file
+
+Over: the `flux-instance` Helm chart and inline `spec.values`, which
+onedr0p/home-ops and buroa/home-ops use, and a `2.10.x` range in the
+FluxInstance. The FluxInstance is one short manifest
+(`kubernetes/apps/flux-system/flux-instance/app/fluxinstance.yaml`) that
+bootstrap applies once and Flux then reconciles from Git; a chart around it
+adds a release and a values layer without adding a setting the lab uses.
+The Flux version is exact so that it moves only through a Renovate pull
+request (custom manager on the `# renovate:` comment, upgrade drill for
+minor and major, D23, which also covers the flux-operator chart); a range
+would let the operator upgrade Flux on its own. The Flux CLI in `mise.toml`
+is a separate pin and arrives as its own pull request; the two are merged
+together. Chart values stay in `values.yaml` next to the HelmRelease, so
+`bootstrap:cilium` uses the file as it is; Flux reads it through a
+`configMapGenerator` ConfigMap whose hashed name `kustomizeconfig.yaml`
+writes into `spec.valuesFrom`, so a changed value changes the HelmRelease
+and starts an upgrade without waiting for its interval. The sync path is
+`kubernetes/apps` with an explicit `kustomization.yaml` that lists the
+namespace directories, as in the references, but written out instead of
+generated. Evidence: docs (fluxoperator.dev FluxInstance reference:
+`version` takes a semver range or an exact version; the operator creates
+GitRepository and Kustomization `flux-system`, default interval 1m),
+reference (both home-ops repositories, read 2026-11-15), tested
+(`kubectl kustomize` renders the hashed ConfigMap name into the
+HelmRelease).

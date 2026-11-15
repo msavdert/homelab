@@ -34,8 +34,8 @@ Last updated: 2026-11-15, when phase 2 closed.
   with `mise run bootstrap:cilium` from
   `kubernetes/apps/kube-system/cilium/app/`. How, and the gate output:
   [Cluster](guide/02-cluster.md).
-- **Phase 3 (Flux): open.** Nothing built. Renovate's `flux` manager
-  already reads `kubernetes/` (added in phase 2 for the Cilium chart).
+- **Phase 3 (Flux): open.** The Flux tree under `kubernetes/apps/` and
+  `mise run bootstrap:flux` are written (D32); Flux is not installed yet.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -92,11 +92,11 @@ raw API calls, not with OpenTofu.
 ## Not verified
 
 - Everything marked "Prove here" in the roadmap from phase 3 on.
-- Whether Renovate detects the new pins: the kubelet image in `mise.toml`
-  (custom manager), the Cilium chart in `ocirepository.yaml` (`flux`
-  manager) and the installer tag in `talos/patches/cluster.yaml` (preset).
-  The configuration validates (renovate 44.239.1); check the "Detected
-  dependencies" of issue #6 after the merge.
+- Whether Renovate detects the Flux version in `fluxinstance.yaml`
+  (custom manager added in phase 3; the regex was tested locally) and the
+  flux-operator chart tag. Check "Detected dependencies" of issue #6.
+  The phase 2 pins (kubelet image, Cilium chart, installer tag) were
+  listed there on 2026-11-15.
 - Rebuilding the cluster from nothing (guide, "Day-two tasks") and
   `upgrade-k8s` have not been run.
 

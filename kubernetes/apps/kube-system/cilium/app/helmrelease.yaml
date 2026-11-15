@@ -1,0 +1,19 @@
+---
+# Name and namespace equal the Helm release bootstrap:cilium creates, so
+# Flux upgrades that release in place instead of installing a second one.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+  annotations:
+    # Never uninstalled by pruning; removing it is a deliberate manual step.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-values

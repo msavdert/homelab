@@ -70,8 +70,9 @@ same pull request; a page that is not in `nav` is not linked on the site.
 
 - Directories as in [Architecture](architecture.md), "Repository layout". A
   directory is created by the phase that fills it.
-- Kubernetes: `kubernetes/apps/<namespace>/<app>/`; the exact files are
-  fixed in phase 3 after reading the reference repositories.
+- Kubernetes: `kubernetes/apps/<namespace>/<app>/` with `ks.yaml` (the Flux
+  Kustomization) and `app/` (`kustomization.yaml`, `ocirepository.yaml`,
+  `helmrelease.yaml`, chart values in `values.yaml`); see D32.
 - Names are lowercase with hyphens. Nodes are `k8s-1` to `k8s-3`.
   1Password items are named in [Architecture](architecture.md), "Secrets".
 - YAML: two spaces, one document per concern, comments only for what the

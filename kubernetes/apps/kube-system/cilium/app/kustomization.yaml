@@ -1,0 +1,17 @@
+---
+# values.yaml stays a plain Helm values file, so bootstrap:cilium can use it
+# as it is. Flux reads it from the generated ConfigMap; the name suffix
+# changes with the content, and kustomizeconfig.yaml carries the new name
+# into the HelmRelease, so a changed value starts an upgrade at once.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+resources:
+  - ./ocirepository.yaml
+  - ./helmrelease.yaml
+configMapGenerator:
+  - name: cilium-values
+    files:
+      - values.yaml
+configurations:
+  - ./kustomizeconfig.yaml

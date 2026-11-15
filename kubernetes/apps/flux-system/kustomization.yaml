@@ -1,0 +1,7 @@
+---
+# The namespace is created by bootstrap:flux and is not managed here.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./flux-operator/ks.yaml
+  - ./flux-instance/ks.yaml
