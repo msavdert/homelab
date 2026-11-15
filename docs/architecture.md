@@ -140,8 +140,9 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 
 An item is created in the phase that first needs it. In vault `homelab`,
 `proxmox-tofu`, `tofu-state`, `object-storage` and `cloudflare-dns` exist
-and were checked on 2026-11-15. Vault `homelab-cluster` and its service
-account do not exist yet; the owner creates them before phase 4.
+and were checked on 2026-11-15. Vault `homelab-cluster` holds
+`cloudflare-dns`; its service account was shown on 2026-11-15 to see only
+that vault and to be refused a write.
 
 ## Repository layout
 

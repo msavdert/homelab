@@ -422,7 +422,10 @@ are how `talosctl` reports the end of a step, not errors.
   3. Steps 4 to 7 above: `talos:apply k8s-N --insecure` for each node,
      `talos:config`, `talos:bootstrap`, `talos:kubeconfig`,
      `bootstrap:cilium`.
-  4. `mise run bootstrap:flux`. It installs flux-operator, applies the
+  4. `mise run bootstrap:secrets`. It creates namespace `external-secrets`
+     and applies the token External Secrets reads 1Password with; without
+     it the next step waits for the store until it times out.
+  5. `mise run bootstrap:flux`. It installs flux-operator, applies the
      FluxInstance and returns when every Kustomization and HelmRelease is
      Ready. Flux adopts the Cilium and flux-operator releases in place,
      and with the feature gate of D33 no pod should restart (shown for

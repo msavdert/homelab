@@ -1,0 +1,10 @@
+---
+# bootstrap:secrets creates this namespace before Flux runs and puts the
+# 1Password token in it; the token is not in Git, so pruning must never
+# delete the namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-secrets
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
