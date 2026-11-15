@@ -37,6 +37,11 @@
       labels: ["dependencies", "upgrade-drill"],
     },
     {
+      description: "The runner image is pinned on purpose; it moves deliberately, not by Renovate",
+      matchDatasources: ["github-runners"],
+      enabled: false,
+    },
+    {
       description: "OpenTofu providers and modules come from the OpenTofu registry",
       matchDatasources: ["terraform-provider", "terraform-module"],
       registryUrls: ["https://registry.opentofu.org"],
