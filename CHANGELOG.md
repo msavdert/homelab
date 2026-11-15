@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/msavdert/homelab/compare/v0.2.0...v0.3.0) (2026-11-15)
+
+
+### Features
+
+* **talos:** build the cluster with Talos and Cilium ([#11](https://github.com/msavdert/homelab/issues/11)) ([b125224](https://github.com/msavdert/homelab/commit/b12522479f2692d975ed81f55e29839aac250c61))
+
 ## [0.2.0](https://github.com/msavdert/homelab/compare/v0.1.0...v0.2.0) (2026-11-15)
 
 
