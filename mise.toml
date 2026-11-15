@@ -129,10 +129,13 @@ run = "talos/talos.sh upgrade"
 description = "print the Image Factory ID of talos/schematic.yaml"
 run = "talos/talos.sh schematic"
 
-# Bootstrap order (D09): bootstrap:cilium, then bootstrap:flux. Both install
-# from the files Flux reconciles later, and Flux adopts the releases in place
-# (D33 keeps the pod templates unchanged). Run them only on a cluster without Flux; afterwards
-# Flux owns the releases and a Helm upgrade by hand fails on field conflicts.
+# Bootstrap order (D09): bootstrap:cilium, bootstrap:secrets, then
+# bootstrap:flux, which waits for every Kustomization, including the
+# 1Password store that needs the token bootstrap:secrets applies. The two
+# Helm tasks install from the files Flux reconciles later, and Flux adopts
+# the releases in place (D33 keeps the pod templates unchanged). Run them
+# only on a cluster without Flux; afterwards Flux owns the releases and a
+# Helm upgrade by hand fails on field conflicts.
 [tasks."bootstrap:cilium"]
 shell = "bash -c"
 description = "install or upgrade Cilium with Helm from kubernetes/apps/kube-system/cilium/app"
@@ -143,6 +146,20 @@ url="$(awk '$1 == "url:" {print $2}' ocirepository.yaml)"
 tag="$(awk '$1 == "tag:" {print $2}' ocirepository.yaml)"
 helm upgrade --install cilium "$url" --version "$tag" \
   --namespace kube-system --values values.yaml --wait --timeout 10m
+'''
+
+[tasks."bootstrap:secrets"]
+shell = "bash -c"
+description = "create namespace external-secrets and apply the 1Password token External Secrets reads vault homelab-cluster with"
+run = '''
+set -euo pipefail
+token="$(op read op://dotfiles/homelab-op-service-account/credential)"
+export OP_SERVICE_ACCOUNT_TOKEN="$token"
+# Works before Flux exists: on a rebuild this runs between bootstrap:cilium
+# and bootstrap:flux. Flux adopts the namespace later (namespace.yaml).
+kubectl create namespace external-secrets --dry-run=client -o yaml |
+  kubectl apply --server-side -f -
+op inject -i bootstrap/external-secrets/secret.yaml | kubectl apply --server-side -f -
 '''
 
 [tasks."bootstrap:flux"]

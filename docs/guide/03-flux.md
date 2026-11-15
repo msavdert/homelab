@@ -200,8 +200,8 @@ because the dependency became Ready first.
   `upgrade-drill` for a minor or major. Merge them together. Upgrade the
   flux-operator chart first when both are pending.
 - **Rebuild from nothing.** The rebuild in [Cluster](02-cluster.md) ends
-  with `mise run bootstrap:flux`, after which Flux takes over. This has not
-  been run end to end.
+  with `mise run bootstrap:secrets` and `mise run bootstrap:flux`, after
+  which Flux takes over. This has not been run end to end.
 
 ## When it goes wrong
 

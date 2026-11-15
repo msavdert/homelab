@@ -72,7 +72,10 @@ same pull request; a page that is not in `nav` is not linked on the site.
   directory is created by the phase that fills it.
 - Kubernetes: `kubernetes/apps/<namespace>/<app>/` with `ks.yaml` (the Flux
   Kustomization) and `app/` (`kustomization.yaml`, `ocirepository.yaml`,
-  `helmrelease.yaml`, chart values in `values.yaml`); see D32.
+  `helmrelease.yaml`, chart values in `values.yaml`); see D32. Resources
+  of the app's own CRDs go in a second directory next to `app/` (such as
+  `stores/`), with its own Flux Kustomization in the same `ks.yaml` that
+  depends on the first, so the CRDs exist before they are used.
 - Names are lowercase with hyphens. Nodes are `k8s-1` to `k8s-3`.
   1Password items are named in [Architecture](architecture.md), "Secrets".
 - YAML: two spaces, one document per concern, comments only for what the

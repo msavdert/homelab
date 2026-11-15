@@ -1,0 +1,50 @@
+---
+# The operator and its CRDs. wait makes this Kustomization Ready only when
+# the HelmRelease is, so the stores below are applied after the CRDs and
+# the webhook exist.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/external-secrets/external-secrets/app
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# The ClusterSecretStore and the ExternalSecrets that prove it. Ready only
+# when the store can reach 1Password and every ExternalSecret has synced.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: external-secrets-stores
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: external-secrets
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/external-secrets/external-secrets/stores
+  prune: true
+  wait: true
+  # Current once Ready is True. No `failed` expression: Ready=False is
+  # normal for a moment after creation, and Flux would treat it as final;
+  # timeout decides instead. exists() rather than filter().all(), because
+  # all() over an empty list is true.
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ClusterSecretStore
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

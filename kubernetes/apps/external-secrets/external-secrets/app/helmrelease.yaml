@@ -1,0 +1,13 @@
+---
+# Chart defaults: one replica each of controller, webhook and cert
+# controller, CRDs installed and upgraded as part of the release (they are
+# templates in this chart, not files in crds/).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-secrets
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: external-secrets

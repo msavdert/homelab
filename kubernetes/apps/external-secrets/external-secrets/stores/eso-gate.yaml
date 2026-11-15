@@ -1,0 +1,19 @@
+---
+# Proves the path from 1Password to a Secret (phase 4 gate). Removed in
+# phase 5, when cert-manager gets its own ExternalSecret for this item.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: eso-gate
+  namespace: external-secrets
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    name: eso-gate
+  data:
+    - secretKey: credential
+      remoteRef:
+        key: cloudflare-dns/credential

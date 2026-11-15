@@ -37,13 +37,15 @@ Last updated: 2026-11-15, when phase 3 closed.
 - **Phase 3 (Flux): done 2026-11-15.** Flux 2.10.0 through the Flux
   Operator 0.62.1 reconciles `kubernetes/apps/` from `main` every minute.
   Cilium, flux-operator and the FluxInstance are managed by Flux; the
-  bootstrap releases were adopted in place. `bootstrap:flux` follows
-  `bootstrap:cilium` on a new cluster. helm-controller runs with
+  bootstrap releases were adopted in place. On a new cluster
+  `bootstrap:secrets` and `bootstrap:flux` follow `bootstrap:cilium`. helm-controller runs with
   `DisableChartDigestTracking` (D33), without which the first adoption
   restarted every Cilium pod. How, and the gate output:
   [Flux](guide/03-flux.md).
-- **Phase 4 (secrets): open.** Nothing built. It needs the owner's items
-  below first.
+- **Phase 4 (secrets): open.** The owner's items are in place. External
+  Secrets 2.15.0, the `onepassword` ClusterSecretStore and `eso-gate` are
+  in `kubernetes/apps/external-secrets/`; the token Secret comes from
+  `mise run bootstrap:secrets`. Gate not run yet.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -115,7 +117,7 @@ raw API calls, not with OpenTofu.
 
 | Needed for | What | State |
 |---|---|---|
-| Phase 4 | Vault `homelab-cluster`, a read-only service account for it, its token in `op://homelab/eso-service-account/credential`, and a copy of `cloudflare-dns` in the new vault | open |
+| Phase 4 | Vault `homelab-cluster`, a read-only service account for it, its token in `op://homelab/eso-service-account/credential`, and a copy of `cloudflare-dns` in the new vault | done 2026-11-15; the account sees only `homelab-cluster` and a write was refused; both copies of `cloudflare-dns` hash equal |
 | Phase 5 | The gate commands run from the owner's device when the phase reaches its gate | open |
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | open |
 
