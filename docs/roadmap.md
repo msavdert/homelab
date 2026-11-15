@@ -90,7 +90,8 @@ mechanics and leave what is specific to that project.
   another way, close the onboarding pull request.
 - Pull request template: summary, how it was verified, checklist.
 - GitHub settings: squash merge only, delete branches after merge, Pages
-  from the workflow, and a ruleset on `main` that requires a pull request
+  from the workflow, GitHub Actions allowed to create pull requests (for
+  release-please), and a ruleset on `main` that requires a pull request
   (no approvals), the checks `check` and `semantic-title`, linear history,
   and blocks force pushes and deletion.
 

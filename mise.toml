@@ -1,0 +1,32 @@
+# Tools used locally and in CI, at the same versions. Renovate keeps them
+# current (mise manager).
+
+[tools]
+opentofu = "1.13.9"
+talosctl = "1.14.6"
+kubectl = "1.37.2"
+helm = "4.3.2"
+flux2 = "2.10.0"
+cilium-cli = "0.20.3"
+uv = "0.13.8"
+ruff = "0.17.5"
+"pipx:zensical" = "0.1.1"
+
+[tasks."docs:build"]
+description = "build the documentation site into site/ (fails on warnings)"
+run = "zensical build --clean --strict"
+
+[tasks."docs:serve"]
+description = "preview the documentation site locally"
+run = "zensical serve"
+
+[tasks."lint:python"]
+description = "byte-compile and ruff check the tracked Python files"
+run = [
+  "git ls-files -z '*.py' | xargs -0 -r python3 -m py_compile",
+  "git ls-files -z '*.py' | xargs -0 -r ruff check --force-exclude",
+]
+
+[tasks.check]
+description = "everything that can be validated without a cluster, as CI runs it"
+depends = ["docs:build", "lint:python"]
