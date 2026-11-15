@@ -35,3 +35,6 @@ operator:
   rollOutPods: true
 hubble:
   enabled: false
+# Phase 3 gate: a value changed only through Git, visible on the agent pods.
+podAnnotations:
+  homelab.savdert.com/managed-by: flux
