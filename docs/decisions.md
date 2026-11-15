@@ -301,3 +301,52 @@ succeeded; setting the tags on the existing VM afterwards also succeeded.
 Inferred, not read in the Proxmox source: at creation Proxmox checks the
 tag right on `/vms/<id>` before the VM is a pool member, so the pool's
 rights do not apply yet.
+
+## D29 Kubernetes version: 1.36, the newest minor both Talos and Cilium list
+
+Over: 1.37.1, the default of `talosctl` v1.14.6. Talos v1.14 supports
+Kubernetes 1.33 to 1.37; Cilium 1.20.4 lists 1.33 to 1.36 as tested and
+says nothing about 1.37. The cluster runs 1.36.6, the newest 1.36 kubelet
+image on 2026-11-15. The move to 1.37 is an upgrade drill (D23) once a
+Cilium release lists it. The version is `KUBERNETES_VERSION` in
+`mise.toml`; Renovate tracks it through the kubelet image. `kubectl` 1.37
+stays: one minor version of skew is supported. Evidence: docs (Talos v1.14
+support matrix; `talos114.go` at v1.14.6 allows 1.32.0 to 1.37.99; Cilium
+stable compatibility page), tested (`talosctl gen config` default, kubelet
+tags on ghcr.io).
+
+## D30 Talos and Kubernetes credentials are regenerated, not stored
+
+Changes D06 in one point: the cluster secrets are not `op://` references
+inside the patch files, rendered by `op inject`. The patches hold no
+secret; the secrets file is read whole with `op read` and passed to
+`talosctl gen config --with-secrets`.
+
+Decided in phase 2 as the roadmap asked. `talosconfig` is derived from the
+cluster secrets (`mise run talos:config`) and `kubeconfig` is fetched from
+the cluster with it (`mise run talos:kubeconfig`). Both are written to the
+repository root, which `.gitignore` excludes, and `mise.toml` points
+`TALOSCONFIG` and `KUBECONFIG` at them. Nothing else holds them, so a box
+rebuild loses nothing that cannot be recreated in two commands.
+
+The secrets are one concealed field `secrets` in item `talos`, holding the
+whole `talosctl gen secrets` file, instead of one field per key. The file
+is always used as a whole (`gen config --with-secrets`), and passing it
+whole avoids the partial certificate merge that home-ops documents for
+patches that carry only a key. It is written only to a private tmpfs
+directory that is removed when the command ends. Evidence: judgment;
+reference (home-ops `talos/README.md` on the `ca` merge).
+
+## D31 Installer image: the `nocloud` installer of the node schematic
+
+Over: `metal-installer`, which `talosctl gen config` and the Talos Proxmox
+guide use. The Image Factory serves a separate installer per platform;
+for schematic `ce4c9805...` at v1.14.6 the `nocloud-installer` and
+`metal-installer` manifests have different digests. The nodes boot the
+`nocloud` image and take their addresses from cloud-init (D05), so the
+installed system must stay on that platform. The image is set in
+`talos/patches/cluster.yaml` and used by both install and upgrade.
+Evidence: tested 2026-11-15: the registry manifests on factory.talos.dev,
+and `talosctl upgrade` of k8s-1 with this image, after which the node
+reported platform `nocloud`, address 10.0.6.11/24 and hostname `k8s-1`
+([Cluster](guide/02-cluster.md), "Upgrade rehearsal").

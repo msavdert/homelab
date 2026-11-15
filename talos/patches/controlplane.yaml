@@ -1,0 +1,22 @@
+# Applies to control-plane nodes, which are all three.
+# Cilium replaces kube-proxy (D08).
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+---
+# The API virtual IP (D07). eth0 is the only NIC of each node.
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: 10.0.6.10
+link: eth0
+---
+# Every node runs ordinary workloads (D01): drop the control-plane taint
+# and the label that keeps load-balancer traffic off control planes.
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+labels:
+  node.kubernetes.io/exclude-from-external-load-balancers:
+    $patch: delete
+taints:
+  node-role.kubernetes.io/control-plane:
+    $patch: delete

@@ -28,8 +28,8 @@ Each phase lists:
 | Host preparation | done 2026-11-15, see [Host](host.md) |
 | 0 Repository foundation | done 2026-11-15, see [Repository](guide/00-repository.md) |
 | 1 Nodes | done 2026-11-15, see [Nodes](guide/01-nodes.md) |
-| 2 Cluster | open |
-| 3 Flux | not started |
+| 2 Cluster | done 2026-11-15, see [Cluster](guide/02-cluster.md) |
+| 3 Flux | open |
 | 4 Secrets | not started |
 | 5 Ingress | not started |
 | 6 Storage | not started |
@@ -252,8 +252,11 @@ kubectl wait --for=condition=Ready nodes --all --timeout=10m
 kill %1; awk '{print $2}' vip.log | sort | uniq -c
 ```
 The log shows answers before and after the reboot and a gap of failed
-requests (code 000) shorter than 60 seconds in between. A log without any
-gap means the reboot did not hit the holder; repeat with the right node.
+requests (code 000) shorter than 60 seconds in between. A clean reboot
+hands the address over before the node goes down, so the gap can be
+zero; check that the holder rebooted (its uptime) and that another node
+holds the address afterwards. A hard stop of the holder leaves a gap of
+about a minute (measured 2026-11-15, [Cluster](guide/02-cluster.md)).
 
 **Guide**: `docs/guide/02-cluster.md`, including how to rebuild the cluster
 from nothing.

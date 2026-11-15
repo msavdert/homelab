@@ -17,6 +17,21 @@
   labels: ["dependencies"],
   prConcurrentLimit: 5,
   commitBodyTable: true,
+  // Flux objects under kubernetes/ (the Cilium chart from phase 2 on).
+  flux: {
+    managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+  },
+  customManagers: [
+    {
+      description: "Kubernetes version of the cluster in mise.toml (D29)",
+      customType: "regex",
+      managerFilePatterns: ["/^mise\\.toml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z_]+ = \"(?<currentValue>[^\"]+)\"",
+      ],
+      extractVersionTemplate: "^v?(?<version>.*)$",
+    },
+  ],
   packageRules: [
     {
       description: "GitHub Actions, pinned by digest",
@@ -35,6 +50,17 @@
       matchUpdateTypes: ["minor", "major"],
       groupName: null,
       labels: ["dependencies", "upgrade-drill"],
+    },
+    {
+      description: "Components of the cluster move with an upgrade drill (D23)",
+      matchPackageNames: ["/siderolabs/", "/talos/", "/cilium/"],
+      matchUpdateTypes: ["minor", "major"],
+      labels: ["dependencies", "upgrade-drill"],
+    },
+    {
+      description: "Kubernetes stays on 1.36 until a Cilium release lists 1.37 (D29)",
+      matchPackageNames: ["ghcr.io/siderolabs/kubelet"],
+      allowedVersions: "<1.37",
     },
     {
       description: "The runner image is pinned on purpose; it moves deliberately, not by Renovate",

@@ -1,0 +1,8 @@
+# Image Factory schematic of the node image and the installer.
+# Its ID, ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515,
+# is used in infra/host/prepare.py (disk image) and patches/cluster.yaml
+# (installer). `mise run talos:schematic` prints the ID of this file.
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/qemu-guest-agent

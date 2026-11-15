@@ -11,7 +11,17 @@ cilium-cli = "0.20.3"
 uv = "0.13.8"
 ruff = "0.17.5"
 jq = "1.8.2"
+shellcheck = "0.11.0"
 "pipx:zensical" = "0.1.1"
+
+[env]
+# Cluster credentials, regenerated on demand and kept out of git (D30).
+TALOSCONFIG = "{{config_root}}/talosconfig"
+KUBECONFIG = "{{config_root}}/kubeconfig"
+# The Kubernetes version of the cluster (D29); Renovate tracks the kubelet
+# image of the same version.
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+KUBERNETES_VERSION = "1.36.6"
 
 [tasks."docs:build"]
 description = "build the documentation site into site/ (fails on warnings)"
@@ -37,9 +47,13 @@ run = [
   "tofu validate",
 ]
 
+[tasks."lint:shell"]
+description = "shellcheck the tracked shell scripts"
+run = "git ls-files -z '*.sh' | xargs -0 -r shellcheck"
+
 [tasks.check]
 description = "everything that can be validated without a cluster, as CI runs it"
-depends = ["docs:build", "lint:python", "lint:tofu"]
+depends = ["docs:build", "lint:python", "lint:shell", "lint:tofu"]
 
 # OpenTofu in infra/. Credentials are references in infra/op.env, resolved
 # per command with the service account of vault homelab.
@@ -79,4 +93,52 @@ secret="$(op read op://homelab/proxmox-tofu/credential)"
 printf 'header = "Authorization: PVEAPIToken=%s=%s"\n' "$id" "$secret" |
   curl -sSfk -K - https://10.0.0.1:8006/api2/json/pools/homelab |
   jq -r '.data.members[] | [.type, (.vmid // .storage), (.name // "")] | @tsv'
+'''
+
+# Talos machine configuration and nodes (talos/talos.sh). Arguments after the
+# task name are passed on, e.g. `mise run talos:apply k8s-1 --insecure`.
+[tasks."talos:secrets"]
+description = "generate the cluster secrets once and store them in 1Password item talos"
+run = "talos/talos.sh secrets"
+
+[tasks."talos:render"]
+description = "print the machine config of one node (contains secrets; pipe it, do not save it)"
+run = "talos/talos.sh render"
+
+[tasks."talos:apply"]
+description = "apply the machine config to one node (add --insecure in maintenance mode)"
+run = "talos/talos.sh apply"
+
+[tasks."talos:config"]
+description = "write the admin talosconfig from the stored secrets"
+run = "talos/talos.sh config"
+
+[tasks."talos:bootstrap"]
+description = "bootstrap etcd on k8s-1 (once per cluster)"
+run = "talos/talos.sh bootstrap"
+
+[tasks."talos:kubeconfig"]
+description = "write the admin kubeconfig from the cluster"
+run = "talos/talos.sh kubeconfig"
+
+[tasks."talos:upgrade"]
+description = "upgrade one node to the installer image in talos/patches/cluster.yaml"
+run = "talos/talos.sh upgrade"
+
+[tasks."talos:schematic"]
+description = "print the Image Factory ID of talos/schematic.yaml"
+run = "talos/talos.sh schematic"
+
+# Installed before Flux exists (D09). Chart and values are the files Flux
+# uses from phase 3 on.
+[tasks."bootstrap:cilium"]
+shell = "bash -c"
+description = "install or upgrade Cilium with Helm from kubernetes/apps/kube-system/cilium/app"
+dir = "kubernetes/apps/kube-system/cilium/app"
+run = '''
+set -euo pipefail
+url="$(awk '$1 == "url:" {print $2}' ocirepository.yaml)"
+tag="$(awk '$1 == "tag:" {print $2}' ocirepository.yaml)"
+helm upgrade --install cilium "$url" --version "$tag" \
+  --namespace kube-system --values values.yaml --wait --timeout 10m
 '''
