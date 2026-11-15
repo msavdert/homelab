@@ -1,0 +1,24 @@
+---
+# Flux itself. bootstrap:flux applies this file once; from then on Flux
+# reconciles it from Git like everything else. The operator creates the
+# GitRepository and Kustomization `flux-system` from spec.sync (D10: public
+# repository, no credential, polling every minute by default).
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+  annotations:
+    # Never removed by pruning; removing Flux is a deliberate manual step.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  distribution:
+    # Exact version, kept current by Renovate (custom manager).
+    # renovate: datasource=github-releases depName=fluxcd/flux2
+    version: 2.10.0
+    registry: ghcr.io/fluxcd
+  sync:
+    kind: GitRepository
+    url: https://github.com/msavdert/homelab.git
+    ref: refs/heads/main
+    path: kubernetes/apps

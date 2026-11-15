@@ -1,0 +1,7 @@
+---
+# kube-system belongs to Talos; there is no namespace.yaml here on purpose,
+# so that pruning can never touch the namespace.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./cilium/ks.yaml

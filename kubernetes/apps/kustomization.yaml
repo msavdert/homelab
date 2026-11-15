@@ -1,0 +1,8 @@
+---
+# Entry point of the cluster. The FluxInstance (flux-system/flux-instance)
+# syncs this directory; every namespace directory is listed here.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./flux-system
+  - ./kube-system

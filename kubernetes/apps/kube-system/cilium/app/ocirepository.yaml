@@ -1,6 +1,6 @@
 ---
-# The Cilium chart. Phase 2 installs it from here with Helm (bootstrap:cilium);
-# phase 3 points a HelmRelease at the same object.
+# The Cilium chart. bootstrap:cilium installs it from here with Helm; the
+# HelmRelease next to it then adopts that release (D09).
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
