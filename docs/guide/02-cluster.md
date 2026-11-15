@@ -402,7 +402,7 @@ are how `talosctl` reports the end of a step, not errors.
   Cilium release lists it (D29).
 - **Change Cilium**: edit `values.yaml` or the tag, then
   `mise run bootstrap:cilium`. From phase 3 on, Flux does this after a
-  merge.
+  merge, and `bootstrap:cilium` is only for a cluster without Flux.
 - **Lost `talosconfig` or `kubeconfig`**: `mise run talos:config`, then
   `mise run talos:kubeconfig` (from k8s-1; name another node, e.g.
   `mise run talos:kubeconfig k8s-2`, when k8s-1 is down).
@@ -422,6 +422,11 @@ are how `talosctl` reports the end of a step, not errors.
   3. Steps 4 to 7 above: `talos:apply k8s-N --insecure` for each node,
      `talos:config`, `talos:bootstrap`, `talos:kubeconfig`,
      `bootstrap:cilium`.
+  4. `mise run bootstrap:flux`. It installs flux-operator, applies the
+     FluxInstance and returns when every Kustomization and HelmRelease is
+     Ready. Flux adopts the Cilium and flux-operator releases in place,
+     and with the feature gate of D33 no pod should restart (shown for
+     flux-operator on a test cluster; a full rebuild has not been run).
 
 ## When it goes wrong
 

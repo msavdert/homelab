@@ -22,3 +22,17 @@ spec:
     url: https://github.com/msavdert/homelab.git
     ref: refs/heads/main
     path: kubernetes/apps
+  kustomize:
+    patches:
+      # helm-controller otherwise appends the digest of the OCI artifact to
+      # the chart version (1.20.4+712e1f65bf30). Charts that put the chart
+      # version in a pod label (helm.sh/chart: Cilium, flux-operator) would
+      # then roll every pod when Flux adopts a release installed by
+      # bootstrap, and again whenever a tag is pushed anew (D33).
+      - target:
+          kind: Deployment
+          name: helm-controller
+        patch: |
+          - op: add
+            path: /spec/template/spec/containers/0/args/-
+            value: --feature-gates=DisableChartDigestTracking=true
