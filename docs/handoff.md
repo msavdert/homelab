@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, when phase 0 closed.
+Last updated: 2026-11-15, when phase 1 closed.
 
 ## How to start a session
 
@@ -21,9 +21,14 @@ Last updated: 2026-11-15, when phase 0 closed.
 - **Phase 0 (repository foundation): done 2026-11-15.** Tool pins and
   `mise run check`, the four workflows, release-please, the docs site on
   Pages, the `main` ruleset and Renovate are in place; how they fit is in
-  [Repository](guide/00-repository.md). Release `v0.1.0` waits in the
-  release pull request (#4) for the owner.
-- **Phase 1 (nodes): open.** Nothing is built yet. No lab VMs exist.
+  [Repository](guide/00-repository.md). Released as `v0.1.0`.
+- **Phase 1 (nodes): done 2026-11-15.** VMs 201 to 203 (`k8s-1` to
+  `k8s-3`) run Talos v1.14.6 in maintenance mode at 10.0.6.11 to
+  10.0.6.13, created by OpenTofu from `infra/`; state is encrypted in
+  bucket `homelab` under `tofu/`. How, and the gate output:
+  [Nodes](guide/01-nodes.md). The VMs have no Proxmox tags (D28).
+- **Phase 2 (cluster): open.** No machine configuration has been applied;
+  the nodes wait in maintenance mode.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -61,10 +66,16 @@ raw API calls, not with OpenTofu.
 - The project agents `researcher` and `auditor` were used in phase 0 and
   returned usable results. `executor`, `locate` and `grunt` have not been
   used yet.
+- Phase 1 proofs, on 2026-11-15: the `s3` backend lock refuses a second
+  run (HTTP 412) with `skip_s3_checksum` alone; the stored state is an
+  encrypted envelope; a fresh clone plans no changes. Details in
+  [Nodes](guide/01-nodes.md), "Check".
+- The QEMU guest agent answers in maintenance mode (Proxmox
+  `agent/network-get-interfaces` on all three VMs).
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap.
+- Everything marked "Prove here" in the roadmap from phase 2 on.
 - `kubectl` is pinned at the newest stable release (1.37.2). The
   Kubernetes version of the cluster is decided in phase 2; if it is more
   than one minor version away, move the pin then.
@@ -117,6 +128,9 @@ accepted:
 - `gh` on the box is `opgh`.
 - The administrator token for Proxmox works from the box. Do not use it for
   anything except `infra/host/prepare.py` on the owner's request.
-- VM IDs 201 to 203 and addresses 10.0.6.10 to 10.0.6.13 are reserved.
+- VM IDs 201 to 203 and addresses 10.0.6.11 to 10.0.6.13 are in use by the
+  nodes; 10.0.6.10 is reserved for the API virtual IP (D07).
+- OpenTofu: `mise run infra:plan`, `infra:apply`, `infra:pool`. The token
+  cannot set Proxmox tags at VM creation (D28).
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.

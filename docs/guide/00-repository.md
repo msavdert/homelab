@@ -20,7 +20,7 @@ release that marks a verified phase. The documentation site is rebuilt from
 ### 1. Tools and the local check
 
 `mise.toml` pins every command-line tool the lab uses (OpenTofu, talosctl,
-kubectl, helm, flux, cilium-cli, uv) plus what the check needs (ruff,
+kubectl, helm, flux, cilium-cli, uv, jq) plus what the check needs (ruff,
 zensical). The same file is used locally and in CI, so a check that passes
 on your machine passes there.
 
@@ -32,8 +32,9 @@ mise run check
 `check` is everything that can be validated without a cluster. Today that is
 the documentation build with `--strict` (a broken link or a page missing
 from the build fails it) and `py_compile` plus `ruff check` on the tracked
-Python. Later phases add `tofu validate`, `tofu fmt -check` and a manifest
-build.
+Python. Phase 1 added `lint:tofu` (`tofu fmt -check` and `tofu validate`
+on `infra/`, without credentials); later phases add a manifest build.
+The output below is from phase 0.
 
 ```
 [lint:python] All checks passed!

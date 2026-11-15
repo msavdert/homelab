@@ -10,6 +10,7 @@ flux2 = "2.10.0"
 cilium-cli = "0.20.3"
 uv = "0.13.8"
 ruff = "0.17.5"
+jq = "1.8.2"
 "pipx:zensical" = "0.1.1"
 
 [tasks."docs:build"]
@@ -27,6 +28,55 @@ run = [
   "git ls-files -z '*.py' | xargs -0 -r ruff check --force-exclude",
 ]
 
+[tasks."lint:tofu"]
+description = "format check and validate infra/ (no backend, no credentials)"
+dir = "infra"
+run = [
+  "tofu fmt -check -diff",
+  "tofu init -backend=false -input=false >/dev/null",
+  "tofu validate",
+]
+
 [tasks.check]
 description = "everything that can be validated without a cluster, as CI runs it"
-depends = ["docs:build", "lint:python"]
+depends = ["docs:build", "lint:python", "lint:tofu"]
+
+# OpenTofu in infra/. Credentials are references in infra/op.env, resolved
+# per command with the service account of vault homelab.
+[tasks."infra:plan"]
+shell = "bash -c"
+description = "init and plan infra/ (the three nodes)"
+dir = "infra"
+run = '''
+set -euo pipefail
+token="$(op read op://dotfiles/homelab-op-service-account/credential)"
+export OP_SERVICE_ACCOUNT_TOKEN="$token"
+op run --env-file op.env -- tofu init -input=false >/dev/null
+op run --env-file op.env -- tofu plan -input=false
+'''
+
+[tasks."infra:apply"]
+shell = "bash -c"
+description = "init and apply infra/ (asks for confirmation)"
+dir = "infra"
+run = '''
+set -euo pipefail
+token="$(op read op://dotfiles/homelab-op-service-account/credential)"
+export OP_SERVICE_ACCOUNT_TOKEN="$token"
+op run --env-file op.env -- tofu init -input=false >/dev/null
+op run --env-file op.env -- tofu apply
+'''
+
+[tasks."infra:pool"]
+shell = "bash -c"
+description = "list the members of pool homelab with the tofu token"
+run = '''
+set -euo pipefail
+token="$(op read op://dotfiles/homelab-op-service-account/credential)"
+export OP_SERVICE_ACCOUNT_TOKEN="$token"
+id="$(op read op://homelab/proxmox-tofu/username)"
+secret="$(op read op://homelab/proxmox-tofu/credential)"
+printf 'header = "Authorization: PVEAPIToken=%s=%s"\n' "$id" "$secret" |
+  curl -sSfk -K - https://10.0.0.1:8006/api2/json/pools/homelab |
+  jq -r '.data.members[] | [.type, (.vmid // .storage), (.name // "")] | @tsv'
+'''

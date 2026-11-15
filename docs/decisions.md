@@ -284,3 +284,20 @@ continuous WAL archiving to `cnpg/postgres/`, retention 7 days (or the
 fallback in D24). The PostgreSQL major version is the newest that the
 current CloudNativePG release lists as supported. Evidence: judgment; sized
 for 8 GiB nodes and a drill, not for data.
+
+## D28 Node VMs carry no Proxmox tags
+
+Changes the node table in [Architecture](architecture.md), which listed the
+tags `homelab` and `talos`. Over: granting the token `VM.Config.Options` on
+`/vms/201` to `/vms/203`, which would give it rights outside pool
+`homelab` (D03); and adding the tags in a second apply, which a fresh
+environment could not reproduce in one run. Reason: membership of pool
+`homelab` already marks the lab's VMs; the tags were only a label.
+Evidence: tested 2026-11-15 with the `tofu` token on Proxmox VE 9.2.26.
+Creating VM 201 with `pool=homelab` and `tags=homelab;talos` was refused
+with `403 Permission check failed (/vms/201, VM.Config.Options)`; the same
+create without tags, and with each other option bpg/proxmox 0.122.0 sends,
+succeeded; setting the tags on the existing VM afterwards also succeeded.
+Inferred, not read in the Proxmox source: at creation Proxmox checks the
+tag right on `/vms/<id>` before the VM is a pool member, so the pool's
+rights do not apply yet.
