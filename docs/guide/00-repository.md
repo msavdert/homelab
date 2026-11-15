@@ -187,7 +187,16 @@ A pull request titled `bad title` (#5, closed): `semantic-title` failed and
 the merge state was `BLOCKED`.
 
 The release pull request `chore(main): release 0.1.0` (#4) was opened by
-release-please after the first merge. Dependency Dashboard (#6) lists the
+release-please after the first merge. After the owner approved its runs in
+the Actions tab, its required checks ran:
+
+```
+$ opgh pr checks 4
+check           pass  13s
+semantic-title  pass  3s
+```
+
+Dependency Dashboard (#6) lists the
 workflows and `mise.toml` and no configuration error.
 
 ## Day-two tasks
