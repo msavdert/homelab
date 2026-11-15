@@ -377,3 +377,36 @@ GitRepository and Kustomization `flux-system`, default interval 1m),
 reference (both home-ops repositories, read 2026-11-15), tested
 (`kubectl kustomize` renders the hashed ConfigMap name into the
 HelmRelease).
+
+## D33 Chart versions: helm-controller does not append the artifact digest
+
+Over: the default, in which helm-controller appends the first twelve
+characters of the OCI artifact digest to the chart version of every
+HelmRelease that uses `chartRef` to an OCIRepository
+(`cilium@1.20.4+712e1f65bf30`, label `cilium-1.20.4_712e1f65bf30`); a `postRenderers` patch per release that
+rewrites the label; and `spec.chart` with a HelmRepository of type `oci`,
+which would give up the OCIRepository layout of D32. Cilium and
+flux-operator write the chart version into the pod label `helm.sh/chart`,
+so with the default the first reconciliation after bootstrap changed every
+pod template and rolled all Cilium agent, Envoy and operator pods and the
+flux-operator pod, although chart and values were identical. The feature
+gate `DisableChartDigestTracking=true` is set on helm-controller through
+`spec.kustomize.patches` of the FluxInstance, so on a rebuild it is in
+force before the first HelmRelease exists. On this cluster it came after
+the first adoption and costs one more roll. The HelmRelease
+API has no field for this; the gate is the documented switch. The price: a
+chart pushed again under the same tag no longer starts an upgrade. The lab
+does not rely on that, since chart tags move only through Renovate pull
+requests (D23). Evidence: tested (lab cluster 2026-11-15: Helm revisions 1
+and 2 of `cilium` and `flux-operator` differ in the pod templates only in
+`helm.sh/chart` (object metadata also gains Flux ownership labels), pods
+rolled at 14:55 UTC; kind cluster with flux-operator 0.62.1 and Flux
+2.10.0, gate set from the same FluxInstance: flux-operator adopted at
+revision 2 with chart `flux-operator@0.62.1`, deployment generation and
+pod UID unchanged; the kind cluster ran on the agent box, not on this
+host), docs (helm-controller v1.7.1: `docs/spec/v2/helmreleases.md`,
+"Chart reference"; changelog 1.3.0, pull request 1212; and the source,
+`mutateChartWithSourceRevision` in
+`internal/controller/helmrelease_controller.go` and
+`internal/features/features.go`), reference (onedr0p/home-ops sets the
+same gate in its FluxInstance).

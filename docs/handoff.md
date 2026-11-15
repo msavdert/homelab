@@ -35,7 +35,17 @@ Last updated: 2026-11-15, when phase 2 closed.
   `kubernetes/apps/kube-system/cilium/app/`. How, and the gate output:
   [Cluster](guide/02-cluster.md).
 - **Phase 3 (Flux): open.** The Flux tree under `kubernetes/apps/` and
-  `mise run bootstrap:flux` are written (D32); Flux is not installed yet.
+  `mise run bootstrap:flux` are written (D32). Flux 2.10.0 was installed
+  with `bootstrap:flux` on 2026-11-15 and adopted the `cilium` and
+  `flux-operator` releases in place (Helm revision 2). The "Prove here"
+  item failed on that run: every Cilium pod and the flux-operator pod were
+  rolled, because helm-controller appended the artifact digest to the
+  chart version and both charts put it in a pod label. D33 turns that off
+  in the FluxInstance. Adoption without a restart was then shown on a kind
+  cluster with the flux-operator chart, not yet on the lab cluster: when
+  D33 is merged, both releases are upgraded once more and their pods roll
+  one last time (the label returns to `cilium-1.20.4`). The gate is still
+  to run.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
