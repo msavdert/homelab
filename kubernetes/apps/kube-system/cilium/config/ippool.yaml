@@ -1,0 +1,12 @@
+---
+# The addresses LoadBalancer Services may take: .20 to .29 of the node
+# network 10.0.6.0/24, outside the DHCP range (.200 to .250). Envoy Gateway
+# asks for 10.0.6.20 by annotation (envoy-gateway/gateway/envoyproxy.yaml).
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: lab
+spec:
+  blocks:
+    - start: "10.0.6.20"
+      stop: "10.0.6.29"

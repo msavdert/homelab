@@ -1,0 +1,50 @@
+---
+# Envoy Gateway with the Gateway API CRDs (D34). wait makes this
+# Kustomization Ready only when the HelmRelease is.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/network/envoy-gateway/app
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# The certificate, the Gateway and the echo fixture. Ready only when the
+# certificate is issued and the Gateway is programmed. Issuance by DNS-01
+# takes minutes, hence the longer timeout.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-gateway
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: envoy-gateway
+    - name: cert-manager-issuers
+    - name: cilium-config
+  interval: 1h
+  retryInterval: 2m
+  timeout: 10m
+  path: ./kubernetes/apps/network/envoy-gateway/gateway
+  prune: true
+  wait: true
+  # Same reasoning as external-secrets-stores: no `failed` expression,
+  # exists() instead of all().
+  healthCheckExprs:
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+    - apiVersion: gateway.networking.k8s.io/v1
+      kind: Gateway
+      current: status.conditions.exists(e, e.type == 'Programmed' && e.status == 'True')
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

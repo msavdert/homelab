@@ -1,19 +1,19 @@
 ---
-# Proves the path from 1Password to a Secret (phase 4 gate). Removed in
-# phase 5, when cert-manager gets its own ExternalSecret for this item.
+# The Cloudflare token for DNS-01 (DNS edit on savdert.com only), read from
+# vault homelab-cluster.
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: eso-gate
-  namespace: external-secrets
+  name: cloudflare-dns
+  namespace: cert-manager
 spec:
   refreshInterval: 1h
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword
   target:
-    name: eso-gate
+    name: cloudflare-dns
   data:
-    - secretKey: credential
+    - secretKey: api-token
       remoteRef:
         key: cloudflare-dns/credential

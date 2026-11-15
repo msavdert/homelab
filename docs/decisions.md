@@ -413,3 +413,35 @@ every pod UID unchanged, [Flux](guide/03-flux.md), "Check"), docs
 `internal/controller/helmrelease_controller.go` and
 `internal/features/features.go`), reference (onedr0p/home-ops sets the
 same gate in its FluxInstance).
+
+## D34 Gateway API CRDs: from the Envoy Gateway chart, upgraded with it; certificates are explicit
+
+Over: the CRD-only chart `gateway-crds-helm` in its own Kustomization, and
+the upstream Gateway API release applied as a Flux Kustomization. The
+Envoy Gateway chart `gateway-helm` installs the Gateway API CRDs
+(experimental channel, the version Envoy Gateway is built against:
+Gateway API 1.6.1 in the CRDs of Envoy Gateway 1.10.0) and its own CRDs by
+default, from the `crds/` directory of its subchart `crds`. Helm applies files in `crds/` on
+install only, and helm-controller's default `upgrade.crds` is `Skip`, so
+the HelmRelease sets `install.crds` and `upgrade.crds` to
+`CreateReplace`: a Renovate update of Envoy Gateway then moves CRDs and
+controller together, which is the order the Envoy Gateway upgrade notes
+require. A separate chart would add a second version to keep in step with
+the first; upstream Gateway API is already one minor ahead (1.7.0) of what
+Envoy Gateway supports. cert-manager does not use Gateway API: the
+wildcard certificate is an explicit `Certificate` that the `Gateway`
+references by Secret name, so cert-manager runs without
+`config.gatewayAPI.enabled` and depends on no Gateway API CRD version.
+That removes the start-up ordering the roadmap's criterion guards against.
+The order that remains is expressed with `dependsOn`: the `Certificate`,
+the `Gateway` and its route are applied together after the Envoy Gateway
+Kustomization is Ready; the `Gateway` waits for the certificate Secret, and
+the Kustomization is Ready only when the `Certificate` is Ready and the
+`Gateway` is Programmed. Evidence: docs (Envoy Gateway
+"Install with Helm" and v1.10.0 release notes; cert-manager "Gateway API"
+usage page; `kubectl explain helmrelease.spec.upgrade.crds` on the lab
+cluster, 2026-11-15), source (`gateway-helm` 1.10.0 pulled and read:
+`Chart.yaml` dependency `crds` with condition `crds.enabled`, CRDs under
+`charts/crds/crds/`), reference (onedr0p/home-ops installs `gateway-helm`
+with its default CRDs and references the certificate Secret from the
+`Gateway`; it does not enable Gateway API in cert-manager).

@@ -95,6 +95,20 @@ printf 'header = "Authorization: PVEAPIToken=%s=%s"\n' "$id" "$secret" |
   jq -r '.data.members[] | [.type, (.vmid // .storage), (.name // "")] | @tsv'
 '''
 
+# The wildcard DNS record for the lab in Cloudflare (infra/dns/apply.py).
+# Add --check to only report; the token is a reference in infra/dns/op.env.
+[tasks."dns:apply"]
+shell = "bash -c"
+description = "ensure the Cloudflare record *.lab.savdert.com -> 10.0.6.20 (add --check to only report)"
+dir = "infra/dns"
+run = '''
+set -euo pipefail
+token="$(op read op://dotfiles/homelab-op-service-account/credential)"
+export OP_SERVICE_ACCOUNT_TOKEN="$token"
+# mise appends the task arguments (--check) to this last line.
+op run --env-file op.env -- python3 -I apply.py
+'''
+
 # Talos machine configuration and nodes (talos/talos.sh). Arguments after the
 # task name are passed on, e.g. `mise run talos:apply k8s-1 --insecure`.
 [tasks."talos:secrets"]

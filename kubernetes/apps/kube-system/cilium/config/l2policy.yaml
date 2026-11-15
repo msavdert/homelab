@@ -1,0 +1,14 @@
+---
+# One node at a time answers ARP for each LoadBalancer address. No
+# nodeSelector on purpose: all three nodes are control-plane nodes, so the
+# documentation's example that excludes control-plane nodes would leave no
+# candidate. eth0 is the node interface (talosctl get links, cilium status,
+# 2026-11-15).
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: lab
+spec:
+  interfaces:
+    - ^eth0$
+  loadBalancerIPs: true

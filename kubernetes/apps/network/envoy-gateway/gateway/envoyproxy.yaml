@@ -1,0 +1,34 @@
+---
+# Settings of the Envoy proxy Service that Envoy Gateway creates for the
+# Gateway. externalTrafficPolicy is Cluster because the EnvoyProxy default
+# is Local (gateway-helm 1.10.0 CRD schema), and Cilium's L2 announcement
+# documentation says Local does not work with L2 announcements: traffic is
+# dropped on the announcing node when no proxy pod runs there. The
+# annotation picks the address from the pool in cilium/config.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: lab
+  namespace: network
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      # Two proxies on different nodes (required anti-affinity; default
+      # spreading is only preferred), so a node reboot leaves one running.
+      envoyDeployment:
+        replicas: 2
+        pod:
+          labels:
+            app: envoy-lab
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - topologyKey: kubernetes.io/hostname
+                  labelSelector:
+                    matchLabels:
+                      app: envoy-lab
+      envoyService:
+        externalTrafficPolicy: Cluster
+        annotations:
+          lbipam.cilium.io/ips: "10.0.6.20"

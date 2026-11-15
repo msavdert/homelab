@@ -13,3 +13,23 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+# The address pool and the L2 announcement policy. Separate from the
+# release so that the CRDs exist before they are used.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cilium-config
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cilium
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/kube-system/cilium/config
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

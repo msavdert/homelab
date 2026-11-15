@@ -123,10 +123,12 @@ changes or prunes it. The namespace carries
 
 ### 5. The gate secret
 
-`stores/eso-gate.yaml` copies field `credential` of item `cloudflare-dns`
+`stores/eso-gate.yaml` copied field `credential` of item `cloudflare-dns`
 into Secret `eso-gate` in namespace `external-secrets`. The key is
-`<item>/<field>`. It exists only to prove the path; phase 5 removes it
-when cert-manager gets its own ExternalSecret for the same item.
+`<item>/<field>`. It existed only to prove the path and was removed in
+phase 5, when cert-manager got its own ExternalSecret for the same item
+(`kubernetes/apps/cert-manager/cert-manager/issuers/cloudflare-dns.yaml`).
+The check below shows it as it was.
 
 ## Check
 
