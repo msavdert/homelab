@@ -1,0 +1,23 @@
+# OpenTofu: state is remote and encrypted; nothing local is committed
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# Cluster credentials and rendered configuration
+talosconfig
+kubeconfig
+*.rendered.yaml
+secrets.yaml
+
+# Documentation build
+site/
+.cache/
+
+.env
+
+# Scratch work of delegated runs and audits
+research/_work/
+
+__pycache__/

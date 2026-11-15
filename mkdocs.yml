@@ -1,0 +1,15 @@
+site_name: homelab
+site_description: A Kubernetes lab on one Proxmox host
+site_url: https://msavdert.github.io/homelab/
+repo_url: https://github.com/msavdert/homelab
+docs_dir: docs
+theme:
+  name: material
+nav:
+  - Overview: index.md
+  - Architecture: architecture.md
+  - Decisions: decisions.md
+  - Roadmap: roadmap.md
+  - Host: host.md
+  - Standards: standards.md
+  - Handoff: handoff.md
