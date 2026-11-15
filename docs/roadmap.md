@@ -30,8 +30,8 @@ Each phase lists:
 | 1 Nodes | done 2026-11-15, see [Nodes](guide/01-nodes.md) |
 | 2 Cluster | done 2026-11-15, see [Cluster](guide/02-cluster.md) |
 | 3 Flux | done 2026-11-15, see [Flux](guide/03-flux.md) |
-| 4 Secrets | open |
-| 5 Ingress | not started |
+| 4 Secrets | done 2026-11-15, see [Secrets](guide/04-secrets.md) |
+| 5 Ingress | open |
 | 6 Storage | not started |
 | 7 First database | not started |
 | 8 First application | not started |
