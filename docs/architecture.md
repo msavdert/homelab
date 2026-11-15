@@ -150,6 +150,7 @@ that vault and to be refused a write.
 AGENTS.md            rules for agents
 docs/                this documentation (published to GitHub Pages)
 infra/host/          one-time host preparation (administrator token)
+infra/dns/           the wildcard DNS record in Cloudflare (dns:apply)    phase 5
 infra/               OpenTofu: the three VMs                        phase 1
 talos/               machine config patches, image schematic        phase 2
 bootstrap/           what is installed before Flux takes over       phase 2 to 4

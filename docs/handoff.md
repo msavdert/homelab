@@ -47,7 +47,8 @@ Last updated: 2026-11-15, when phase 4 closed.
   ClusterSecretStore `onepassword` (D25). The token Secret is applied by
   `mise run bootstrap:secrets`, which runs between `bootstrap:cilium` and
   `bootstrap:flux` on a rebuild. `eso-gate` in namespace
-  `external-secrets` proves the path and is removed in phase 5. How, how
+  `external-secrets` proved the path; it is removed with the first phase 5
+  change. How, how
   to add a secret, and the gate output: [Secrets](guide/04-secrets.md).
   The read-write token of vault `homelab` was printed into a session log
   during the gate and rotated by the owner the same day.

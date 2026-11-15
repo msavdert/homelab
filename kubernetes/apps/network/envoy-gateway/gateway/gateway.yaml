@@ -1,0 +1,27 @@
+---
+# HTTPS only; there is no HTTP listener. Routes from any namespace may
+# attach.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: lab
+  namespace: network
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: lab
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.lab.savdert.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: lab-savdert-com-tls
+      allowedRoutes:
+        namespaces:
+          from: All

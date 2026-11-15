@@ -38,3 +38,6 @@ hubble:
 # Phase 3 gate: a value changed only through Git, visible on the agent pods.
 podAnnotations:
   homelab.savdert.com/managed-by: flux
+# Nodes answer ARP for LoadBalancer addresses (policy in ../config).
+l2announcements:
+  enabled: true

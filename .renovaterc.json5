@@ -21,6 +21,10 @@
   flux: {
     managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
   },
+  // Container images in plain manifests under kubernetes/ (the echo fixture).
+  kubernetes: {
+    managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+  },
   customManagers: [
     {
       description: "Kubernetes version of the cluster in mise.toml (D29)",

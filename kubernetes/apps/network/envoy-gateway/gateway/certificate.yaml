@@ -1,0 +1,15 @@
+---
+# Wildcard certificate for the lab, issued by DNS-01 and referenced by the
+# Gateway by Secret name (D34).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lab-savdert-com
+  namespace: network
+spec:
+  secretName: lab-savdert-com-tls
+  dnsNames:
+    - "*.lab.savdert.com"
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt

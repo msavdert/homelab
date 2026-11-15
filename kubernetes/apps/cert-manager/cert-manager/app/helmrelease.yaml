@@ -1,0 +1,16 @@
+---
+# The CRDs are templates in this chart, installed and upgraded with the
+# release when crds.enabled is set. Gateway API support stays off (D34):
+# the certificate is an explicit Certificate.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: cert-manager
+  values:
+    crds:
+      enabled: true
