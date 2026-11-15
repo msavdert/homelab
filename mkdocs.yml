@@ -17,3 +17,4 @@ nav:
       - 00 Repository: guide/00-repository.md
       - 01 Nodes: guide/01-nodes.md
       - 02 Cluster: guide/02-cluster.md
+      - 03 Flux: guide/03-flux.md

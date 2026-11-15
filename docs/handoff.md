@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, when phase 2 closed.
+Last updated: 2026-11-15, when phase 3 closed.
 
 ## How to start a session
 
@@ -34,18 +34,16 @@ Last updated: 2026-11-15, when phase 2 closed.
   with `mise run bootstrap:cilium` from
   `kubernetes/apps/kube-system/cilium/app/`. How, and the gate output:
   [Cluster](guide/02-cluster.md).
-- **Phase 3 (Flux): open.** The Flux tree under `kubernetes/apps/` and
-  `mise run bootstrap:flux` are written (D32). Flux 2.10.0 was installed
-  with `bootstrap:flux` on 2026-11-15 and adopted the `cilium` and
-  `flux-operator` releases in place (Helm revision 2). The "Prove here"
-  item failed on that run: every Cilium pod and the flux-operator pod were
-  rolled, because helm-controller appended the artifact digest to the
-  chart version and both charts put it in a pod label. D33 turns that off
-  in the FluxInstance. Adoption without a restart was then shown on a kind
-  cluster with the flux-operator chart, not yet on the lab cluster: when
-  D33 is merged, both releases are upgraded once more and their pods roll
-  one last time (the label returns to `cilium-1.20.4`). The gate is still
-  to run.
+- **Phase 3 (Flux): done 2026-11-15.** Flux 2.10.0 through the Flux
+  Operator 0.62.1 reconciles `kubernetes/apps/` from `main` every minute.
+  Cilium, flux-operator and the FluxInstance are managed by Flux; the
+  bootstrap releases were adopted in place. `bootstrap:flux` follows
+  `bootstrap:cilium` on a new cluster. helm-controller runs with
+  `DisableChartDigestTracking` (D33), without which the first adoption
+  restarted every Cilium pod. How, and the gate output:
+  [Flux](guide/03-flux.md).
+- **Phase 4 (secrets): open.** Nothing built. It needs the owner's items
+  below first.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -96,19 +94,22 @@ raw API calls, not with OpenTofu.
   not keep pods off control planes; `talosctl upgrade` to the same
   version with the factory installer works. Details in
   [Cluster](guide/02-cluster.md), "Check".
+- Phase 3 proofs, on 2026-11-15: a Flux Helm upgrade of `cilium` with
+  unchanged inputs replaces no pod once D33 is in force; a merged value
+  change reaches the cluster in seconds with nothing run by hand. Details
+  in [Flux](guide/03-flux.md), "Check". Renovate lists the flux-operator
+  chart and `fluxcd/flux2` in `fluxinstance.yaml` in issue #6.
 - `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
   for the whole gate without problems.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 3 on.
-- Whether Renovate detects the Flux version in `fluxinstance.yaml`
-  (custom manager added in phase 3; the regex was tested locally) and the
-  flux-operator chart tag. Check "Detected dependencies" of issue #6.
-  The phase 2 pins (kubelet image, Cilium chart, installer tag) were
-  listed there on 2026-11-15.
-- Rebuilding the cluster from nothing (guide, "Day-two tasks") and
-  `upgrade-k8s` have not been run.
+- Everything marked "Prove here" in the roadmap from phase 4 on.
+- Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two
+  tasks") and `upgrade-k8s` have not been run. A fresh adoption of Cilium
+  with D33 in force from the start was shown only through the equivalent
+  forced upgrade, and for flux-operator on a kind cluster.
+- A Renovate pull request for Flux or flux-operator has not arrived yet.
 
 ## Waiting on the owner
 
@@ -170,5 +171,11 @@ accepted:
   not part of this repository and is not used; D30 regenerates instead.
 - OpenTofu: `mise run infra:plan`, `infra:apply`, `infra:pool`. The token
   cannot set Proxmox tags at VM creation (D28).
+- The Bash tool has no mise environment: export `KUBECONFIG` and put the
+  tools on `PATH` (`export PATH="$(dirname "$(mise which flux)"):$PATH"`).
+  `mise exec` always uses the clone's `kubeconfig`, whatever is exported.
+- From phase 3 on, the cluster changes through merged pull requests. Do
+  not `helm upgrade` a Flux-owned release by hand; it fails on field
+  conflicts (Flux guide, "When it goes wrong").
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.

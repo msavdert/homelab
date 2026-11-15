@@ -404,7 +404,10 @@ rolled at 14:55 UTC; kind cluster with flux-operator 0.62.1 and Flux
 2.10.0, gate set from the same FluxInstance: flux-operator adopted at
 revision 2 with chart `flux-operator@0.62.1`, deployment generation and
 pod UID unchanged; the kind cluster ran on the agent box, not on this
-host), docs (helm-controller v1.7.1: `docs/spec/v2/helmreleases.md`,
+host; lab cluster after the merge: a forced Helm upgrade of `cilium`,
+revision 3 to 4, left the DaemonSet, Envoy and operator generations and
+every pod UID unchanged, [Flux](guide/03-flux.md), "Check"), docs
+(helm-controller v1.7.1: `docs/spec/v2/helmreleases.md`,
 "Chart reference"; changelog 1.3.0, pull request 1212; and the source,
 `mutateChartWithSourceRevision` in
 `internal/controller/helmrelease_controller.go` and
