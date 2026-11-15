@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/msavdert/homelab/compare/v0.1.0...v0.2.0) (2026-11-15)
+
+
+### Features
+
+* **infra:** create the three Talos nodes with OpenTofu ([#9](https://github.com/msavdert/homelab/issues/9)) ([f299813](https://github.com/msavdert/homelab/commit/f299813d9a981ad0c41a998b64f0411eeddb04fe))
+
 ## 0.1.0 (2026-11-15)
 
 
