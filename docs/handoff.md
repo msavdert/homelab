@@ -70,7 +70,7 @@ raw API calls, not with OpenTofu.
 | Needed for | What | State |
 |---|---|---|
 | Phase 4 | Vault `homelab-cluster`, a read-only service account for it, its token in `op://homelab/eso-service-account/credential`, and a copy of `cloudflare-dns` in the new vault | open |
-| Phase 5 | A test from the owner's device (`ping 10.0.6.1`, later the gate commands) | open |
+| Phase 5 | The gate commands run from the owner's device when the phase reaches its gate | open |
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | open |
 
 Everything else the earlier phases need is in place.
@@ -79,8 +79,9 @@ Everything else the earlier phases need is in place.
 
 Done on 2026-11-15 and read back with the read-only client in
 `op://dotfiles/tailscale-oauth-readonly`: the subnet router advertises and
-has enabled 10.0.6.0/24, and the policy lets tailnet members reach it. Not
-yet tested: traffic from one of the owner's devices to 10.0.6.0/24.
+has enabled 10.0.6.0/24, and the policy lets tailnet members reach it. The
+owner's laptop reached 10.0.6.1 over the tailnet on 2026-11-15 (`ping`, no
+loss, about 95 ms).
 
 ## Reviews of the design
 
