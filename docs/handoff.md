@@ -21,8 +21,10 @@ Last updated: 2026-11-15, by the planning session.
 - **Phase 0 (repository foundation): open.** The planning session made the
   first commit directly on `main`: the rules (`AGENTS.md`, `CLAUDE.md`),
   `docs/`, `.claude/`, `mkdocs.yml`, `README.md`, `.gitignore` and
-  `infra/host/prepare.py`. Everything else in phase 0 is still to do,
-  through pull requests.
+  `infra/host/prepare.py`. The tooling (`mise.toml`, the workflows,
+  release-please, the pull request template) arrives through the first
+  pull request; the repository settings, the `main` ruleset, the Renovate
+  configuration and the guide page are still to do.
 - Nothing of the cluster exists yet. There are no lab VMs.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
@@ -54,7 +56,7 @@ raw API calls, not with OpenTofu.
 ## Verified in this repository
 
 - `uvx zensical build` builds `docs/` with `mkdocs.yml` without issues
-  (2026-11-15, local). The Pages workflow does not exist yet.
+  (2026-11-15, local); `mise run check` runs that build with `--strict`.
 - The deny rules in `.claude/settings.json` take effect: after the file was
   written, the session reported the agents `general-purpose`, `Explore`,
   `Plan` and `claude` as no longer available.
