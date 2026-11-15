@@ -1,0 +1,45 @@
+{
+  // Renovate proposes, the architect triages (docs/decisions.md, D23).
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    ":dependencyDashboard",
+    "helpers:pinGitHubActionDigests",
+    // Talos versions from factory.talos.dev, in YAML files under talos/
+    // (installer image tag or a talosVersion key).
+    "github>home-operations/renovate-presets//apps/talosFactory.json5",
+  ],
+  timezone: "Europe/Istanbul",
+  // Before 06:00 on Monday. Cron form; the text form is deprecated.
+  schedule: ["* 0-5 * * 1"],
+  minimumReleaseAge: "3 days",
+  labels: ["dependencies"],
+  prConcurrentLimit: 5,
+  commitBodyTable: true,
+  packageRules: [
+    {
+      description: "GitHub Actions, pinned by digest",
+      matchManagers: ["github-actions"],
+      groupName: "ci",
+    },
+    {
+      description: "Tools pinned in mise.toml",
+      matchManagers: ["mise"],
+      groupName: "dev tools",
+    },
+    {
+      description: "Clients of the cluster's components move with an upgrade drill (D23), not with the dev tools group",
+      matchManagers: ["mise"],
+      matchDepNames: ["talosctl", "kubectl", "flux2", "cilium-cli"],
+      matchUpdateTypes: ["minor", "major"],
+      groupName: null,
+      labels: ["dependencies", "upgrade-drill"],
+    },
+    {
+      description: "OpenTofu providers and modules come from the OpenTofu registry",
+      matchDatasources: ["terraform-provider", "terraform-module"],
+      registryUrls: ["https://registry.opentofu.org"],
+    },
+  ],
+}
