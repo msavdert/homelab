@@ -29,8 +29,8 @@ Each phase lists:
 | 0 Repository foundation | done 2026-11-15, see [Repository](guide/00-repository.md) |
 | 1 Nodes | done 2026-11-15, see [Nodes](guide/01-nodes.md) |
 | 2 Cluster | done 2026-11-15, see [Cluster](guide/02-cluster.md) |
-| 3 Flux | open |
-| 4 Secrets | not started |
+| 3 Flux | done 2026-11-15, see [Flux](guide/03-flux.md) |
+| 4 Secrets | open |
 | 5 Ingress | not started |
 | 6 Storage | not started |
 | 7 First database | not started |
