@@ -27,8 +27,8 @@ Each phase lists:
 |---|---|
 | Host preparation | done 2026-11-15, see [Host](host.md) |
 | 0 Repository foundation | done 2026-11-15, see [Repository](guide/00-repository.md) |
-| 1 Nodes | open |
-| 2 Cluster | not started |
+| 1 Nodes | done 2026-11-15, see [Nodes](guide/01-nodes.md) |
+| 2 Cluster | open |
 | 3 Flux | not started |
 | 4 Secrets | not started |
 | 5 Ingress | not started |
@@ -167,7 +167,7 @@ lock file needs.
 ```
 for ip in 10.0.6.11 10.0.6.12 10.0.6.13; do talosctl get disks --insecure --nodes $ip; done
 ```
-Each lists `sda` (about 21 GB) and `sdb` (about 107 GB).
+Each lists `sda` (22 GB: talosctl shows 20 GiB in decimal units, rounded) and `sdb` (107 GB).
 ```
 git clone https://github.com/msavdert/homelab /tmp/fresh && cd /tmp/fresh && mise run infra:plan   # "No changes"
 mise run infra:pool        # a task that lists the pool members with the tofu token

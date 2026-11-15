@@ -66,7 +66,6 @@ control-plane node that also runs workloads.
 | `scsi1` | 100 GiB data disk for persistent volumes; `/dev/sdb` |
 | Network | one VirtIO NIC on bridge `k8s`, static address from cloud-init |
 | Guest agent | enabled (the image carries `siderolabs/qemu-guest-agent`) |
-| Tags | `homelab`, `talos` |
 
 The VMs are created by OpenTofu in `infra/` with the bpg/proxmox provider.
 Someone with other infrastructure skips `infra/` and starts from "three
