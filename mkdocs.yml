@@ -13,3 +13,5 @@ nav:
   - Host: host.md
   - Standards: standards.md
   - Handoff: handoff.md
+  - Guide:
+      - 00 Repository: guide/00-repository.md

@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, by the planning session.
+Last updated: 2026-11-15, when phase 0 closed.
 
 ## How to start a session
 
@@ -18,14 +18,12 @@ Last updated: 2026-11-15, by the planning session.
 
 - **Host preparation: done.** Pool, VNet (10.0.6.0/24), roles, user, the
   token `homelab@pve!tofu` and the Talos image exist ([Host](host.md)).
-- **Phase 0 (repository foundation): open.** The planning session made the
-  first commit directly on `main`: the rules (`AGENTS.md`, `CLAUDE.md`),
-  `docs/`, `.claude/`, `mkdocs.yml`, `README.md`, `.gitignore` and
-  `infra/host/prepare.py`. The tooling (`mise.toml`, the workflows,
-  release-please, the pull request template) arrives through the first
-  pull request; the repository settings, the `main` ruleset, the Renovate
-  configuration and the guide page are still to do.
-- Nothing of the cluster exists yet. There are no lab VMs.
+- **Phase 0 (repository foundation): done 2026-11-15.** Tool pins and
+  `mise run check`, the four workflows, release-please, the docs site on
+  Pages, the `main` ruleset and Renovate are in place; how they fit is in
+  [Repository](guide/00-repository.md). Release `v0.1.0` waits in the
+  release pull request (#4) for the owner.
+- **Phase 1 (nodes): open.** Nothing is built yet. No lab VMs exist.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -55,17 +53,21 @@ raw API calls, not with OpenTofu.
 
 ## Verified in this repository
 
-- `uvx zensical build` builds `docs/` with `mkdocs.yml` without issues
-  (2026-11-15, local); `mise run check` runs that build with `--strict`.
+- The phase 0 gate, on 2026-11-15: output in
+  [Repository](guide/00-repository.md), "Check".
 - The deny rules in `.claude/settings.json` take effect: after the file was
   written, the session reported the agents `general-purpose`, `Explore`,
   `Plan` and `claude` as no longer available.
+- The project agents `researcher` and `auditor` were used in phase 0 and
+  returned usable results. `executor`, `locate` and `grunt` have not been
+  used yet.
 
 ## Not verified
 
-- The project agents have not been used yet. Their models and tool lists are
-  as written in `.claude/agents/`; confirm with `/agents` in phase 0.
 - Everything marked "Prove here" in the roadmap.
+- `kubectl` is pinned at the newest stable release (1.37.2). The
+  Kubernetes version of the cluster is decided in phase 2; if it is more
+  than one minor version away, move the pin then.
 
 ## Waiting on the owner
 
@@ -104,14 +106,15 @@ accepted:
 
 - The design is closed. The open work is implementation, the "Decide here"
   items and the "Prove here" items in the roadmap.
+- Start of every session: Dependency Dashboard (issue #6) and the open
+  Renovate pull requests (D23). Minor and major updates of `talosctl`,
+  `kubectl`, `flux2` and `cilium-cli` arrive labelled `upgrade-drill`.
 - The box cannot read vault `homelab` with its own service account. Tasks
   that need it take the `homelab` token from vault `dotfiles` for that one
   command:
   `OP_SERVICE_ACCOUNT_TOKEN="$(op read op://dotfiles/homelab-op-service-account/credential)" op ...`
   That account can also create items.
 - `gh` on the box is `opgh`.
-- The first thing to do in phase 0 is the "Read first" list; obenhub is
-  checked out at `/home/agent/work/obenhub`.
 - The administrator token for Proxmox works from the box. Do not use it for
   anything except `infra/host/prepare.py` on the owner's request.
 - VM IDs 201 to 203 and addresses 10.0.6.10 to 10.0.6.13 are reserved.

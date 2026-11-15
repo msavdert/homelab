@@ -26,8 +26,8 @@ Each phase lists:
 | Phase | State |
 |---|---|
 | Host preparation | done 2026-11-15, see [Host](host.md) |
-| 0 Repository foundation | open |
-| 1 Nodes | not started |
+| 0 Repository foundation | done 2026-11-15, see [Repository](guide/00-repository.md) |
+| 1 Nodes | open |
 | 2 Cluster | not started |
 | 3 Flux | not started |
 | 4 Secrets | not started |
