@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, when phase 3 closed.
+Last updated: 2026-11-15, when phase 4 closed.
 
 ## How to start a session
 
@@ -42,10 +42,16 @@ Last updated: 2026-11-15, when phase 3 closed.
   `DisableChartDigestTracking` (D33), without which the first adoption
   restarted every Cilium pod. How, and the gate output:
   [Flux](guide/03-flux.md).
-- **Phase 4 (secrets): open.** The owner's items are in place. External
-  Secrets 2.15.0, the `onepassword` ClusterSecretStore and `eso-gate` are
-  in `kubernetes/apps/external-secrets/`; the token Secret comes from
-  `mise run bootstrap:secrets`. Gate not run yet.
+- **Phase 4 (secrets): done 2026-11-15.** External Secrets 2.15.0 reads
+  vault `homelab-cluster` with a read-only service account through
+  ClusterSecretStore `onepassword` (D25). The token Secret is applied by
+  `mise run bootstrap:secrets`, which runs between `bootstrap:cilium` and
+  `bootstrap:flux` on a rebuild. `eso-gate` in namespace
+  `external-secrets` proves the path and is removed in phase 5. How, how
+  to add a secret, and the gate output: [Secrets](guide/04-secrets.md).
+  The read-write token of vault `homelab` was printed into a session log
+  during the gate and rotated by the owner the same day.
+- **Phase 5 (ingress): open.** Nothing built.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -106,7 +112,7 @@ raw API calls, not with OpenTofu.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 4 on.
+- Everything marked "Prove here" in the roadmap from phase 5 on.
 - Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two
   tasks") and `upgrade-k8s` have not been run. A fresh adoption of Cilium
   with D33 in force from the start was shown only through the equivalent
@@ -117,7 +123,6 @@ raw API calls, not with OpenTofu.
 
 | Needed for | What | State |
 |---|---|---|
-| Phase 4 | Vault `homelab-cluster`, a read-only service account for it, its token in `op://homelab/eso-service-account/credential`, and a copy of `cloudflare-dns` in the new vault | done 2026-11-15; the account sees only `homelab-cluster` and a write was refused; both copies of `cloudflare-dns` hash equal |
 | Phase 5 | The gate commands run from the owner's device when the phase reaches its gate | open |
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | open |
 
