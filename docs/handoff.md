@@ -65,7 +65,9 @@ Last updated: 2026-11-16, when phase 6 closed.
   0.0.37 keeps volumes there and provides the default StorageClass
   `local-path` (D35). Volumes are bound to their node. How, and the gate
   output: [Storage](guide/06-storage.md).
-- **Phase 7 (first database): open.** Nothing built. The bucket-limited
+- **Phase 7 (first database): open.** The operator, the plugin and
+  cluster `postgres` are defined under `kubernetes/apps/cnpg-system/` and
+  `kubernetes/apps/database/` (D36); the gate has not run. The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
 - Checked and working on 2026-11-15: the Proxmox token (four permission

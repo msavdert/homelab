@@ -1,0 +1,12 @@
+---
+# PostgreSQL clusters. CloudNativePG runs instances as a non-root user with
+# the RuntimeDefault seccomp profile, all capabilities dropped and no
+# privilege escalation (CloudNativePG security docs, 1.30), which is what
+# the restricted level asks for. The docs do not claim conformance, so it
+# is checked at the phase 7 gate.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: database
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

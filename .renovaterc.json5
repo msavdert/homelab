@@ -44,6 +44,15 @@
       ],
       extractVersionTemplate: "^v?(?<version>.*)$",
     },
+    {
+      description: "PostgreSQL images of CloudNativePG clusters (imageName is not an image: field)",
+      customType: "regex",
+      managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
+      matchStrings: [
+        "imageName: \"?(?<depName>[^:\"\\s]+):(?<currentValue>[^\"\\s]+)\"?",
+      ],
+      datasourceTemplate: "docker",
+    },
   ],
   packageRules: [
     {
@@ -59,15 +68,16 @@
     {
       description: "Clients of the cluster's components move with an upgrade drill (D23), not with the dev tools group",
       matchManagers: ["mise"],
-      matchDepNames: ["talosctl", "kubectl", "flux2", "cilium-cli"],
+      matchDepNames: ["talosctl", "kubectl", "flux2", "cilium-cli", "aqua:cloudnative-pg/cloudnative-pg/kubectl-cnpg"],
       matchUpdateTypes: ["minor", "major"],
       groupName: null,
       labels: ["dependencies", "upgrade-drill"],
     },
     {
       description: "Components of the cluster move with an upgrade drill (D23)",
-      matchPackageNames: ["/siderolabs/", "/talos/", "/cilium/", "/flux/"],
+      matchPackageNames: ["/siderolabs/", "/talos/", "/cilium/", "/flux/", "/cloudnative-pg/"],
       matchUpdateTypes: ["minor", "major"],
+      groupName: null,
       labels: ["dependencies", "upgrade-drill"],
     },
     {

@@ -476,3 +476,42 @@ OCI registry and its templates read; tag list read from ghcr.io), command
 output (`talosctl get volumestatus` and `mountstatus` on the lab nodes,
 2026-11-16), reference (onedr0p/home-ops uses Rook-Ceph, buroa/k8s-gitops
 OpenEBS hostpath under `/var/mnt`).
+
+## D36 Database details: OCI charts, the minimal image, the endpoint from a Secret
+
+CloudNativePG 1.30.1 (chart `cloudnative-pg` 0.29.1) and the Barman Cloud
+Plugin v0.16.0 (chart `plugin-barman-cloud` 0.9.0), both from
+`oci://ghcr.io/cloudnative-pg/charts/`, so they fit the OCIRepository
+layout of D32. Both run in `cnpg-system`: the plugin must share the
+operator's namespace, and v0.16.0 needs operator 1.30 or newer, so the two
+are upgraded together; Renovate marks minor and major updates of every
+`cloudnative-pg` package as an upgrade drill. CloudNativePG 1.30 lists
+Kubernetes 1.34 to 1.36 as supported and PostgreSQL 14 to 18; the image is
+`ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie`, over the
+operator's default `18.6-system-trixie`: `system` is deprecated and exists
+only to carry Barman, which now runs in the plugin's sidecar. Namespace
+`database` enforces the `restricted` pod security level; CloudNativePG's
+defaults match it, but its docs do not claim conformance, so this is
+verified at the gate. The ObjectStore takes the endpoint from the
+environment variable `AWS_ENDPOINT_URL_S3`, filled from the Secret, instead
+of `endpointURL`: the endpoint carries the tenancy namespace and the
+repository is public; path-style addressing as in D24, and the two
+checksum variables at `when_required` as the plugin's "Object stores" page
+documents. The sidecar reads its environment only when a pod is created
+(plugin issue #918, open), so the ObjectStore is in place before the
+Cluster. On retention, D24 stands and the test is moved forward: the
+sidecar ships boto3 1.43.126 without `awscrt`, and boto3 computes CRC32C
+only through the CRT, so no setting makes its multi-object delete use the
+one checksum the store accepted. The test deletes one base backup with
+`barman-cloud-backup-delete` inside the sidecar as soon as two backups
+exist, instead of waiting a day for the retention policy; issue #770
+(base backups not pruned, open) is a second reason to check the bucket and
+not the plugin's status. Evidence: source (`Chart.yaml` of both charts
+read from the OCI registry with `helm show chart`; the plugin's
+`api/v1/objectstore_types.go`, `containers/sidecar-requirements.txt` and
+CloudNativePG's `pkg/versions/versions.go` at the release tags), docs
+(CloudNativePG supported releases, security, backup and recovery pages;
+the plugin's installation, object stores and retention pages; the AWS SDK
+data integrity reference), command output (the image tag answered 200
+from ghcr.io, 2026-11-16), issues (plugin-barman-cloud #770, #918, #1049,
+#1055).

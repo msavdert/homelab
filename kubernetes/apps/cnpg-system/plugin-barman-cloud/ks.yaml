@@ -1,0 +1,22 @@
+---
+# The Barman Cloud Plugin: the ObjectStore CRD and the sidecar injector.
+# Its chart creates a self-signed Issuer and two Certificates, so it needs
+# cert-manager, and the operator for the plugin registration.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: plugin-barman-cloud
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cert-manager
+    - name: cloudnative-pg
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/cnpg-system/plugin-barman-cloud/app
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

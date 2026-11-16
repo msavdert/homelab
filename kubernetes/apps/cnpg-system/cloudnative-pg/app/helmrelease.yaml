@@ -1,0 +1,13 @@
+---
+# Chart defaults: the operator, its webhooks and the CRDs (templated by the
+# chart with resource-policy keep, so not under crds/). The plugin
+# (plugin-barman-cloud) needs operator 1.30 or newer; upgrade them together.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: cloudnative-pg

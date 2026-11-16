@@ -13,6 +13,7 @@ ruff = "0.17.5"
 jq = "1.8.2"
 shellcheck = "0.11.0"
 "pipx:zensical" = "0.1.1"
+"aqua:cloudnative-pg/cloudnative-pg/kubectl-cnpg" = "1.30.1"
 
 [env]
 # Cluster credentials, regenerated on demand and kept out of git (D30).
