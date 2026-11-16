@@ -6,7 +6,10 @@ kind: ObjectStore
 metadata:
   name: object-storage
 spec:
-  retentionPolicy: 7d
+  # Temporarily 1d for gate step 6: the plugin's own retention must remove
+  # an expired backup, which with 7d (D27) would take eight days. Back to
+  # 7d once the bucket shows the removal (roadmap, phase 7).
+  retentionPolicy: 1d
   configuration:
     destinationPath: s3://homelab/cnpg/
     s3AddressingStyle: path
