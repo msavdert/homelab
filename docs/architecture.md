@@ -117,7 +117,7 @@ only what the cluster needs (D25):
 | Vault | Holds | Read by |
 |---|---|---|
 | `dotfiles` | the owner's general secrets | the workstation's own service account |
-| `homelab` | what builds and operates the lab from the workstation | a read-write service account whose token is in `dotfiles` |
+| `homelab` | what builds and operates the lab from the workstation | a read-write service account whose token is in `dotfiles`; it can also write `homelab-cluster` |
 | `homelab-cluster` | what workloads in the cluster need | a read-only service account used by External Secrets |
 
 A task that needs vault `homelab` runs `op` with that vault's token for
@@ -141,8 +141,15 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 An item is created in the phase that first needs it. In vault `homelab`,
 `proxmox-tofu`, `tofu-state`, `object-storage` and `cloudflare-dns` exist
 and were checked on 2026-11-15. Vault `homelab-cluster` holds
-`cloudflare-dns`; its service account was shown on 2026-11-15 to see only
-that vault and to be refused a write.
+`cloudflare-dns` and `object-storage`; its service account was shown on
+2026-11-15 to see only that vault and to be refused a write. The
+`object-storage` key belongs to the OCI user `homelab-cnpg`, whose policy
+`homelab-cnpg` allows only bucket `homelab`; the limit is per bucket, so
+the key can also write `tofu/`. It was checked on 2026-11-15 with the
+read-only account's token: list, upload, read and delete in `homelab`
+work, a multi-object delete works only with CRC32C, buckets `dokploy` and
+`general` are refused, and listing buckets returns none. The owner's copy
+is `OCI S3 Bucket homelab` in vault `dotfiles`.
 
 ## Repository layout
 
