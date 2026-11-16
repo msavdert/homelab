@@ -515,3 +515,29 @@ the plugin's installation, object stores and retention pages; the AWS SDK
 data integrity reference), command output (the image tag answered 200
 from ghcr.io, 2026-11-16), issues (plugin-barman-cloud #770, #918, #1049,
 #1055).
+
+## D37 Gate step 6 of phase 7 is split: the retention delete closes the gate, the plugin's own run is a follow-up
+
+Owner's decision, 2026-11-16. The plugin cannot expire anything sooner than
+a day: the ObjectStore accepts only `^[1-9][0-9]*[dwm]$`, and Barman's
+recovery window keeps the newest backup that ended before the window start,
+so a backup becomes obsolete only once a newer one is itself older than
+the window. With one backup in the bucket on 2026-11-16, the earliest
+plugin delete was about 2026-11-18 03:30 UTC. What step 6 was meant to
+prove first, that the bucket accepts retention deletes of backups and WAL
+(D24, D36), does not need the plugin's timer: `barman-cloud-backup-delete
+-r "REDUNDANCY 2"` from the sidecar image (Barman 3.20.1) removed two
+backups and WAL segments 1/7 to 2/B on 2026-11-16, through the per-object
+fallback after `MissingContentMD5`, and a direct listing of the bucket
+showed only the two kept backups and the WAL they need. That closes the
+gate (step 6a). Whether the plugin's own run removes an expired backup
+(issue #770: base backups not pruned, open) is step 6b, a follow-up that
+does not hold phase 8. If it fails, the result is backups piling up in the
+bucket, not lost data, and the fallback in D24 is applied in a small
+change. Retention stays `1d` until 6b has been observed, then returns to
+`7d` (D27). Evidence: command output (the Job and the listing in the
+database guide, 2026-11-16), source (plugin v0.16.0
+`internal/cnpgi/instance/retention.go`; Barman
+`barman/retention_policies.py` as read at 3.12.1, while the sidecar runs
+3.20.1), the CRD read from the cluster, issues
+(plugin-barman-cloud #770, #1115).

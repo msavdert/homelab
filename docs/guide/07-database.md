@@ -1,10 +1,10 @@
 # 07 Database
 
-!!! note "Phase 7 is still open"
-    Gate steps 1 to 5 passed on 2026-11-16. Step 6 (the plugin's own
-    retention removes an expired backup) is checked on 2026-11-18; its
-    output and the return to 7-day retention are added here when the
-    phase closes.
+!!! note "One follow-up is open"
+    The gate passed on 2026-11-16. Step 6b, the plugin's own retention
+    removing an expired backup (D37), is expected on 2026-11-17 at about
+    19:00 UTC. Its output and the return to 7-day retention are added
+    here when it has been observed.
 
 ## What this adds
 
@@ -207,8 +207,9 @@ The bucket refuses the bulk delete, and Barman 3.20.1 falls back to one
 request per object, which the bucket accepts. A direct listing of
 `cnpg/` (boto3 `list_objects_v2` from the same image) confirmed it: only
 the remaining backup and WAL from segment 7 on were left. So retention
-can work without the fallback of D24; gate step 6 shows whether the
-plugin's own runs do it.
+can work without the fallback of D24. Gate step 6a repeats this with a
+retention policy instead of a backup ID; step 6b shows whether the
+plugin's own runs do it (D37).
 
 The Backup object of a backup deleted this way stays in the cluster, and
 `kubectl cnpg status` keeps showing it as the first point of
@@ -351,8 +352,90 @@ to `postgres-2` on k8s-2. `postgres-rw` failed for about 12 seconds
 (04:34:04 to 04:34:15) and then answered from the new primary. After the
 uncordon, `postgres-1` came back on k8s-3 as a replica.
 
-**6. Retention.** Pending, see the note at the top. Retention is set to
-`1d` until then (pull request #31).
+**6. Retention.** Split in two (D37). Retention is set to `1d` until 6b
+has been observed (pull request #31).
+
+*6a, retention delete on the bucket (2026-11-16).* The plugin cannot
+expire a backup sooner than a day, so the same Barman command it runs is
+run by hand with a policy that applies at once, as `DELETE OBSOLETE` with
+`REDUNDANCY 2` would in RMAN. First three more backups, with WAL written
+and switched before the last one so that it starts in a later segment
+than the one before it (on an idle database two backups in a row start in
+the same segment, and deleting the older would remove no WAL):
+
+```
+$ kubectl create -f backup.yaml        # postgres-manual-2, then -3
+$ kubectl exec -n database postgres-2 -c postgres -- psql -X -At \
+    -c "create table retention_probe(at timestamptz)" \
+    -c "insert into retention_probe values (now())" \
+    -c "checkpoint" -c "select pg_switch_wal()"
+$ kubectl create -f backup.yaml        # postgres-manual-4
+```
+
+`backup.yaml` is a `Backup` with `method: plugin`, cluster `postgres` and
+`pluginConfiguration.name: barman-cloud.cloudnative-pg.io`. Then the Job
+from step 4, with its `delete` container replaced by two:
+
+```yaml
+        - name: dry-run
+          image: ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar:v0.16.0
+          command: ["/venv/bin/barman-cloud-backup-delete", "-v", "--cloud-provider", "aws-s3",
+                    "--addressing-style", "path", "-r", "REDUNDANCY 2", "--dry-run",
+                    "s3://homelab/cnpg/", "postgres"]
+          env: *env
+          securityContext: *sc
+        - name: delete
+          image: ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar:v0.16.0
+          command: ["/venv/bin/barman-cloud-backup-delete", "-v", "--cloud-provider", "aws-s3",
+                    "--addressing-style", "path", "-r", "REDUNDANCY 2",
+                    "s3://homelab/cnpg/", "postgres"]
+          env: *env
+          securityContext: *sc
+```
+
+```
+== list-before
+Backup ID           End Time                 Begin Wal
+20261116T042838     2026-11-16 04:28:47      000000010000000000000007
+20261116T184847     2026-11-16 18:48:52      00000002000000000000000C
+20261116T184904     2026-11-16 18:49:09      00000002000000000000000C
+20261116T184933     2026-11-16 18:49:40      00000002000000000000000D
+== delete
+INFO: Found file from backup '20261116T042838' of server 'postgres': cnpg/postgres/base/20261116T042838/data.tar.gz
+WARNING: Bulk delete failed with 'MissingContentMD5'. ... cnpg/postgres/base/20261116T042838/data.tar.gz.
+INFO: Found file from backup '20261116T184847' of server 'postgres': cnpg/postgres/base/20261116T184847/data.tar.gz
+... (one WARNING and single delete per object: the two data.tar.gz and
+     backup.info files, WAL 1/7 to 1/B with the .backup and .partial
+     files, and WAL 2/B)
+== list-after
+Backup ID           End Time                 Begin Wal
+20261116T184904     2026-11-16 18:49:09      00000002000000000000000C
+20261116T184933     2026-11-16 18:49:40      00000002000000000000000D
+```
+
+The dry run listed the same objects first. A direct listing of
+`cnpg/postgres/` (boto3 `list_objects_v2` in a Job from the same image)
+showed only what the two kept backups need:
+
+```
+cnpg/postgres/base/20261116T184904/backup.info
+cnpg/postgres/base/20261116T184904/data.tar.gz
+cnpg/postgres/base/20261116T184933/backup.info
+cnpg/postgres/base/20261116T184933/data.tar.gz
+cnpg/postgres/wals/00000002.history.gz
+cnpg/postgres/wals/0000000200000000/00000002000000000000000C.gz
+cnpg/postgres/wals/0000000200000000/00000002000000000000000D.gz
+```
+
+The table `retention_probe` was dropped afterwards.
+
+*6b, the plugin's own run (follow-up).* With `1d`, backup
+`20261116T184904` becomes obsolete when `20261116T184933` ended more than
+a day ago, on 2026-11-17 after 18:49:40 UTC; the next 30-minute retention
+run on the primary should remove it and WAL segment 2/C. Check the
+sidecar log, the bucket listing and `kubectl get backup -n database`
+(only `postgres-manual-3` should go: plugin issue #1115 deletes Backup
+objects on a short catalog listing).
 
 ## Day-two tasks
 

@@ -33,8 +33,8 @@ Each phase lists:
 | 4 Secrets | done 2026-11-15, see [Secrets](guide/04-secrets.md) |
 | 5 Ingress | done 2026-11-15, see [Ingress](guide/05-ingress.md) |
 | 6 Storage | done 2026-11-16, see [Storage](guide/06-storage.md) |
-| 7 First database | open |
-| 8 First application | not started |
+| 7 First database | done 2026-11-16 (step 6b follow-up open, D37), see [Database](guide/07-database.md) |
+| 8 First application | open, waiting for the owner to name the application |
 | 9 Monitoring | not started |
 
 ## Phase 0: repository foundation
@@ -496,8 +496,15 @@ A PostgreSQL cluster runs, is backed up and is restored to a point in time.
    replica promoted, and a `psql` through the `-rw` Service works again
    within a minute. `kubectl uncordon` the node; `kubectl cnpg status`
    shows three healthy instances again.
-6. Retention: an expired base backup and its WAL are gone from the bucket,
-   by the plugin or by the fallback in D24.
+6. Retention: an expired base backup and its WAL are gone from the bucket.
+   Split in two by D37:
+   - 6a, closes the gate: `barman-cloud-backup-delete` with a retention
+     policy (`REDUNDANCY 2`), run from the sidecar image against the
+     bucket, removes the older backups and the WAL before the oldest kept
+     backup; a direct listing of the bucket confirms it.
+   - 6b, a follow-up that does not hold the next phase: the plugin's own
+     retention run removes a backup that expired under `1d`, or the
+     fallback in D24 is applied. Retention then goes back to `7d`.
 
 **Guide**: `docs/guide/07-database.md`, written as a drill someone can
 repeat.

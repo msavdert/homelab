@@ -42,8 +42,8 @@ Exact versions are pinned where they are used and kept current by Renovate.
 | 4 Secrets | done | [Secrets](https://msavdert.github.io/homelab/guide/04-secrets/) |
 | 5 Ingress | done | [Ingress](https://msavdert.github.io/homelab/guide/05-ingress/) |
 | 6 Storage | done | [Storage](https://msavdert.github.io/homelab/guide/06-storage/) |
-| 7 First database | in progress | |
-| 8 First application | planned | |
+| 7 First database | done | [Database](https://msavdert.github.io/homelab/guide/07-database/) |
+| 8 First application | open | |
 | 9 Monitoring | planned | |
 
 The [roadmap](docs/roadmap.md) has the gate of every phase.
