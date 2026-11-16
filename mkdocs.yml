@@ -21,3 +21,4 @@ nav:
       - 04 Secrets: guide/04-secrets.md
       - 05 Ingress: guide/05-ingress.md
       - 06 Storage: guide/06-storage.md
+      - 07 Database: guide/07-database.md
