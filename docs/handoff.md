@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-16, when phase 6 closed.
+Last updated: 2026-11-16, during phase 7 (gate steps 1 to 5 passed).
 
 ## How to start a session
 
@@ -67,7 +67,15 @@ Last updated: 2026-11-16, when phase 6 closed.
   output: [Storage](guide/06-storage.md).
 - **Phase 7 (first database): open.** The operator, the plugin and
   cluster `postgres` are defined under `kubernetes/apps/cnpg-system/` and
-  `kubernetes/apps/database/` (D36); the gate has not run. The bucket-limited
+  `kubernetes/apps/database/` (D36). Gate steps 1 to 5 passed on
+  2026-11-16. A bulk delete is refused by the bucket (`MissingContentMD5`)
+  and Barman 3.20.1 falls back to single deletes, which worked: one backup
+  and its WAL were removed by hand. Step 6 waits for the plugin's own
+  retention, set to `1d` for that on 2026-11-16. Once the backup of
+  2026-11-17 03:00 UTC has completed, the plugin's 30-minute retention run
+  removes the backup of 2026-11-16 and its WAL at about 03:00 to 03:40 UTC
+  on 2026-11-18; check the bucket after 04:00. Then retention goes back to `7d` and the phase closes. If the
+  plugin does not remove it (issue #770), apply the D24 fallback. The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
 - Checked and working on 2026-11-15: the Proxmox token (four permission
