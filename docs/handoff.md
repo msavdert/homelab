@@ -46,13 +46,20 @@ Last updated: 2026-11-15, when phase 4 closed.
   vault `homelab-cluster` with a read-only service account through
   ClusterSecretStore `onepassword` (D25). The token Secret is applied by
   `mise run bootstrap:secrets`, which runs between `bootstrap:cilium` and
-  `bootstrap:flux` on a rebuild. `eso-gate` in namespace
-  `external-secrets` proved the path; it is removed with the first phase 5
-  change. How, how
-  to add a secret, and the gate output: [Secrets](guide/04-secrets.md).
+  `bootstrap:flux` on a rebuild. `eso-gate` proved the path and
+  was removed in phase 5. How, how to add a secret, and the gate output:
+  [Secrets](guide/04-secrets.md).
   The read-write token of vault `homelab` was printed into a session log
   during the gate and rotated by the owner the same day.
-- **Phase 5 (ingress): open.** Nothing built.
+- **Phase 5 (ingress): done 2026-11-15.** `https://<name>.lab.savdert.com`
+  answers on the tailnet: Cilium announces 10.0.6.20 on layer 2 (pool
+  10.0.6.20 to 10.0.6.29), Envoy Gateway 1.10.0 terminates TLS with a
+  wildcard certificate that cert-manager v1.21.3 issues by DNS-01, and
+  `mise run dns:apply` keeps the record `*.lab.savdert.com` in Cloudflare.
+  Gateway API CRDs come from the Envoy Gateway chart (D34). The echo
+  fixture in `network` stays until a real application is served. How, how
+  to expose a service, and the gate output: [Ingress](guide/05-ingress.md).
+- **Phase 6 (storage): open.** Nothing built.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -108,12 +115,20 @@ raw API calls, not with OpenTofu.
   change reaches the cluster in seconds with nothing run by hand. Details
   in [Flux](guide/03-flux.md), "Check". Renovate lists the flux-operator
   chart and `fluxcd/flux2` in `fluxinstance.yaml` in issue #6.
+- Phase 5 proofs, on 2026-11-15: the address moved to another node on a
+  clean reboot of its holder with no failed request; the owner's Mac
+  reached the lab over the tailnet with a valid certificate, and resolved
+  the public record with a private address without a DNS override (with
+  Tailscale off: `curl` exit 28, not 6). Details in
+  [Ingress](guide/05-ingress.md), "Check".
 - `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
   for the whole gate without problems.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 5 on.
+- Everything marked "Prove here" in the roadmap from phase 6 on.
+- Failover of the load-balancer address on a hard stop of its holder (lease
+  expiry, 15 s by default); only a clean reboot was tested.
 - Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two
   tasks") and `upgrade-k8s` have not been run. A fresh adoption of Cilium
   with D33 in force from the start was shown only through the equivalent
@@ -124,7 +139,6 @@ raw API calls, not with OpenTofu.
 
 | Needed for | What | State |
 |---|---|---|
-| Phase 5 | The gate commands run from the owner's device when the phase reaches its gate | open |
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | open |
 
 Everything else the earlier phases need is in place.
