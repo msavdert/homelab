@@ -445,3 +445,34 @@ cluster, 2026-11-15), source (`gateway-helm` 1.10.0 pulled and read:
 `charts/crds/crds/`), reference (onedr0p/home-ops installs `gateway-helm`
 with its default CRDs and references the certificate Secret from the
 `Gateway`; it does not enable Gateway API in cert-manager).
+
+## D35 Storage details: the upstream OCI chart, the whole data disk, Delete on release
+
+Over: the kustomize base `github.com/rancher/local-path-provisioner/deploy`
+that the Sidero local storage guide applies with three patches, and
+OpenEBS hostpath, which buroa/k8s-gitops uses for the same purpose. The
+project publishes its Helm chart to
+`oci://ghcr.io/rancher/local-path-provisioner/charts/local-path-provisioner`
+(tags are the release versions, `0.0.37` current; release candidates and
+`0.0.0-master` sit beside them), so it fits the OCIRepository layout of
+D32 and Renovate's flux manager; the chart sets the path, the default
+class and the helper image through values instead of patches. OpenEBS is
+a different product from the one D14 chose. The Talos `UserVolumeConfig`
+`local-path-provisioner` selects `!system_disk` with `minSize: 50GB` (the
+CD-ROM with the cloud-init data is 4 MB) and has no `maxSize`, so it takes
+all of `/dev/sdb`. It does not name `/dev/sdb`: device names are not
+stable, and each node has exactly one non-system disk; a second data disk
+would need a narrower selector. Defaults give XFS and a
+`nosuid,nodev,noexec` mount at `/var/mnt/local-path-provisioner`, so a
+workload cannot run a binary from its volume; PostgreSQL data needs no
+exec. It applied without a reboot on all three
+nodes. The StorageClass keeps the chart's `reclaimPolicy: Delete` and
+`WaitForFirstConsumer`: deleting a claim deletes its directory, which suits
+a lab whose data is disposable and whose databases are restored from
+object storage (D15). The helper pods' image is pinned (chart default
+`busybox:latest`). Evidence: docs (Sidero "Local storage" guide and
+`UserVolumeConfig` reference, v1.14), source (chart 0.0.37 pulled from the
+OCI registry and its templates read; tag list read from ghcr.io), command
+output (`talosctl get volumestatus` and `mountstatus` on the lab nodes,
+2026-11-16), reference (onedr0p/home-ops uses Rook-Ceph, buroa/k8s-gitops
+OpenEBS hostpath under `/var/mnt`).

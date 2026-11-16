@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-15, when phase 4 closed.
+Last updated: 2026-11-16, during phase 6.
 
 ## How to start a session
 
@@ -59,7 +59,10 @@ Last updated: 2026-11-15, when phase 4 closed.
   Gateway API CRDs come from the Envoy Gateway chart (D34). The echo
   fixture in `network` stays until a real application is served. How, how
   to expose a service, and the gate output: [Ingress](guide/05-ingress.md).
-- **Phase 6 (storage): open.** Nothing built.
+- **Phase 6 (storage): open.** The data volume `u-local-path-provisioner`
+  (`/dev/sdb1`, XFS) is mounted at `/var/mnt/local-path-provisioner` on all
+  three nodes since 2026-11-16 (D35); local-path-provisioner is in review;
+  the gate has not run.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
