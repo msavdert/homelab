@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/msavdert/homelab/compare/v0.5.0...v0.6.0) (2026-11-16)
+
+
+### Features
+
+* **network:** serve the lab over Envoy Gateway with a Let's Encrypt wildcard ([#21](https://github.com/msavdert/homelab/issues/21)) ([8dea0f5](https://github.com/msavdert/homelab/commit/8dea0f509831eeb154e9ef0c0e2db7978ddf99d0))
+
+
+### Documentation
+
+* add the ingress guide and close phase 5 ([#23](https://github.com/msavdert/homelab/issues/23)) ([cb84fba](https://github.com/msavdert/homelab/commit/cb84fba675e8c83824264f2da418eda65754e54f))
+
 ## [0.5.0](https://github.com/msavdert/homelab/compare/v0.4.0...v0.5.0) (2026-11-15)
 
 
