@@ -1,0 +1,13 @@
+# Volumes live on the data disk that talos/patches/cluster.yaml mounts on
+# every node (D14).
+nodePathMap:
+  - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+    paths:
+      - /var/mnt/local-path-provisioner
+storageClass:
+  defaultClass: true
+# The chart defaults to busybox:latest for the helper pods.
+helperImage:
+  repository: docker.io/library/busybox
+  # renovate: datasource=docker depName=docker.io/library/busybox
+  tag: "1.38.0"

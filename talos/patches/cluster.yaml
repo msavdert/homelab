@@ -10,3 +10,16 @@ installer:
 apiVersion: v1alpha1
 kind: KubeFlannelCNIConfig
 $patch: delete
+---
+# The data disk (D14): a partition over the whole second disk, XFS, mounted
+# at /var/mnt/local-path-provisioner, where local-path-provisioner keeps its
+# volumes. The selector names no device path, which can change between
+# boots; a disk qualifies only with room for minSize, which the 4 MB
+# cloud-init CD-ROM does not have.
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-path-provisioner
+provisioning:
+  diskSelector:
+    match: "!system_disk"
+  minSize: 50GB

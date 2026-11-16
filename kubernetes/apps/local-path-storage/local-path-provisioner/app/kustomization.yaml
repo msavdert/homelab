@@ -1,0 +1,15 @@
+---
+# Values as in kube-system/cilium (D32): the generated ConfigMap name
+# changes with values.yaml, so a changed value starts an upgrade at once.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: local-path-storage
+resources:
+  - ./ocirepository.yaml
+  - ./helmrelease.yaml
+configMapGenerator:
+  - name: local-path-provisioner-values
+    files:
+      - values.yaml
+configurations:
+  - ./kustomizeconfig.yaml

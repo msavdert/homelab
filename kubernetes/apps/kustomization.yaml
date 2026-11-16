@@ -8,4 +8,5 @@ resources:
   - ./external-secrets
   - ./flux-system
   - ./kube-system
+  - ./local-path-storage
   - ./network
