@@ -21,8 +21,12 @@ the lab is disposable; the procedures are what matter.
 
 ## State
 
-The host is prepared. No cluster exists yet. The roadmap has the detail.
+Phases 0 to 6 are finished: the nodes, the cluster, Flux, secrets, ingress
+and storage run. Phase 7, the first database, is open. The
+[Roadmap](roadmap.md) has the detail.
 
 ## Guides
 
-A guide is added when its phase is finished and verified. None yet.
+A guide is added when its phase is finished and verified. They are listed
+under "Guide" in the navigation, from [00 Repository](guide/00-repository.md)
+to [06 Storage](guide/06-storage.md).
