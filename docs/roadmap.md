@@ -476,9 +476,11 @@ A PostgreSQL cluster runs, is backed up and is restored to a point in time.
 **Prove here**
 - The bucket accepts the plugin's retention deletes. In the bucket tests a
   multi-object delete was refused both with the default checksum and with
-  `when_required`, and accepted only with CRC32C (D24). Whether the
-  plugin's S3 client is affected depends on its version. Test it early in
-  the phase with a retention of one day. If deletes fail, apply the
+  `when_required`, and accepted only with CRC32C (D24). By its source, the
+  plugin's sidecar has no way to use CRC32C (D36). Test it early in the
+  phase: take a second base backup with a manual `Backup`, delete the older
+  one with `barman-cloud-backup-delete` inside the sidecar and check the
+  bucket. If deletes fail, apply the
   fallback fixed in D24 and say so in the guide.
 
 **Gate**

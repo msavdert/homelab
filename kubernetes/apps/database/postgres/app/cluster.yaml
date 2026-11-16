@@ -1,0 +1,22 @@
+---
+# The parameters fixed in D27. The minimal image: Barman runs in the
+# plugin's sidecar, so the deprecated system image (the operator default)
+# is not needed.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie
+  storage:
+    size: 10Gi
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+    topologyKey: kubernetes.io/hostname
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: object-storage

@@ -1,0 +1,17 @@
+---
+# Daily base backup at 03:00 UTC (D27). The schedule has six fields, the
+# first is seconds. immediate takes the first backup at once, which the
+# gate needs.
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgres-daily
+spec:
+  schedule: "0 0 3 * * *"
+  immediate: true
+  backupOwnerReference: self
+  method: plugin
+  cluster:
+    name: postgres
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
