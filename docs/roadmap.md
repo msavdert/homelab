@@ -32,8 +32,8 @@ Each phase lists:
 | 3 Flux | done 2026-11-15, see [Flux](guide/03-flux.md) |
 | 4 Secrets | done 2026-11-15, see [Secrets](guide/04-secrets.md) |
 | 5 Ingress | done 2026-11-15, see [Ingress](guide/05-ingress.md) |
-| 6 Storage | open |
-| 7 First database | not started |
+| 6 Storage | done 2026-11-16, see [Storage](guide/06-storage.md) |
+| 7 First database | open |
 | 8 First application | not started |
 | 9 Monitoring | not started |
 

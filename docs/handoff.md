@@ -3,7 +3,7 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-16, during phase 6.
+Last updated: 2026-11-16, when phase 6 closed.
 
 ## How to start a session
 
@@ -59,10 +59,14 @@ Last updated: 2026-11-16, during phase 6.
   Gateway API CRDs come from the Envoy Gateway chart (D34). The echo
   fixture in `network` stays until a real application is served. How, how
   to expose a service, and the gate output: [Ingress](guide/05-ingress.md).
-- **Phase 6 (storage): open.** The data volume `u-local-path-provisioner`
-  (`/dev/sdb1`, XFS) is mounted at `/var/mnt/local-path-provisioner` on all
-  three nodes since 2026-11-16 (D35); local-path-provisioner is in review;
-  the gate has not run.
+- **Phase 6 (storage): done 2026-11-16.** The data disk of each node is
+  the Talos user volume `local-path-provisioner` (`/dev/sdb1`, XFS,
+  `noexec`) at `/var/mnt/local-path-provisioner`; local-path-provisioner
+  0.0.37 keeps volumes there and provides the default StorageClass
+  `local-path` (D35). Volumes are bound to their node. How, and the gate
+  output: [Storage](guide/06-storage.md).
+- **Phase 7 (first database): open.** Nothing built. It needs the
+  bucket-limited key below.
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -124,12 +128,19 @@ raw API calls, not with OpenTofu.
   the public record with a private address without a DNS override (with
   Tailscale off: `curl` exit 28, not 6). Details in
   [Ingress](guide/05-ingress.md), "Check".
+- Phase 6 proof, on 2026-11-16: a volume kept its data across a reboot of
+  its node (k8s-3), and deleting the claim removed the PV and its
+  directory. The same reboot left 45 failed cilium-operator pods
+  (`NodeShutdown`), removed by hand; see [Storage](guide/06-storage.md),
+  "When it goes wrong".
 - `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
   for the whole gate without problems.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 6 on.
+- Everything marked "Prove here" in the roadmap from phase 7 on.
+- A drain of a node that holds a local-path volume (the pod is expected to
+  stay Pending until uncordon).
 - Failover of the load-balancer address on a hard stop of its holder (lease
   expiry, 15 s by default); only a clean reboot was tested.
 - Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two

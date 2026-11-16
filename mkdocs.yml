@@ -20,3 +20,4 @@ nav:
       - 03 Flux: guide/03-flux.md
       - 04 Secrets: guide/04-secrets.md
       - 05 Ingress: guide/05-ingress.md
+      - 06 Storage: guide/06-storage.md
