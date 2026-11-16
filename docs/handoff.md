@@ -3,7 +3,8 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-16, during phase 7 (gate steps 1 to 5 passed).
+Last updated: 2026-11-16, phase 7 closed; phase 8 open, waiting for the
+owner to name the application.
 
 ## How to start a session
 
@@ -65,17 +66,20 @@ Last updated: 2026-11-16, during phase 7 (gate steps 1 to 5 passed).
   0.0.37 keeps volumes there and provides the default StorageClass
   `local-path` (D35). Volumes are bound to their node. How, and the gate
   output: [Storage](guide/06-storage.md).
-- **Phase 7 (first database): open.** The operator, the plugin and
-  cluster `postgres` are defined under `kubernetes/apps/cnpg-system/` and
-  `kubernetes/apps/database/` (D36). Gate steps 1 to 5 passed on
-  2026-11-16. A bulk delete is refused by the bucket (`MissingContentMD5`)
-  and Barman 3.20.1 falls back to single deletes, which worked: one backup
-  and its WAL were removed by hand. Step 6 waits for the plugin's own
-  retention, set to `1d` for that on 2026-11-16. Once the backup of
-  2026-11-17 03:00 UTC has completed, the plugin's 30-minute retention run
-  removes the backup of 2026-11-16 and its WAL at about 03:00 to 03:40 UTC
-  on 2026-11-18; check the bucket after 04:00. Then retention goes back to `7d` and the phase closes. If the
-  plugin does not remove it (issue #770), apply the D24 fallback. The bucket-limited
+- **Phase 7 (first database): done 2026-11-16, one follow-up open.** The
+  operator, the plugin and cluster `postgres` are defined under
+  `kubernetes/apps/cnpg-system/` and `kubernetes/apps/database/` (D36).
+  The bucket refuses bulk deletes (`MissingContentMD5`); Barman 3.20.1
+  falls back to single deletes, which work, including a retention delete
+  with `REDUNDANCY 2` (gate step 6a, D37). How, and the gate output:
+  [Database](guide/07-database.md). **Follow-up 6b:** retention is `1d`
+  until the plugin's own run is seen removing backup `20261116T184904` and
+  WAL segment 2/C, expected 2026-11-17 at about 19:00 UTC. In the first
+  session after that: check the sidecar log of the primary, list the
+  bucket, and check that only Backup object `postgres-manual-3` was
+  removed (issue #1115). Then set retention back to `7d` and add the output
+  to the guide; if the plugin did not delete (issue #770), apply the
+  fallback in D24. The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
 - Checked and working on 2026-11-15: the Proxmox token (four permission
@@ -144,14 +148,22 @@ raw API calls, not with OpenTofu.
   directory. The same reboot left 45 failed cilium-operator pods
   (`NodeShutdown`), removed by hand; see [Storage](guide/06-storage.md),
   "When it goes wrong".
+- Phase 7 proofs, on 2026-11-16: point-in-time recovery to a time between
+  two inserts; a drain of the primary's node promoted a replica and
+  `postgres-rw` answered again after about 12 seconds, and after the
+  uncordon the drained instance came back on its own node (where its
+  local-path volume is; its state during the drain was not recorded); the
+  bucket accepts retention deletes through Barman's
+  per-object fallback (D37). Details in [Database](guide/07-database.md),
+  "Check".
 - `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
   for the whole gate without problems.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 7 on.
-- A drain of a node that holds a local-path volume (the pod is expected to
-  stay Pending until uncordon).
+- Everything marked "Prove here" in the roadmap from phase 8 on.
+- The plugin's own retention run deleting an expired backup (phase 7
+  follow-up 6b, D37).
 - Failover of the load-balancer address on a hard stop of its holder (lease
   expiry, 15 s by default); only a clean reboot was tested.
 - Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two
@@ -165,6 +177,7 @@ raw API calls, not with OpenTofu.
 | Needed for | What | State |
 |---|---|---|
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | done 2026-11-15 |
+| Phase 8 | The name of the first application | open |
 
 Everything else the earlier phases need is in place.
 

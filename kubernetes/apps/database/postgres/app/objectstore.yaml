@@ -6,9 +6,9 @@ kind: ObjectStore
 metadata:
   name: object-storage
 spec:
-  # Temporarily 1d for gate step 6: the plugin's own retention must remove
-  # an expired backup, which with 7d (D27) would take eight days. Back to
-  # 7d once the bucket shows the removal (roadmap, phase 7).
+  # Temporarily 1d for follow-up 6b of phase 7 (D37): the plugin's own
+  # retention must remove an expired backup, which with 7d (D27) would take
+  # eight days. Back to 7d once the bucket shows the removal.
   retentionPolicy: 1d
   configuration:
     destinationPath: s3://homelab/cnpg/
