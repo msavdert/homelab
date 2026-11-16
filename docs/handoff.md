@@ -65,12 +65,13 @@ Last updated: 2026-11-16, when phase 6 closed.
   0.0.37 keeps volumes there and provides the default StorageClass
   `local-path` (D35). Volumes are bound to their node. How, and the gate
   output: [Storage](guide/06-storage.md).
-- **Phase 7 (first database): open.** Nothing built. It needs the
-  bucket-limited key below.
+- **Phase 7 (first database): open.** Nothing built. The bucket-limited
+  key is in vault `homelab-cluster` as `object-storage` (checked
+  2026-11-15, see [Architecture](architecture.md), "Secrets").
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
-  vault `homelab`.
+  vault `homelab` and `homelab-cluster`.
 
 ## What was tested during planning
 
@@ -153,7 +154,7 @@ raw API calls, not with OpenTofu.
 
 | Needed for | What | State |
 |---|---|---|
-| Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | open |
+| Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | done 2026-11-15 |
 
 Everything else the earlier phases need is in place.
 
