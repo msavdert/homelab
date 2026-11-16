@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0](https://github.com/msavdert/homelab/compare/v0.7.0...v0.8.0) (2026-11-16)
+
+
+### Features
+
+* **database:** CloudNativePG operator, Barman Cloud Plugin and cluster postgres ([#30](https://github.com/msavdert/homelab/issues/30)) ([adf2a8e](https://github.com/msavdert/homelab/commit/adf2a8e3675f1bcf7bfb7e7667375dc7204f5303))
+
+
+### Documentation
+
+* close phase 7, split retention gate step 6 (D37) ([#33](https://github.com/msavdert/homelab/issues/33)) ([f084646](https://github.com/msavdert/homelab/commit/f084646588eb4c2ad2611b7bbd5d2595f7aefe2b))
+* database guide for phase 7, gate steps 1 to 5 ([#32](https://github.com/msavdert/homelab/issues/32)) ([458b2d1](https://github.com/msavdert/homelab/commit/458b2d198252e991cd7d077e18c72e4c96be7f2a))
+* record the bucket-limited object-storage key for the cluster ([#27](https://github.com/msavdert/homelab/issues/27)) ([b223f4c](https://github.com/msavdert/homelab/commit/b223f4c83a6a04274576ad1b5f44d50ec631dc43))
+* rewrite the README, add the MIT license and a contributing note ([#29](https://github.com/msavdert/homelab/issues/29)) ([b31127d](https://github.com/msavdert/homelab/commit/b31127d3f8882a723f325221969aa4ed57e46548))
+
 ## [0.7.0](https://github.com/msavdert/homelab/compare/v0.6.0...v0.7.0) (2026-11-16)
 
 
