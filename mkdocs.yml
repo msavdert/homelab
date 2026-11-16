@@ -19,3 +19,4 @@ nav:
       - 02 Cluster: guide/02-cluster.md
       - 03 Flux: guide/03-flux.md
       - 04 Secrets: guide/04-secrets.md
+      - 05 Ingress: guide/05-ingress.md
