@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/msavdert/homelab/compare/v0.6.0...v0.7.0) (2026-11-16)
+
+
+### Features
+
+* **storage:** local-path-provisioner on a Talos user volume ([#24](https://github.com/msavdert/homelab/issues/24)) ([4145f3a](https://github.com/msavdert/homelab/commit/4145f3a474698320be99a9edeb3ff953c35cae07))
+
+
+### Documentation
+
+* add the storage guide and close phase 6 ([#26](https://github.com/msavdert/homelab/issues/26)) ([77eadac](https://github.com/msavdert/homelab/commit/77eadacd1c67c7661d59742c6b1a290b05b6bbe3))
+
 ## [0.6.0](https://github.com/msavdert/homelab/compare/v0.5.0...v0.6.0) (2026-11-16)
 
 
