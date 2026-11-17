@@ -11,8 +11,9 @@ the architect"). The owner asked what Pi-hole and Uptime Kuma are
 ## How to start a session
 
 1. Read `AGENTS.md`, then this page, then the open phase in
-   [Roadmap](roadmap.md).
-2. Read the records in [Decisions](decisions.md) that the phase refers to.
+   [Roadmap](roadmap.md), if one is open. Between phases, AGENTS.md
+   ("Between phases") says what may be done.
+2. Read the records in [Decisions](decisions.md) that the work refers to.
 3. Check "Waiting on the owner" below. If the open phase needs something
    that is not there yet, ask for it first.
 4. Do the phase's "Read first" list before writing anything.
