@@ -8,8 +8,9 @@
 # exits when it cannot, so each of those files is mounted from the
 # ConfigMap (nine in v2.8.0; check the list on upgrade). Logs and the
 # Next.js cache are emptyDir volumes.
-# Resources: the memory figures are an assumption, to be set from measured
-# use like D40; no CPU limit.
+# Resources: measured 2026-11-17 over about 8 hours, maximum working set
+# 126 MiB and under 2 millicores (VMSingle); the request covers that with
+# room, the limit stays at 512 MiB; no CPU limit.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -102,7 +103,7 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              memory: 128Mi
+              memory: 192Mi
             limits:
               memory: 512Mi
           volumeMounts:

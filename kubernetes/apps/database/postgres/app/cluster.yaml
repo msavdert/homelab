@@ -11,6 +11,16 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie
   storage:
     size: 10Gi
+  # Review 2026-11-17 (V4): measured 24 h maximum working set 65 to 87 MiB
+  # for the postgres container, under 20 millicores (VMSingle). Memory
+  # request equals limit with room for shared_buffers (128 MB) and
+  # maintenance work; QoS becomes Burstable through the CPU request.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
   affinity:
     enablePodAntiAffinity: true
     podAntiAffinityType: required
