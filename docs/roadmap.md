@@ -39,6 +39,11 @@ Each phase lists:
 | 9 Start page: Homepage | done 2026-11-17, see [Homepage](guide/09-homepage.md) |
 | 10 Monitoring | done 2026-11-17, see [Monitoring](guide/10-monitoring.md) |
 | 11 Rebuild and restore drill | done 2026-11-17, see [Rebuild](guide/11-rebuild.md) |
+| 12 Alert delivery and dead man's switch | planned (D46), not open |
+| 13 Backup and database alerts | planned (D46), not open |
+| 14 Proxmox host and ZFS | planned (D46), not open |
+| 15 Logs | planned (D46), not open |
+| 16 Control plane metrics | planned (D46), not open |
 
 ## Phase 0: repository foundation
 
@@ -750,7 +755,8 @@ databases restored from their archives. This is the only way to prove
 that Git and the bucket are enough to get the lab back (review of
 2026-11-17, V1), and it is the database recovery practice the lab exists
 for. Alerting, the phase the review placed before this one, is being
-prepared by the owner separately and is not part of the roadmap yet.
+prepared by the owner separately and is not part of the roadmap yet
+(since planned as phase 12, D46).
 
 The owner approved `tofu destroy` of the lab VMs (pool `homelab`, VMs 201
 to 203) on 2026-11-17 for this drill only. Settled: both clusters
@@ -822,3 +828,382 @@ server name (D45).
 8. The time of each rebuild step is written into the guide.
 
 **Guide**: `docs/guide/11-rebuild.md`.
+
+## Phases 12 to 16: monitoring, the lab's own
+
+Planned on 2026-11-17 from the gaps listed in D46. The lab builds these as
+if the owner's `obenhub` did not exist (D46). They run in this order:
+delivery first, because every later alert is worthless without it; then
+the alerts that guard data (backups, the pool); then logs and the control
+plane. Backups come before the host because they need nothing from the
+owner and are what is left when a disk of the striped pool dies; logs
+come after the host because they add writes to a pool whose health
+nothing watches yet. The owner may swap 15 and 16. Every phase that adds
+pods to `observability` repeats the memory gate of phase 10. External facts below were read on
+2026-11-17 and carry their source; anything marked unverified is checked
+in the phase's "Read first" before it is built on.
+
+## Phase 12: alert delivery and dead man's switch
+
+An alert reaches the owner's phone, and silence from the lab raises an
+alarm somewhere outside it. Today vmalert runs with `-notifier.blackhole`
+and Alertmanager is off (D42); the whole stack sits in the cluster it
+watches, on one host.
+
+**Needs from the owner**
+- The notification channel. Alertmanager delivers natively to email and
+  Telegram among others
+  ([configuration](https://prometheus.io/docs/alerting/latest/configuration/);
+  unverified for the version the chart ships); ntfy needs its webhook
+  template
+  (`?template=alertmanager`, [ntfy publish docs](https://docs.ntfy.sh/publish/)).
+  The owner creates the bot, mailbox or topic; the architect stores its
+  credential as item `alertmanager` in vault `homelab-cluster`.
+- An account at an external heartbeat service and where its alarm goes;
+  that path must not pass through the lab. Candidate: healthchecks.io
+  (free plan 20 checks, [pricing](https://healthchecks.io/pricing/)).
+- Whether the alerting the owner was preparing separately (note in phase
+  11) changes anything here.
+
+**Read first**
+- The pinned chart's values `alertmanager.enabled`, `alertmanager.spec`,
+  `alertmanager.spec.configSecret` (when set, `alertmanager.config` is
+  ignored) and the template `vmalert/notifiers.yaml`, which wires vmalert
+  to Alertmanager only when it is enabled. Unverified: whether
+  `notifier.blackhole` conflicts with that wiring; plan to remove it.
+- Whether the synced default rules contain an always-firing `Watchdog`:
+  `kubectl get vmrule -A -o yaml | grep -n Watchdog`. Unverified; if it
+  is missing, the lab adds its own.
+- The Alertmanager version the chart ships and its receiver syntax for the
+  chosen channel; the heartbeat service's ping API and that it accepts
+  Alertmanager's webhook POST (unverified).
+- How to stop the `Watchdog` from leaving the cluster for gate 4.
+  Alertmanager is a `VMAlertmanager` object that the operator reconciles,
+  so suspending the HelmRelease and scaling its StatefulSet is probably
+  undone at once (unverified). Candidates: scale the operator to zero
+  first, or pause the object, or stop vmalert. Confirm one on the running
+  version and write it into the guide.
+- What fires today: `ALERTS{alertstate="firing"}` against VMSingle
+  (unverified: that vmalert writes `ALERTS` back to the store in this
+  chart; otherwise vmalert's own `/api/v1/alerts`). Every
+  alert in that list is either fixed, or switched off with a reason (the
+  rules for targets D42 does not scrape are the likely ones).
+
+**Build**
+- An `ExternalSecret` on item `alertmanager` that renders the Alertmanager
+  configuration; Alertmanager with one replica, pointed at it.
+- vmalert without the blackhole flag.
+- A rule for the path the `Watchdog` does not cover. The `Watchdog` proves
+  vmalert, Alertmanager and the way out; it says nothing about vmagent
+  having stopped scraping (assumption: its expression does not depend on
+  scraped series). One rule alerts when no fresh `up` samples arrive.
+- Routes: `Watchdog` to the heartbeat webhook with `send_resolved: false`
+  and a repeat interval shorter than the check's period; everything else
+  to the owner's channel, grouped so that one fault is one message.
+
+**Decide here**
+- The channel and the heartbeat service, from what the owner provides.
+- Whether the default rules and dashboards stay unpinned (D42). Once rules
+  page a person, a change upstream changes what pages without a pull
+  request. Criteria: pin (copies in Git, or the chart's sync switched off)
+  if the Read-first list shows default alerts that had to be switched off;
+  otherwise keep D42 and say so.
+- Whether Alertmanager gets an `HTTPRoute`. It has no login of its own;
+  default is no route, port-forward only.
+- Silences and notification state: `emptyDir` or a volume.
+- Platform alerts the default rules may lack: an `ExternalSecret` that
+  stops syncing, a certificate close to expiry, a Flux object that stops
+  reconciling. Each needs its controller scraped; take the ones whose
+  metrics are already in the store, record the rest as a gap.
+- The real fault for gate 3: one the architect can provoke and undo
+  without the owner, on something the default rules watch.
+
+**Prove here**
+- The stack still fits the 2048 MiB budget of D42 with Alertmanager added
+  (1310 MiB measured after 7.5 h in phase 10). If not, stop and ask.
+
+**Gate**
+1. `kubectl -n observability get pods` shows every pod ready, `flux get hr
+   -n observability` ready. The running vmalert pod's arguments, not only
+   the `VMAlert` object, carry no `blackhole` and name the Alertmanager:
+   `kubectl -n observability get pods -o yaml | grep -c blackhole` prints
+   `0` (grep then exits 1), and vmalert's notifier list shows the
+   Alertmanager address.
+2. A synthetic alert (a temporary `VMRule` with `expr: vector(1)`, applied
+   and removed by the architect) arrives on the owner's device, and its
+   resolution arrives after removal.
+3. One alert of the default rules, provoked by the fault chosen in
+   "Decide here", arrives and resolves.
+4. Dead man: stop the `Watchdog` with the method confirmed in "Read
+   first" and check that Alertmanager or vmalert is in fact down; the
+   heartbeat service alarms the owner within its grace time. Undo it;
+   the check turns healthy again.
+5. One hour later the firing alerts, read the way "Read first" settled,
+   are `Watchdog` only, and vmalert reports no rule group with an
+   evaluation error.
+6. With vmagent stopped, the no-samples rule arrives; it resolves after
+   vmagent is back.
+7. The memory command of phase 10, gate 5, prints less than 2048.
+
+**Guide**: `docs/guide/12-alerting.md`.
+
+## Phase 13: backup and database alerts
+
+The lab is told when a backup or WAL archiving stops, for both
+CloudNativePG clusters. Today the only check is a person reading
+`kubectl get backup -A`.
+
+**Needs from the owner**
+- Nothing new.
+
+**Read first**
+- The live `/metrics` of one instance pod of each cluster. Backups go
+  through the Barman Cloud plugin, whose metrics
+  `barman_cloud_cloudnative_pg_io_last_available_backup_timestamp`,
+  `..._last_failed_backup_timestamp` and `..._first_recoverability_point`
+  supersede the `cnpg_collector_*` ones
+  ([plugin observability](https://cloudnative-pg.io/plugin-barman-cloud/docs/observability/)).
+  Unverified: that the existing `VMPodScrape` on port `metrics` already
+  collects them, and what the old names show with plugin backups.
+- Which instances carry the backup series (primary only, or replicas
+  too) and what a cluster shows that has never completed a backup: zero,
+  or no series. The rules must alert in that case as well, not return
+  nothing.
+- The archiver series (`cnpg_pg_stat_archiver_*`, name inferred from the
+  default monitoring queries; primary only) and
+  `cnpg_collector_pg_wal_archive_status`.
+- CloudNativePG's sample alert rules. Anything copied records file,
+  licence and commit beside it.
+- `vmalert-tool unittest` for the pinned vmalert version.
+
+**Build**
+- One `VMRule` in Git, the lab's own: last successful backup older than
+  the daily schedule allows; a failed backup newer than the last
+  successful one; WAL archiving failing or files waiting to be archived
+  piling up; a cluster with fewer ready instances or streaming replicas
+  than it declares.
+- Unit tests for those rules. `vmalert-tool` is not in `mise.toml` today:
+  add it there with a lint task that `check` depends on.
+
+**Decide here**
+- Thresholds, from the schedules (03:00 and 03:30 UTC daily) and what the
+  series look like over a few days.
+- Whether volume fill alerts belong here. Unverified: that kubelet volume
+  statistics exist for local-path volumes.
+
+**Prove here**
+- Each alert fires on a real fault, on a throwaway CloudNativePG cluster
+  in its own namespace: archiving fails, an on-demand backup fails. The
+  real object-storage key can write the whole bucket, so the throwaway
+  cluster never gets it: its `ObjectStore` carries a made-up access key
+  in a Secret of its own, which cannot write anywhere, and the cluster
+  and its server name are none of `postgres`, `postgres-g2`,
+  `keycloak-db`, `keycloak-db-g2`. Unverified: that a cluster with a
+  refused key starts and then reports failed archiving, rather than never
+  becoming ready; if it does not start, change the fault (an unreachable
+  endpoint) and keep the rule about the key. The throwaway cluster is
+  removed in the same phase.
+- What is proven live and what by unit test. Live, on the throwaway
+  cluster: archiving failing, a failed backup, a cluster that never had
+  a backup, and a missing replica (delete one of its instances). By unit
+  test only: backup age, which would need a day of waiting, and that a
+  later successful backup clears the failed-backup alert, which the
+  throwaway cluster cannot produce without the real key. Its alerts
+  resolve because its series end, which proves nothing about recovery.
+
+**Gate**
+1. vmalert lists the group with every rule healthy; `mise run check`
+   passes with the unit tests.
+2. On the throwaway cluster the alerts listed as live in "Prove here"
+   each arrive on the owner's device; the unit tests cover the rest, a
+   recovery after a failed backup among them.
+3. A listing of `s3://homelab/cnpg/` before the throwaway cluster and
+   after its removal shows the same prefixes (the check of phase 11,
+   gate 1).
+4. For `postgres` and `keycloak-db` the last-backup metric chosen in
+   "Read first", queried from VMSingle, agrees with the newest
+   `completed` object of `kubectl get backup -A`.
+5. One day later, after the scheduled backups, nothing from this group
+   fires.
+6. The memory command of phase 10, gate 5, prints less than 2048.
+
+**Guide**: `docs/guide/13-backup-alerts.md`.
+
+## Phase 14: Proxmox host and ZFS
+
+The host's CPU, memory, disks and the state of `rpool` are in the store
+and alert. The pool is a striped pair without redundancy and the host has
+no scheduled backups ([Host](host.md)), so the first sign of a failing
+disk matters. A stripe does not degrade: when a disk goes, the pool
+faults and the cluster, Alertmanager included, stops with it (assumption,
+not tested and not testable here). That case is covered only by the dead
+man's switch of phase 12. What this phase can add is warning before it:
+the disks' own error and wear counters.
+
+**Needs from the owner**
+- The host change itself (AGENTS.md, "Proxmox safety"): the owner installs
+  and starts the exporter on the host, or approves the exact commands.
+- Whether guests outside pool `homelab` may appear in the lab's metrics.
+  If yes, and a per-guest view is wanted, a read-only API token
+  (`PVEAuditor`).
+
+**Read first**
+- `node_exporter` as packaged for the host's Debian release: version, and
+  that its `zfs` collector exports `node_zfs_zpool_state{zpool,state}`
+  ([source](https://github.com/prometheus/node_exporter/blob/master/collector/zfs_linux.go)).
+- Where pool capacity and disk errors come from. The linked collector
+  source shows pool state and I/O; pool size and allocation, and a
+  per-disk error series, are unverified. If `node_exporter` lacks them,
+  the rule list below shrinks or a textfile collector is decided here.
+- NVMe wear, media errors and SMART, which are the early warning on this
+  pool: not in `node_exporter`'s defaults as far as read. Find the source
+  (a SMART exporter, or a textfile collector fed by `smartctl` or `nvme`)
+  and its licence. Also ZFS read, write and checksum error counts per
+  device, source unverified.
+- How the pinned operator scrapes a static address outside the cluster
+  (`VMStaticScrape` or `VMScrapeConfig`).
+- Why not Proxmox's own OpenTelemetry metric server (pve-manager 9.0 and
+  later; JSON body per its
+  [patch](https://lists.proxmox.com/pipermail/pve-devel/2025-July/073437.html)):
+  it sends OTLP as JSON, VictoriaMetrics accepts protobuf only
+  ([VictoriaMetrics OpenTelemetry](https://docs.victoriametrics.com/victoriametrics/integrations/opentelemetry/)),
+  so it would need a collector in between, and it reports pool capacity
+  but, as far as read, not pool health.
+
+**Build**
+- The exporter on the host, listening on the lab gateway address
+  10.0.6.1 only.
+- A static scrape, a host dashboard, and a `VMRule`: target down, pool
+  state anything but online, NVMe media errors or wear past a threshold,
+  memory and load sustained, and pool nearly full and ZFS device errors
+  if "Read first" found their series.
+
+**Decide here**
+- `node_exporter` alone, or with
+  [`prometheus-pve-exporter`](https://github.com/prometheus-pve/prometheus-pve-exporter)
+  (Apache-2.0 per its repository, API token) for per-guest figures.
+  Criteria: the owner's answer above and the memory budget. A second
+  token contradicts AGENTS.md, "Proxmox safety", which names
+  `homelab@pve!tofu` as the only one: choosing it means a decision
+  record, that rule updated, and the new item in the table of
+  [Architecture](architecture.md).
+- Who may reach the exporter. It has no login, and 10.0.6.0/24 is
+  advertised to the tailnet and reachable from `vnet0` (D21). Default:
+  the owner restricts the port to the three node addresses; leaving it
+  open is a recorded decision.
+- If no SMART source fits (footprint, licence, what the owner will run
+  on the host): stop and tell the owner; without it the phase gives no
+  warning ahead of a disk failure.
+
+**Prove here**
+- Pods reach 10.0.6.1 on the exporter's port (no host firewall rule is
+  recorded in this repository).
+- `node_zfs_zpool_state` is present for `rpool`.
+
+**Gate**
+1. The host target is up in vmagent's target list.
+2. `node_zfs_zpool_state{zpool="rpool",state="online"}` returns 1.
+3. The pool-state rule passes unit tests with the pool degraded, faulted
+   and suspended; none can be provoked on a pool without redundancy.
+   The disk-health series of both NVMe disks are in the store.
+4. The owner stops the exporter; the target-down alert arrives, and
+   resolves after the restart.
+5. The host dashboard shows CPU, memory and disk I/O, and pool capacity
+   if its series exists.
+6. The memory command of phase 10, gate 5, prints less than 2048.
+
+**Guide**: `docs/guide/14-host.md`.
+
+## Phase 15: logs
+
+Pod logs, the PostgreSQL logs among them, are kept for a few days and can
+be searched from Grafana after the pod is gone.
+
+**Needs from the owner**
+- Nothing new.
+
+**Read first**
+- The `victoria-logs-single` and `victoria-logs-collector` charts (the
+  collector is a DaemonSet of `vlagent` that mounts `/var/log` and
+  `/var/lib` read-only,
+  [chart docs](https://docs.victoriametrics.com/helm/victoria-logs-collector/)):
+  values, resources, and the namespace's pod security level.
+- That pod logs on Talos are where the collector expects them. Unverified.
+- The VictoriaLogs datasource for the pinned Grafana and how the chart
+  installs a plugin.
+
+**Build**
+- VictoriaLogs with a volume on local-path, the collector, the Grafana
+  datasource.
+
+**Decide here**
+- Retention and volume size, from one day of measured ingestion.
+- The memory budget for logs, as a new record; the 2048 MiB of D42 was
+  set for metrics. The record states the total for metrics and logs
+  against what the nodes have free, and the CPU the collector takes on a
+  host whose scarce resource is CPU (D20).
+
+**Prove here**
+- CloudNativePG's JSON log lines arrive with fields that can be filtered
+  by cluster and instance.
+
+**Gate**
+1. Every pod ready, HelmReleases ready.
+2. A query for one instance pod of `postgres` returns its PostgreSQL log
+   lines.
+3. A pod logs a marker line; once a query returns it, delete the pod;
+   the line is still returned afterwards.
+4. Memory of the logs pods is under the budget decided here.
+5. Delete the VictoriaLogs pod; the marker line of step 3, whose pod no
+   longer exists and cannot be read again, is still returned.
+
+**Guide**: `docs/guide/15-logs.md`.
+
+## Phase 16: control plane metrics
+
+etcd, the scheduler and the controller manager are scraped, with their
+default alerts and the etcd dashboard switched on. D42 left each as "a
+later change with its own record".
+
+**Needs from the owner**
+- Approval of a rolling machine-configuration change on all three nodes,
+  possibly with a reboot each; it is run like an upgrade drill (D23).
+
+**Read first**
+- The etcd patch in the Talos documentation for the running version:
+  `cluster.etcd.extraArgs.listen-metrics-urls: http://0.0.0.0:2381`
+  ([Sidero docs](https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/etcd-metrics)).
+  The port is plain HTTP without authentication.
+- Scheduler and controller manager: no official Talos page was found;
+  community reports use `bind-address: 0.0.0.0` in their `extraArgs`
+  (ports 10259 and 10257, HTTPS). Unverified, as is a report that newer
+  Talos versions reject these fields beside their own config documents.
+- The chart's `kubeEtcd`, `kubeScheduler` and `kubeControllerManager`
+  values with explicit endpoints; its selectors expect pods Talos does
+  not run.
+
+**Build**
+- The machine-configuration patches, applied one node at a time with etcd
+  health checked in between; the scrape switches and the dashboard.
+
+**Decide here**
+- The unauthenticated metrics port on the node address. Default: a
+  Cilium policy that admits vmagent only; leaving it open is a recorded
+  decision.
+- Whether the scheduler and controller manager are worth the change if no
+  documented way exists; etcd alone is an acceptable outcome.
+
+**Prove here**
+- The change needs no cluster rebuild, and a node returns Ready after it.
+
+**Gate**
+1. `talosctl etcd members` and `kubectl get nodes` are healthy after each
+   node.
+2. The etcd targets are up, three; so are the scheduler's and the
+   controller manager's if "Decide here" kept them.
+3. The etcd dashboard shows three members and a leader.
+4. The default alerts of the components kept are loaded and none fires
+   at rest.
+5. The memory command of phase 10, gate 5, prints less than 2048.
+
+**Guide**: `docs/guide/16-control-plane.md`.

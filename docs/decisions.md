@@ -666,7 +666,7 @@ Next.js cache are `emptyDir` volumes. Evidence: tested (the crash on the
 cluster with eight files, reproduced and fixed with the same image under
 Docker, then the phase gate).
 
-## D42 Monitoring: victoria-metrics-k8s-stack, Prometheus-format scraping, OTLP later
+## D42 Monitoring: victoria-metrics-k8s-stack, Prometheus-format scraping, OTLP later (one sentence of its reason replaced by D46)
 
 One HelmRelease of `victoria-metrics-k8s-stack` in namespace
 `observability`: the VictoriaMetrics operator, a single-node VMSingle, a
@@ -826,3 +826,66 @@ proven in phase 11: retention per server name; that a cluster created
 by recovery reconciles cleanly with `bootstrap.recovery` still in Git;
 that the regenerated
 `<cluster>-app` Secret matches the recovered role.
+
+## D46 Monitoring is the lab's own; obenhub is a later reader, not a dependency
+
+The lab builds and runs its monitoring by itself, as if the owner's
+`obenhub` project did not exist: its own store, rules, dashboards, alert
+delivery, logs and host metrics, all in this repository and deployed by
+Flux (phases 12 to 16 of the roadmap). Nothing here consumes obenhub's
+packs, Collector configuration or backends, and no phase waits on obenhub.
+
+Later, obenhub may use this cluster as a long-running target. That work
+belongs to obenhub (its `docs/roadmap.md`, "Homelab as a long-running
+target") and waits until obenhub's open items close (owner, 2026-11-17).
+When it starts it attaches beside the lab's monitoring without changing
+it: obenhub's own Collector reads the databases and sends OTLP to
+obenhub's gateway and store. What the lab then provides is a phase of its
+own here, opened at that time and not built before: a namespace, a
+monitoring role on the databases, and the network path to the gateway.
+
+This replaces the candidate "an OpenTelemetry Collector shared with the
+owner's `obenhub`" in the handoff, and replaces one sentence of D42's
+reason, that "queries, rules and dashboards can move between the two":
+they are not shared between the two projects. The rest of D42 stands,
+including that a collector can later write OTLP into the same VMSingle.
+
+Division of work:
+
+| Concern | Lab (this repository) | obenhub |
+|---|---|---|
+| Kubernetes, Cilium, Flux, Keycloak, Gateway metrics | yes | no |
+| Alert delivery, dead man's switch | yes | no |
+| Backup and WAL archive alerts for the lab's clusters | yes | no |
+| Proxmox host and ZFS | yes | no |
+| Logs | yes | no |
+| PostgreSQL internals through OpenTelemetry (pack queries, naming contract) | no | later, reading this cluster |
+| Whether pack thresholds hold on a cluster that runs for weeks | no | later |
+
+Over: running the lab's monitoring through obenhub. Its labs are
+disposable and broken on purpose, they live on the agent box, which is
+itself rolled back to a snapshot, and its ADR 0001 delays breadth and
+packaging; a permanent service does not fit there. Also over: loading
+obenhub's rules into the lab's vmalert now. They expect the Collector's
+metric names and `service.instance.id` grouping, while the lab scrapes
+the CloudNativePG exporter in Prometheus format (D42), so they would not
+evaluate without a second collection path.
+
+Reason: the two projects fail differently. The lab needs to be told when
+a backup stops or the pool degrades, today, with as few parts as
+possible. obenhub needs a target that is not reset between runs. Keeping
+the first independent of the second means neither blocks the other.
+
+Gaps this decision is based on, read in this repository on 2026-11-17:
+alerts go nowhere (`notifier.blackhole`, D42); nothing checks that a
+backup succeeded; the Proxmox host and its striped pool are not
+monitored (host notes: no redundancy, no scheduled backups); the
+monitoring runs inside the cluster it watches, on one host, so a dead
+host is silent; no logs; dashboards and rules follow upstream `master`
+(D42).
+
+Evidence: judgment; reference (obenhub ADR 0001, 0002, 0005 and 0006,
+`lab/k8s/otel/agent-values.yaml`, `lab/mon/otelcol-gateway-mtls.yaml`,
+read 2026-11-17); owner's decision 2026-11-17. Assumption: the box
+(10.0.0.11) and the lab subnet reach each other through the host (D21),
+so obenhub's gateway needs no new network; not tested for this purpose.

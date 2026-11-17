@@ -4,8 +4,9 @@ Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
 Last updated: 2026-11-17, phase 11 (rebuild and restore drill) closed.
-Every phase of the roadmap is done; between phases, maintenance follows
-AGENTS.md. Open: follow-up 6b, now on archive generation 2 (below).
+Phases 0 to 11 are done; phases 12 to 16 (monitoring, D46) were planned
+on 2026-11-17 and none is open, so maintenance follows AGENTS.md. Open:
+follow-up 6b, now on archive generation 2 (below).
 
 ## How to start a session
 
@@ -257,7 +258,7 @@ accepted:
 
 ## For the architect
 
-- The design is closed and every phase is done. Between phases,
+- Phases 0 to 11 are done; 12 to 16 are planned, none open (D46). Between phases,
   maintenance follows the "Between phases" rule in AGENTS.md; work with a
   live gate of its own opens a new phase.
 - Start of every session: Dependency Dashboard (issue #6) and the open
@@ -310,10 +311,13 @@ accepted:
 - A subagent that runs `kind` from inside the clone writes into the
   clone's `kubeconfig`; give it its own `KUBECONFIG` (Monitoring guide,
   "When it goes wrong").
-- Candidates for the next phase, none decided: alerting (an Alertmanager
-  receiver), logs (VictoriaLogs, which both reference repositories run),
-  an OpenTelemetry Collector shared with the owner's `obenhub`, etcd
-  metrics on Talos, the open phase 7 follow-up 6b (D37).
+- Next phases, planned and none open: 12 alert delivery and dead man's
+  switch, 13 backup and database alerts, 14 Proxmox host and ZFS, 15
+  logs, 16 control plane metrics ([Roadmap](roadmap.md)). The lab's
+  monitoring does not depend on the owner's `obenhub`; obenhub may read
+  this cluster later, as its own work (D46). Phase 12 starts when the
+  owner opens it and has answered its "Needs from the owner". The phase 7
+  follow-up 6b (D37) stays open beside them.
 - When a phase closes: update the state table in the roadmap, write the
   guide page, bring `README.md`, `docs/index.md` and
   `docs/architecture.md` up to date, rewrite this page.
