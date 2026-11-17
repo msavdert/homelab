@@ -22,3 +22,4 @@ nav:
       - 05 Ingress: guide/05-ingress.md
       - 06 Storage: guide/06-storage.md
       - 07 Database: guide/07-database.md
+      - 08 Keycloak: guide/08-keycloak.md

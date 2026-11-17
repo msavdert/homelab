@@ -3,8 +3,10 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-16, phase 7 closed; phase 8 open, waiting for the
-owner to name the application.
+Last updated: 2026-11-17, phase 8 (Keycloak) closed. The next phase is
+not chosen yet: the owner wants a start page for all applications
+(Homepage, behind a Keycloak login) and phase 9 is monitoring; ask which
+comes first.
 
 ## How to start a session
 
@@ -82,6 +84,15 @@ owner to name the application.
   fallback in D24. The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
+- **Phase 8 (first application, Keycloak): done 2026-11-17.** The
+  Keycloak Operator 26.8.2 from `keycloak-k8s-resources` at the tag (a Flux
+  `GitRepository`; CRDs never pruned), cluster `keycloak-db` (two
+  instances, backups to `cnpg/keycloak-db/`) and Keycloak at
+  `https://keycloak.lab.savdert.com`, all in namespace `keycloak` under
+  the restricted pod security level (D38, D39, D40). The bootstrap admin
+  is item `keycloak` in vault `homelab-cluster`; Keycloak shows it as a
+  temporary admin, which is kept until realms are kept in Git. How, and
+  the gate output: [Keycloak](guide/08-keycloak.md).
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -171,13 +182,18 @@ raw API calls, not with OpenTofu.
   with D33 in force from the start was shown only through the equivalent
   forced upgrade, and for flux-operator on a kind cluster.
 - A Renovate pull request for Flux or flux-operator has not arrived yet.
+- Renovate updating the `GitRepository` tag of the Keycloak Operator; the
+  flux manager documents it, but no pull request has arrived yet.
+- Behaviour of the bootstrap admin when item `keycloak` changes (believed
+  not to apply, see the Keycloak guide).
 
 ## Waiting on the owner
 
 | Needed for | What | State |
 |---|---|---|
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | done 2026-11-15 |
-| Phase 8 | The name of the first application | open |
+| Phase 8 | The name of the first application | done 2026-11-16: Keycloak |
+| Next phase | Which comes first: the start page (Homepage behind Keycloak) or phase 9 monitoring | open |
 
 Everything else the earlier phases need is in place.
 
@@ -237,5 +253,15 @@ accepted:
 - From phase 3 on, the cluster changes through merged pull requests. Do
   not `helm upgrade` a Flux-owned release by hand; it fails on field
   conflicts (Flux guide, "When it goes wrong").
+- Every application with PostgreSQL gets its own CloudNativePG cluster
+  `<app>-db` in its namespace (D39); extract a shared Flux component when
+  the second one arrives, not before.
+- Keycloak admin tasks: pipe the login lines from the Keycloak guide
+  (check step 3) and `kcadm.sh` commands into
+  `kubectl -n keycloak exec -i keycloak-0 -- sh`; the credentials come from
+  the pod's environment, not from the box.
+- The echo fixture in `network` was meant to go once a real application
+  is served; Keycloak is that application. Remove it in its own pull
+  request.
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.
