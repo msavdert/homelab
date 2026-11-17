@@ -49,6 +49,7 @@ Exact versions are pinned where they are used and kept current by Renovate.
 | 8 First application: Keycloak | done | [Keycloak](https://msavdert.github.io/homelab/guide/08-keycloak/) |
 | 9 Start page: Homepage | done | [Homepage](https://msavdert.github.io/homelab/guide/09-homepage/) |
 | 10 Monitoring | done | [Monitoring](https://msavdert.github.io/homelab/guide/10-monitoring/) |
+| 11 Rebuild and restore drill | done | [Rebuild](https://msavdert.github.io/homelab/guide/11-rebuild/) |
 
 The [roadmap](docs/roadmap.md) has the gate of every phase.
 

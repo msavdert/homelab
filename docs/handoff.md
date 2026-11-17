@@ -3,9 +3,9 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-17, phase 11 (rebuild and restore drill) opened
-after the review of 2026-11-17; phases 0 to 10 are done. The drill starts
-after phase 7 follow-up 6b is closed (see "Where things stand").
+Last updated: 2026-11-17, phase 11 (rebuild and restore drill) closed.
+Every phase of the roadmap is done; between phases, maintenance follows
+AGENTS.md. Open: follow-up 6b, now on archive generation 2 (below).
 
 ## How to start a session
 
@@ -75,12 +75,10 @@ after phase 7 follow-up 6b is closed (see "Where things stand").
   falls back to single deletes, which work, including a retention delete
   with `REDUNDANCY 2` (gate step 6a, D37). How, and the gate output:
   [Database](guide/07-database.md). **Follow-up 6b:** retention is `1d`
-  until the plugin's own run is seen removing backup `20261116T184904` and
-  WAL segment 2/C, expected 2026-11-17 at about 19:00 UTC. In the first
-  session after that: check the sidecar log of the primary, list the
-  bucket, and check that only Backup object `postgres-manual-3` was
-  removed (issue #1115). Then set retention back to `7d` and add the output
-  to the guide; if the plugin did not delete (issue #770), apply the
+  until the plugin's own run is seen on archive generation 2 (phase 11
+  moved the clusters there first); what to check and when is under "Not
+  verified". Then set retention back to `7d` and add the output to the
+  Database guide; if the plugin did not delete (issue #770), apply the
   fallback in D24. The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
@@ -114,13 +112,13 @@ after phase 7 follow-up 6b is closed (see "Where things stand").
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
   vault `homelab` and `homelab-cluster`.
-- **Phase 11 (rebuild and restore drill): open 2026-11-17.** Opened after
-  the review of 2026-11-17 (D45). Built before the destroy:
-  `bootstrap:flux` ends when the bootstrap releases are adopted,
-  `talos:upgrade-k8s`. Branch `feat/recover-databases-g2` holds the
-  recovery manifests; merge it only after the old cluster is destroyed
-  (the running clusters refuse a second bootstrap method). Starts after
-  follow-up 6b.
+- **Phase 11 (rebuild and restore drill): done 2026-11-17.** VMs 201 to
+  203 destroyed and rebuilt from Git in 20 minutes; both clusters
+  recovered from generation 1 and archive to `postgres-g2` and
+  `keycloak-db-g2` (D45). Marker row, realm `lab` with its users and
+  clients came back; Cilium was adopted without a restart (D33). The next
+  rebuild moves both to generation 3 in one pull request merged after the
+  destroy ([Rebuild](guide/11-rebuild.md)).
 
 ## What was tested during planning
 
@@ -197,13 +195,19 @@ raw API calls, not with OpenTofu.
 ## Not verified
 
 - The plugin's own retention run deleting an expired backup (phase 7
-  follow-up 6b, D37).
+  follow-up 6b, D37). The rebuild of phase 11 moved the clusters to
+  archive generation 2 before the run on generation 1 was due, so 6b is
+  repeated there: retention stays `1d`; from 2026-11-18 about 15:00 UTC a
+  newer completed backup should make the plugin remove the first `-g2`
+  backups (`postgres-daily-20261117144024`, `keycloak-db-daily-20261117144258`).
+  Check the sidecar log of the primary, the bucket listing (Rebuild guide,
+  "Look at the bucket") and `kubectl get backup -A`; then `7d`.
 - Failover of the load-balancer address on a hard stop of its holder (lease
   expiry, 15 s by default); only a clean reboot was tested.
-- Rebuilding the cluster from nothing (Cluster and Flux guides, "Day-two
-  tasks") and `upgrade-k8s` have not been run. A fresh adoption of Cilium
-  with D33 in force from the start was shown only through the equivalent
-  forced upgrade, and for flux-operator on a kind cluster.
+- `upgrade-k8s` has not been run for real (only `--dry-run`). That a
+  newer installer image than the disk image installs cleanly on a new VM
+  (V18) was not tested; both were v1.14.6 in the drill.
+- That the plugin's retention leaves older archive generations alone.
 - A Renovate pull request for Flux or flux-operator has not arrived yet.
 - Renovate updating the `GitRepository` tag of the Keycloak Operator; the
   flux manager documents it, but no pull request has arrived yet.
@@ -253,7 +257,7 @@ accepted:
 
 ## For the architect
 
-- The design is closed. Phase 11 is open (roadmap). Between phases,
+- The design is closed and every phase is done. Between phases,
   maintenance follows the "Between phases" rule in AGENTS.md; work with a
   live gate of its own opens a new phase.
 - Start of every session: Dependency Dashboard (issue #6) and the open

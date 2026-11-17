@@ -25,3 +25,4 @@ nav:
       - 08 Keycloak: guide/08-keycloak.md
       - 09 Homepage: guide/09-homepage.md
       - 10 Monitoring: guide/10-monitoring.md
+      - 11 Rebuild: guide/11-rebuild.md
