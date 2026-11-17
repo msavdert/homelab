@@ -755,8 +755,9 @@ databases restored from their archives. This is the only way to prove
 that Git and the bucket are enough to get the lab back (review of
 2026-11-17, V1), and it is the database recovery practice the lab exists
 for. Alerting, the phase the review placed before this one, is being
-prepared by the owner separately and is not part of the roadmap yet
-(since planned as phase 12, D46).
+prepared by the owner separately and is not part of the roadmap yet.
+(That was the state on 2026-11-17; alerting is now phase 12, and the
+owner prepares nothing separately.)
 
 The owner approved `tofu destroy` of the lab VMs (pool `homelab`, VMs 201
 to 203) on 2026-11-17 for this drill only. Settled: both clusters
@@ -851,19 +852,44 @@ and Alertmanager is off (D42); the whole stack sits in the cluster it
 watches, on one host.
 
 **Needs from the owner**
-- The notification channel. Alertmanager delivers natively to email and
-  Telegram among others
-  ([configuration](https://prometheus.io/docs/alerting/latest/configuration/);
-  unverified for the version the chart ships); ntfy needs its webhook
-  template
-  (`?template=alertmanager`, [ntfy publish docs](https://docs.ntfy.sh/publish/)).
-  The owner creates the bot, mailbox or topic; the architect stores its
-  credential as item `alertmanager` in vault `homelab-cluster`.
-- An account at an external heartbeat service and where its alarm goes;
-  that path must not pass through the lab. Candidate: healthchecks.io
-  (free plan 20 checks, [pricing](https://healthchecks.io/pricing/)).
-- Whether the alerting the owner was preparing separately (note in phase
-  11) changes anything here.
+- Nothing new (owner, 2026-11-17: the owner prepares nothing for this
+  phase, the note in phase 11 included, and the plan is followed as
+  written). The phase reuses what the owner already runs for
+  `perp-live` on the agent box, read in that repository on 2026-11-17
+  (`docs/decisions/0002-canary-monitoring.md`,
+  `docs/operations/monitoring.md`, `src/perplive/alarm.py`):
+  - Heartbeat: the owner's healthchecks.io account. Its API key and
+    project ping key are item `Healtchecks API` (spelled so) in vault
+    `dotfiles`; `perp-live` creates its checks through the management
+    API and pings `hc-ping.com/<ping key>/<slug>`. Its dead man's check
+    alarms by email and a Bark push, both outside the host.
+  - Notification: Alertmanager's own Telegram receiver with the bot
+    `perp-live` pushes through (item `Hermes`, vault `dotfiles`), or
+    email. Unverified: the fields of that item and that the bot may
+    post to the owner's chat from a second sender.
+- The architect creates one check, `homelab-watchdog` (tag `homelab`),
+  and attaches the channels the `perp-live` check has; which those are
+  is read from the account, not from `perp-live`'s code, where the owner
+  attached them by hand. The authority is the owner's instruction of
+  2026-11-17 to use this account. The account also holds the dead man
+  of `perp-live`, and the API key can change every check in it, so:
+  count the checks first, create this one and nothing else, never update
+  or delete an existing check, and show the owner the exact API call and
+  the 1Password item write (fields, not values) in the pull request
+  description before running either. No reply is waited for (owner,
+  2026-11-17); the rule asks that the owner sees the plan. This handles credentials and writes to
+  a live system outside Flux, so it takes the audit of that tier
+  ([Standards](standards.md)).
+- What the cluster needs becomes item `alertmanager` in vault
+  `homelab-cluster`: the new check's own ping URL, not the project ping
+  key, which could keep every check of the account alive, and the
+  notification credential. The API key and ping key are read with the
+  workstation's own account, the only one that reads `dotfiles`; the
+  item is written with the `homelab` account, the only one that writes
+  `homelab-cluster`; values pass in memory, never through a file. The
+  item and its fields go into the table of
+  [Architecture](architecture.md), "Secrets". The cluster never reads
+  vault `dotfiles`.
 
 **Read first**
 - The pinned chart's values `alertmanager.enabled`, `alertmanager.spec`,
@@ -875,7 +901,7 @@ watches, on one host.
   `kubectl get vmrule -A -o yaml | grep -n Watchdog`. Unverified; if it
   is missing, the lab adds its own.
 - The Alertmanager version the chart ships and its receiver syntax for the
-  chosen channel; the heartbeat service's ping API and that it accepts
+  chosen channel; the healthchecks.io ping API and that it accepts
   Alertmanager's webhook POST (unverified).
 - How to stop the `Watchdog` from leaving the cluster for gate 4.
   Alertmanager is a `VMAlertmanager` object that the operator reconciles,
@@ -883,6 +909,10 @@ watches, on one host.
   undone at once (unverified). Candidates: scale the operator to zero
   first, or pause the object, or stop vmalert. Confirm one on the running
   version and write it into the guide.
+- healthchecks.io: how many checks the account already holds against the
+  free plan's 20, whether the API key may attach existing channels to a
+  new check, and a period and grace for `homelab-watchdog` that fit the
+  `Watchdog` repeat interval (`perp-live` uses 300 s and 900 s).
 - What fires today: `ALERTS{alertstate="firing"}` against VMSingle
   (unverified: that vmalert writes `ALERTS` back to the store in this
   chart; otherwise vmalert's own `/api/v1/alerts`). Every
@@ -897,12 +927,20 @@ watches, on one host.
   vmalert, Alertmanager and the way out; it says nothing about vmagent
   having stopped scraping (assumption: its expression does not depend on
   scraped series). One rule alerts when no fresh `up` samples arrive.
-- Routes: `Watchdog` to the heartbeat webhook with `send_resolved: false`
+- Routes: `Watchdog` to the `homelab-watchdog` ping URL with
+  `send_resolved: false`
   and a repeat interval shorter than the check's period; everything else
   to the owner's channel, grouped so that one fault is one message.
 
 **Decide here**
-- The channel and the heartbeat service, from what the owner provides.
+- The channel for ordinary alerts. Default: Telegram with the existing
+  bot. If its item lacks what the receiver needs, or the bot cannot
+  post from a second sender, stop and ask; email has no credentials
+  named anywhere and is not a silent fallback.
+- The shared bot token. Copying it into `homelab-cluster` puts a secret
+  of `dotfiles` inside the cluster, and whoever takes it there can post
+  as the bot `perp-live` uses. Record it as an accepted risk, or ask the
+  owner for a bot of the lab's own.
 - Whether the default rules and dashboards stay unpinned (D42). Once rules
   page a person, a change upstream changes what pages without a pull
   request. Criteria: pin (copies in Git, or the chart's sync switched off)
@@ -930,14 +968,17 @@ watches, on one host.
    `0` (grep then exits 1), and vmalert's notifier list shows the
    Alertmanager address.
 2. A synthetic alert (a temporary `VMRule` with `expr: vector(1)`, applied
-   and removed by the architect) arrives on the owner's device, and its
-   resolution arrives after removal.
+   and removed by the architect) is delivered, and its resolution after
+   removal: Alertmanager's notification counter for the receiver rises
+   and its failure counter does not.
 3. One alert of the default rules, provoked by the fault chosen in
-   "Decide here", arrives and resolves.
+   "Decide here", is delivered and so is its resolution, by the same
+   counters.
 4. Dead man: stop the `Watchdog` with the method confirmed in "Read
    first" and check that Alertmanager or vmalert is in fact down; the
-   heartbeat service alarms the owner within its grace time. Undo it;
-   the check turns healthy again.
+   healthchecks.io API shows `homelab-watchdog` down within its grace
+   time and a notification sent; this pages the owner once, by email and
+   Bark, so say so beforehand. Undo it; the check is up again.
 5. One hour later the firing alerts, read the way "Read first" settled,
    are `Watchdog` only, and vmalert reports no rule group with an
    evaluation error.
