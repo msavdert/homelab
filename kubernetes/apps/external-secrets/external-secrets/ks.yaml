@@ -18,8 +18,8 @@ spec:
     kind: GitRepository
     name: flux-system
 ---
-# The ClusterSecretStore and the ExternalSecrets that prove it. Ready only
-# when the store can reach 1Password and every ExternalSecret has synced.
+# The ClusterSecretStore. Ready only when the store can reach 1Password.
+# The ExternalSecrets that use it live with their applications.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -41,9 +41,6 @@ spec:
   healthCheckExprs:
     - apiVersion: external-secrets.io/v1
       kind: ClusterSecretStore
-      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
-    - apiVersion: external-secrets.io/v1
-      kind: ExternalSecret
       current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
   sourceRef:
     kind: GitRepository

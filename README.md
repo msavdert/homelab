@@ -24,9 +24,12 @@ step-by-step guide that can be repeated from scratch.
 | GitOps | Flux, through the Flux Operator, following `main` |
 | Secrets | External Secrets Operator reading 1Password |
 | Certificates | cert-manager, Let's Encrypt DNS-01 through Cloudflare |
-| Ingress | Envoy Gateway (Gateway API), reachable only over Tailscale |
+| Ingress | Envoy Gateway (Gateway API), reachable from the tailnet and from guests on the Proxmox host's `vnet0`, not from the internet |
 | Storage | local-path-provisioner on a dedicated data disk per node |
 | Databases | CloudNativePG, backups to S3-compatible object storage |
+| Identity | Keycloak (Keycloak Operator 26.8.2), realm `lab` |
+| Start page | Homepage 2.8.0, behind Keycloak login |
+| Monitoring | victoria-metrics-k8s-stack 0.98.1, with Grafana behind Keycloak realm `lab` |
 | Updates | Renovate and release-please |
 
 Exact versions are pinned where they are used and kept current by Renovate.
@@ -43,8 +46,9 @@ Exact versions are pinned where they are used and kept current by Renovate.
 | 5 Ingress | done | [Ingress](https://msavdert.github.io/homelab/guide/05-ingress/) |
 | 6 Storage | done | [Storage](https://msavdert.github.io/homelab/guide/06-storage/) |
 | 7 First database | done | [Database](https://msavdert.github.io/homelab/guide/07-database/) |
-| 8 First application | open | |
-| 9 Monitoring | planned | |
+| 8 First application: Keycloak | done | [Keycloak](https://msavdert.github.io/homelab/guide/08-keycloak/) |
+| 9 Start page: Homepage | done | [Homepage](https://msavdert.github.io/homelab/guide/09-homepage/) |
+| 10 Monitoring | done | [Monitoring](https://msavdert.github.io/homelab/guide/10-monitoring/) |
 
 The [roadmap](docs/roadmap.md) has the gate of every phase.
 

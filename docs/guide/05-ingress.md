@@ -7,8 +7,9 @@ on the tailnet. `https://<name>.lab.savdert.com` resolves in public DNS to
 10.0.6.20, an address on the lab network that Cilium answers for on layer 2.
 Behind it, Envoy Gateway 1.10.0 terminates TLS with a Let's Encrypt
 wildcard certificate that cert-manager v1.21.3 renews by DNS-01 against
-Cloudflare. From outside the tailnet the name still resolves, but nothing
-routes to the address.
+Cloudflare. From the internet the name still resolves, but nothing
+routes to the address. Besides the tailnet, guests on the Proxmox host's
+`vnet0` can reach it through the host (D21).
 
 ```
 device on the tailnet

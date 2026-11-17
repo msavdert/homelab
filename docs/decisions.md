@@ -753,3 +753,33 @@ client is created with `kcadm.sh` and written back into the
 Evidence: judgment (D41 left an application with its own login to its own
 OIDC), docs to be read in phase 10 (Grafana generic OAuth for the pinned
 version).
+
+## D44 Review follow-ups of 2026-11-17: additions to D23, D32 and D39
+
+The project review of 2026-11-17 found three records that no longer cover
+what was built. They stay as they are; this record adds to them.
+
+D23, the remaining charts and images. cert-manager, External Secrets,
+Envoy Gateway, victoria-metrics-k8s-stack, Homepage, local-path-provisioner
+and its helper image are covered by D23 for patch updates only; D23
+names no rule for their minor and major updates. Their minor updates are
+merged by the architect when the release notes show no change to a
+value the lab sets, followed by the usual check that Flux reconciled;
+otherwise, and for every major update, they are prepared as an
+upgrade drill. Keycloak and the Keycloak Operator are upgrade drills for
+minor and major updates, as `.renovaterc.json5` already labels them.
+
+D32, where chart values live. A `values.yaml` next to the HelmRelease is
+required where something outside Flux reads the same values (Cilium,
+through `bootstrap:cilium`); local-path-provisioner keeps its file. Other
+releases set their few values inline in `spec.values` (cert-manager,
+victoria-metrics-k8s-stack) or none. A new release uses inline values
+unless the same reason applies.
+
+D39, availability. Two database instances protect the data and let the
+database fail over during a node restart. Keycloak itself runs one
+instance, so a restart of its node still restarts the application.
+
+Evidence: review of 2026-11-17 (V12, V17 and the accepted risk on D39),
+checked against `.renovaterc.json5` and the HelmReleases under
+`kubernetes/apps/`.

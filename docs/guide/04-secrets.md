@@ -47,13 +47,14 @@ kubernetes/apps/external-secrets/
   external-secrets/
     ks.yaml                     # two Flux Kustomizations
     app/                        # the operator: OCIRepository, HelmRelease
-    stores/                     # ClusterSecretStore, ExternalSecrets
+    stores/                     # ClusterSecretStore
 bootstrap/external-secrets/
   secret.yaml                   # the token Secret, as an op inject template
 ```
 
-The operator and its CRDs come from the chart in `app/`. The store and the
-ExternalSecrets in `stores/` are objects of those CRDs, so they get their
+The operator and its CRDs come from the chart in `app/`. The store in
+`stores/` is an object of those CRDs (since phase 5 the ExternalSecrets
+live with their applications), so they get their
 own Flux Kustomization, `external-secrets-stores`, which `dependsOn` the
 operator's. The operator's Kustomization has `wait: true`, so it is Ready
 only when the HelmRelease is; the stores are applied after that.
@@ -95,9 +96,8 @@ are meant to have (D25). `kubectl get clustersecretstore` shows
 `CAPABILITIES ReadWrite`: that is what the provider supports, not what
 the account may do. The account was refused a write (above).
 
-The stores Kustomization reports Ready only when the store and every
-ExternalSecret have the condition `Ready=True` (`healthCheckExprs` in
-`ks.yaml`). A store that cannot log in keeps the Kustomization in
+The stores Kustomization reports Ready only when the store has the
+condition `Ready=True` (`healthCheckExprs` in `ks.yaml`). A store that cannot log in keeps the Kustomization in
 progress until its five-minute timeout, then it fails and retries every
 two minutes.
 
