@@ -29,7 +29,15 @@ spec:
       compression: gzip
   # The sidecar reads env only when an instance pod is created (plugin
   # issue #918); after a change here, run `kubectl cnpg restart`.
+  # Measured 2026-11-17: 16 MiB idle, 62 MiB during a backup, under 10
+  # millicores. Like env, read only when an instance pod is created.
   instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 96Mi
+      limits:
+        memory: 256Mi
     env:
       # boto3 reads the endpoint from here when endpointURL is unset.
       - name: AWS_ENDPOINT_URL_S3
