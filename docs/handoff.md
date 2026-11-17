@@ -4,7 +4,9 @@ Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
 Last updated: 2026-11-17, phase 9 (start page: Homepage behind a Keycloak
-login, D41) opened. Monitoring moved to phase 10.
+login) closed. The next phase is 10, monitoring. The owner also asked what
+Pi-hole and Uptime Kuma are (summarised in the session of 2026-11-17);
+neither is planned.
 
 ## How to start a session
 
@@ -91,6 +93,14 @@ login, D41) opened. Monitoring moved to phase 10.
   is item `keycloak` in vault `homelab-cluster`; Keycloak shows it as a
   temporary admin, which is kept until realms are kept in Git. How, and
   the gate output: [Keycloak](guide/08-keycloak.md).
+- **Phase 9 (start page): done 2026-11-17.** Homepage v2.8.0 at
+  `https://home.lab.savdert.com` in namespace `homepage` (restricted, read-only
+  root file system), signed in by its own OIDC against Keycloak realm
+  `lab`, which a `KeycloakRealmImport` creates with client `homepage` and
+  user `owner` (D41; items `homepage` and `keycloak-lab-user` in vault
+  `homelab-cluster`). Applications appear on the page from annotations on
+  their `HTTPRoute`. How, and the gate output:
+  [Homepage](guide/09-homepage.md).
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -184,6 +194,8 @@ raw API calls, not with OpenTofu.
   flux manager documents it, but no pull request has arrived yet.
 - Behaviour of the bootstrap admin when item `keycloak` changes (believed
   not to apply, see the Keycloak guide).
+- Rotating the client secret of `homepage` (Homepage guide, "Day-two
+  tasks").
 
 ## Waiting on the owner
 
@@ -193,6 +205,7 @@ raw API calls, not with OpenTofu.
 | Phase 8 | The name of the first application | done 2026-11-16: Keycloak |
 | Next phase | Which comes first: the start page or monitoring | done 2026-11-17: the start page (D41) |
 | Phase 9 | Login method, realm user name, 1Password items | done 2026-11-17: Homepage OIDC, user `owner`, items approved |
+| Phase 10 | Nothing known yet; read the phase before starting | - |
 
 Everything else the earlier phases need is in place.
 
@@ -259,7 +272,11 @@ accepted:
   (check step 3) and `kcadm.sh` commands into
   `kubectl -n keycloak exec -i keycloak-0 -- sh`; the credentials come from
   the pod's environment, not from the box.
-- The echo fixture in `network` was removed once Keycloak was served
-  through the Gateway.
+- A new application goes on the start page through `gethomepage.dev/*`
+  annotations on its `HTTPRoute` (Homepage guide, step 3); a realm or
+  client for it goes into a `KeycloakRealmImport` (D41).
+- A Renovate bump of Homepage: list `/app/src/skeleton` in the new image
+  first; every file there needs a ConfigMap entry and a mount, or the pod
+  crashes after login (Homepage guide, "Day-two tasks").
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.
