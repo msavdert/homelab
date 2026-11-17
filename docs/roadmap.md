@@ -35,7 +35,7 @@ Each phase lists:
 | 6 Storage | done 2026-11-16, see [Storage](guide/06-storage.md) |
 | 7 First database | done 2026-11-16 (step 6b follow-up open, D37), see [Database](guide/07-database.md) |
 | 8 First application: Keycloak | done 2026-11-17, see [Keycloak](guide/08-keycloak.md) |
-| 9 Start page: Homepage | open |
+| 9 Start page: Homepage | done 2026-11-17, see [Homepage](guide/09-homepage.md) |
 | 10 Monitoring | not started |
 
 ## Phase 0: repository foundation
@@ -628,7 +628,8 @@ the same day (D41).
 
 **Decide here**
 - Whether Homepage runs with a read-only root file system, from a test.
-  Record the outcome with D41.
+  Record the outcome with D41. Decided: yes, with every skeleton file
+  mounted (D41).
 
 **Prove here**
 - The Homepage pod reaches the issuer at `keycloak.lab.savdert.com` from

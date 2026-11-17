@@ -23,3 +23,4 @@ nav:
       - 06 Storage: guide/06-storage.md
       - 07 Database: guide/07-database.md
       - 08 Keycloak: guide/08-keycloak.md
+      - 09 Homepage: guide/09-homepage.md

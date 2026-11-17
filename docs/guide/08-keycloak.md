@@ -300,10 +300,10 @@ and 536 MiB about seven minutes after start.
   `keycloak` in vault `homelab-cluster`.
 - **The temporary admin.** Keycloak 26 marks the bootstrap admin as
   temporary and asks for a permanent one. It is kept for now: removing it
-  needs a permanent admin and a service account for automation, and both
-  belong with the decision on how realms are kept in Git, which is made
-  when the first client is added. `KeycloakRealmImport` only creates
-  realms and never updates them.
+  needs a permanent admin and a service account for automation. Realms
+  for applications are created from Git by `KeycloakRealmImport` (D41,
+  first used for realm `lab` in [09 Homepage](09-homepage.md)), which only
+  creates realms and never updates them.
 - **Run `kcadm.sh`.** As in check step 3: pipe the login lines and the
   command into `kubectl -n keycloak exec -i keycloak-0 -- sh`.
 - **Upgrade.** Renovate bumps the `GitRepository` tag; minor and major

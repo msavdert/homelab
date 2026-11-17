@@ -657,3 +657,11 @@ Evidence: docs (Homepage installation pages, "Security / Authentication",
 read and checked 2026-11-17 for v2.8.0; Keycloak Operator realm import
 page and the 26.8.2 source of the import Job; Envoy Gateway OIDC task for
 v1.10), the owner's choice on 2026-11-17.
+
+Outcome of the phase, 2026-11-17: Homepage runs with a read-only root file
+system. It copies any file of `/app/src/skeleton` missing from
+`/app/config` when `/api/validate` runs and exits when it cannot, so all
+nine skeleton files of v2.8.0 are mounted from the ConfigMap; logs and the
+Next.js cache are `emptyDir` volumes. Evidence: tested (the crash on the
+cluster with eight files, reproduced and fixed with the same image under
+Docker, then the phase gate).
