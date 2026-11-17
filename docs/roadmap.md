@@ -1,6 +1,7 @@
 # Roadmap
 
-The phases in order. Exactly one is open. A phase is closed when every gate
+The phases in order. At most one is open; between phases, maintenance
+follows AGENTS.md, "Between phases". A phase is closed when every gate
 command has passed on the real system with the work merged to `main`, the
 output was shown to the owner, and its guide page is written. The
 architect then tells the owner that the release pull request can be

@@ -11,8 +11,9 @@ the architect"). The owner asked what Pi-hole and Uptime Kuma are
 ## How to start a session
 
 1. Read `AGENTS.md`, then this page, then the open phase in
-   [Roadmap](roadmap.md).
-2. Read the records in [Decisions](decisions.md) that the phase refers to.
+   [Roadmap](roadmap.md), if one is open. Between phases, AGENTS.md
+   ("Between phases") says what may be done.
+2. Read the records in [Decisions](decisions.md) that the work refers to.
 3. Check "Waiting on the owner" below. If the open phase needs something
    that is not there yet, ask for it first.
 4. Do the phase's "Read first" list before writing anything.
@@ -189,7 +190,6 @@ raw API calls, not with OpenTofu.
 
 ## Not verified
 
-- Everything marked "Prove here" in the roadmap from phase 8 on.
 - The plugin's own retention run deleting an expired backup (phase 7
   follow-up 6b, D37).
 - Failover of the load-balancer address on a hard stop of its holder (lease
@@ -247,8 +247,9 @@ accepted:
 
 ## For the architect
 
-- The design is closed. The open work is implementation, the "Decide here"
-  items and the "Prove here" items in the roadmap.
+- The design is closed and every phase of the roadmap is done. Between
+  phases, maintenance follows the "Between phases" rule in AGENTS.md; work
+  with a live gate of its own opens a new phase.
 - Start of every session: Dependency Dashboard (issue #6) and the open
   Renovate pull requests (D23). Minor and major updates of `talosctl`,
   `kubectl`, `flux2` and `cilium-cli` arrive labelled `upgrade-drill`.
@@ -304,4 +305,5 @@ accepted:
   an OpenTelemetry Collector shared with the owner's `obenhub`, etcd
   metrics on Talos, the open phase 7 follow-up 6b (D37).
 - When a phase closes: update the state table in the roadmap, write the
-  guide page, rewrite this page.
+  guide page, bring `README.md`, `docs/index.md` and
+  `docs/architecture.md` up to date, rewrite this page.
