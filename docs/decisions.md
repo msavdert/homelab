@@ -761,8 +761,8 @@ what was built. They stay as they are; this record adds to them.
 
 D23, the remaining charts and images. cert-manager, External Secrets,
 Envoy Gateway, victoria-metrics-k8s-stack, Homepage, local-path-provisioner
-and its helper image are not in either list of D23. Their patch updates
-are merged by the architect like the others. Their minor updates are
+and its helper image are covered by D23 for patch updates only; D23
+names no rule for their minor and major updates. Their minor updates are
 merged by the architect when the release notes show no change to a
 value the lab sets, followed by the usual check that Flux reconciled;
 otherwise, and for every major update, they are prepared as an
