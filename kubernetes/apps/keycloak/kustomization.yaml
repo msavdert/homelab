@@ -5,3 +5,4 @@ resources:
   - ./namespace.yaml
   - ./keycloak-operator/ks.yaml
   - ./keycloak/ks.yaml
+  - ./realm-lab/ks.yaml

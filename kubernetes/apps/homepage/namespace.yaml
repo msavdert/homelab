@@ -1,0 +1,8 @@
+---
+# Homepage, the start page (D41), from plain manifests.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homepage
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

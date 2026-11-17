@@ -1,11 +1,20 @@
 ---
 # keycloak.lab.savdert.com through Gateway lab. The operator's Service is
 # <name>-service with port http 8080; the management port 9000 is not
-# routed.
+# routed. The gethomepage.dev annotations make Homepage list Keycloak
+# (service discovery from HTTPRoutes, D41).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: keycloak
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Keycloak
+    gethomepage.dev/group: Identity
+    gethomepage.dev/icon: keycloak.png
+    gethomepage.dev/description: Identity provider
+    gethomepage.dev/href: https://keycloak.lab.savdert.com
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=keycloak,app.kubernetes.io/component=server
 spec:
   parentRefs:
     - name: lab

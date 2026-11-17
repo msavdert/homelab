@@ -1,0 +1,142 @@
+---
+# Homepage v2.8.0 in the shape of the upstream Kubernetes page. Login is
+# Homepage's own OIDC against realm lab (D41); the variable names are those
+# of "Security & Authentication" on the installation page.
+# The tag is updated by Renovate's kubernetes manager.
+# The read-only root filesystem and the two emptyDir volumes (logs and the
+# Next.js cache) are an assumption until a run on the cluster shows that
+# Homepage starts with them; drop the setting if it does not.
+# Resources: the memory figures are an assumption, to be set from measured
+# use like D40; no CPU limit.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homepage
+    spec:
+      serviceAccountName: homepage
+      automountServiceAccountToken: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.8.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            # Must come before the variable that uses it.
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            # The pod address is what the kubelet probes send as Host.
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "home.lab.savdert.com,$(MY_POD_IP):3000"
+            - name: HOMEPAGE_AUTH_ENABLED
+              value: "true"
+            - name: HOMEPAGE_EXTERNAL_URL
+              value: https://home.lab.savdert.com
+            - name: HOMEPAGE_OIDC_ISSUER
+              value: https://keycloak.lab.savdert.com/realms/lab
+            - name: HOMEPAGE_OIDC_CLIENT_ID
+              value: homepage
+            - name: HOMEPAGE_OIDC_NAME
+              value: Keycloak
+            - name: HOMEPAGE_OIDC_AUTO_LOGIN
+              value: "true"
+            - name: HOMEPAGE_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: homepage
+                  key: auth-secret
+            - name: HOMEPAGE_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: homepage
+                  key: oidc-client-secret
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /app/config/custom.js
+              name: homepage-config
+              subPath: custom.js
+            - mountPath: /app/config/custom.css
+              name: homepage-config
+              subPath: custom.css
+            - mountPath: /app/config/bookmarks.yaml
+              name: homepage-config
+              subPath: bookmarks.yaml
+            - mountPath: /app/config/docker.yaml
+              name: homepage-config
+              subPath: docker.yaml
+            - mountPath: /app/config/kubernetes.yaml
+              name: homepage-config
+              subPath: kubernetes.yaml
+            - mountPath: /app/config/services.yaml
+              name: homepage-config
+              subPath: services.yaml
+            - mountPath: /app/config/settings.yaml
+              name: homepage-config
+              subPath: settings.yaml
+            - mountPath: /app/config/widgets.yaml
+              name: homepage-config
+              subPath: widgets.yaml
+            - mountPath: /app/config/logs
+              name: logs
+            - mountPath: /app/.next/cache
+              name: next-cache
+      volumes:
+        - name: homepage-config
+          configMap:
+            name: homepage
+        - name: logs
+          emptyDir: {}
+        - name: next-cache
+          emptyDir: {}
