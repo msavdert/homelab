@@ -29,7 +29,8 @@ cgroup:
   autoMount:
     enabled: false
   hostRoot: /sys/fs/cgroup
-# D26: a changed setting restarts the pods; Hubble off until phase 9.
+# D26: a changed setting restarts the pods. Hubble off; whether to enable
+# it is decided with alerting, not yet planned.
 rollOutCiliumPods: true
 operator:
   rollOutPods: true

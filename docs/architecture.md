@@ -86,15 +86,17 @@ Talos nodes answer in maintenance mode".
 | Object storage | bucket `homelab` (Oracle, S3-compatible) | `tofu/` state, `cnpg/` backups |
 | Databases | CloudNativePG | backups to an S3-compatible bucket; one cluster per application (D39) |
 | Identity | Keycloak, by the Keycloak Operator | first application; SSO and the identity-integration lab (D38) |
+| Start page | Homepage | namespace `homepage`; signs in through Keycloak realm `lab` |
+| Monitoring | victoria-metrics-k8s-stack | namespace `observability`; Grafana signs in through Keycloak realm `lab` (D42, D43) |
 | Updates | Renovate | hosted GitHub app; opens pull requests |
 
 Left out on purpose: replicated storage (Rook-Ceph, Longhorn), a service
-mesh, Multus, Spegel, Cloudflare tunnels. Monitoring comes last, as one
-tool.
+mesh, Multus, Spegel, Cloudflare tunnels. Monitoring exists as one tool,
+victoria-metrics-k8s-stack (phase 10, D42, D43).
 
 ## How a request reaches a service
 
-This is the design for phase 5; none of it exists yet.
+This is how it works since phase 5.
 
 1. A device on the tailnet resolves `app.lab.savdert.com`. The public
    wildcard record `*.lab.savdert.com` returns 10.0.6.20, a private
@@ -136,8 +138,9 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `cloudflare-dns` (vault `homelab-cluster`) | `credential` (same token) | cert-manager |
 | `object-storage` (vault `homelab-cluster`) | as above, but a key limited to bucket `homelab` | CloudNativePG backups |
 | `keycloak` (vault `homelab-cluster`) | `username`, `password` | Keycloak bootstrap admin |
-| `keycloak-lab-user` (vault `homelab-cluster`) | `username`, `password` | the user of realm `lab` |
-| `homepage` (vault `homelab-cluster`) | `oidc-client-secret`, `auth-secret` | the Keycloak client of Homepage and its session key |
+| `keycloak-lab-user` (vault `homelab-cluster`) | `password` | the user of realm `lab` |
+| `homepage` (vault `homelab-cluster`) | `oidc-client-secret`, `auth-secret` | the Keycloak client of Homepage and its session key; the client secret is also read by realm `lab` |
+| `grafana` (vault `homelab-cluster`) | `admin-user`, `admin-password`, `oidc-client-secret` | Grafana's administrator and its Keycloak client; the client secret is also read by realm `lab` |
 | `homelab-op-service-account` (vault `dotfiles`) | `credential` | tasks that read or write vault `homelab`; never given to the cluster |
 | `Proxmox API` (vault `dotfiles`) | `username`, `credential` | the administrator token; `infra/host/prepare.py` only |
 | `tailscale-oauth-readonly` (vault `dotfiles`) | `client-id`, `credential` | reading the tailnet policy and routes to check the owner's steps |
@@ -145,7 +148,9 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 An item is created in the phase that first needs it. In vault `homelab`,
 `proxmox-tofu`, `tofu-state`, `object-storage` and `cloudflare-dns` exist
 and were checked on 2026-11-15. Vault `homelab-cluster` holds
-`cloudflare-dns` and `object-storage`; its service account was shown on
+`cloudflare-dns`, `object-storage`, `keycloak`, `keycloak-lab-user`,
+`homepage` and `grafana` (the items the ExternalSecrets in `kubernetes/`
+read); its service account was shown on
 2026-11-15 to see only that vault and to be refused a write. The
 `object-storage` key belongs to the OCI user `homelab-cnpg`, whose policy
 `homelab-cnpg` allows only bucket `homelab`; the limit is per bucket, so
