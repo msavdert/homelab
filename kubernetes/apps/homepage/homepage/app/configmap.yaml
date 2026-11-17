@@ -1,0 +1,29 @@
+---
+# Homepage's configuration files, mounted one by one by subPath. Services
+# are discovered from annotated HTTPRoutes (gateway: true); ingress is off
+# because the cluster has none. The cluster widget is left out: it needs the
+# metrics API, which this cluster does not have.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  kubernetes.yaml: |
+    mode: cluster
+    ingress: false
+    gateway: true
+  settings.yaml: |
+    title: lab
+  services.yaml: ""
+  bookmarks.yaml: ""
+  widgets.yaml: |
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          hour12: false
+  docker.yaml: ""
+  custom.css: ""
+  custom.js: ""

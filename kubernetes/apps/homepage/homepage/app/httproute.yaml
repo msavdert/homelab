@@ -1,0 +1,18 @@
+---
+# home.lab.savdert.com through Gateway lab. Homepage's own login (OIDC)
+# guards every route except /api/healthcheck.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: homepage
+spec:
+  parentRefs:
+    - name: lab
+      namespace: network
+      sectionName: https
+  hostnames:
+    - home.lab.savdert.com
+  rules:
+    - backendRefs:
+        - name: homepage
+          port: 3000

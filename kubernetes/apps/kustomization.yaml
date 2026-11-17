@@ -9,6 +9,7 @@ resources:
   - ./database
   - ./external-secrets
   - ./flux-system
+  - ./homepage
   - ./keycloak
   - ./kube-system
   - ./local-path-storage

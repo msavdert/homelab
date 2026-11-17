@@ -1,0 +1,32 @@
+---
+# Realm lab with the client homepage and the user owner (D41). Ready when the
+# import Job has finished: the operator sets Done on the KeycloakRealmImport
+# (HasErrors is True when it failed).
+# No postBuild here on purpose: Flux would replace the ${...} placeholders of
+# the realm with its own substitution; the Keycloak import Job fills them
+# from the Secret realm-lab instead.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: keycloak-realm-lab
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: keycloak
+    - name: external-secrets-stores
+  interval: 1h
+  retryInterval: 2m
+  timeout: 10m
+  path: ./kubernetes/apps/keycloak/realm-lab/app
+  prune: true
+  wait: true
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+    - apiVersion: k8s.keycloak.org/v2beta1
+      kind: KeycloakRealmImport
+      current: status.conditions.exists(e, e.type == 'Done' && e.status == 'True')
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
