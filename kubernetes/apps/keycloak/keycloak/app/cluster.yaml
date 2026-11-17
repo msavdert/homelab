@@ -31,6 +31,8 @@ spec:
   bootstrap:
     recovery:
       source: previous
+      database: app
+      owner: app
   externalClusters:
     - name: previous
       plugin:
