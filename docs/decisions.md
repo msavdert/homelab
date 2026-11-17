@@ -608,3 +608,22 @@ Application data in these clusters is backed up by D15; D16 still holds
 for volumes. Evidence: docs (CloudNativePG FAQ, bootstrap and upgrade
 pages, read 2026-11-16 on GitHub for `main` and `release-1.30`), judgment;
 bjw-s-labs/home-ops runs one cluster per application in the same way.
+
+## D40 Keycloak memory: 1 GiB requested, 2 GiB limit
+
+The `Keycloak` resource sets a memory request of 1 GiB and a limit of 2
+GiB, over the operator's default request of 1700 MiB with the same limit.
+A few minutes after a restart, with realm `master` and realm `gate` from
+the phase gate and no application sessions, Keycloak's working set was 564
+MiB; a second read about seven minutes after start gave 536 MiB (kubelet
+stats summary, 2026-11-17; the cluster has no metrics API). Keycloak gives
+the JVM heap 70% of the container limit, and needs about 300 MB outside
+the heap on top (sizing guide), so the limit is kept and the heap stays as
+it was. The request drops so that one Keycloak does not reserve almost a
+quarter of a node's 7.1 GiB allocatable memory. The sizing guide's 1250 MB
+base per pod includes 10,000 cached sessions, which a lab will not reach,
+so a request below it is intended. No CPU request or limit: the same stats
+read showed 1.3 cores in use shortly after start and under 15 millicores
+for the database and operator pods. Evidence: tested (kubelet stats
+summary of `keycloak-0`, 2026-11-17), docs (Keycloak memory and CPU
+sizing), the owner's approval on 2026-11-17.
