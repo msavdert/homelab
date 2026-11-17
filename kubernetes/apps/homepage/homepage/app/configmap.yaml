@@ -25,5 +25,6 @@ data:
           timeStyle: short
           hour12: false
   docker.yaml: ""
+  proxmox.yaml: ""
   custom.css: ""
   custom.js: ""

@@ -3,9 +3,11 @@
 # Homepage's own OIDC against realm lab (D41); the variable names are those
 # of "Security & Authentication" on the installation page.
 # The tag is updated by Renovate's kubernetes manager.
-# The read-only root filesystem and the two emptyDir volumes (logs and the
-# Next.js cache) are an assumption until a run on the cluster shows that
-# Homepage starts with them; drop the setting if it does not.
+# Read-only root filesystem: Homepage copies every file of
+# /app/src/skeleton that is missing from /app/config on a page load and
+# exits when it cannot, so each of those files is mounted from the
+# ConfigMap (nine in v2.8.0; check the list on upgrade). Logs and the
+# Next.js cache are emptyDir volumes.
 # Resources: the memory figures are an assumption, to be set from measured
 # use like D40; no CPU limit.
 apiVersion: apps/v1
@@ -116,6 +118,9 @@ spec:
             - mountPath: /app/config/docker.yaml
               name: homepage-config
               subPath: docker.yaml
+            - mountPath: /app/config/proxmox.yaml
+              name: homepage-config
+              subPath: proxmox.yaml
             - mountPath: /app/config/kubernetes.yaml
               name: homepage-config
               subPath: kubernetes.yaml
