@@ -1,0 +1,58 @@
+---
+# Keycloak (D38). Field names from the operator's CRD at 26.8.2. The image
+# is the operator's default (RELATED_IMAGE_KEYCLOAK), so a bump of the
+# operator's tag moves the operator and Keycloak in one step; the
+# image-first order in D38 applies only to a custom spec.image. Minor and
+# major bumps are upgrade drills (.renovaterc.json5).
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  instances: 1
+  db:
+    vendor: postgres
+    host: keycloak-db-rw
+    port: 5432
+    database: app
+    usernameSecret:
+      name: keycloak-db-app
+      key: username
+    passwordSecret:
+      name: keycloak-db-app
+      key: password
+  bootstrapAdmin:
+    user:
+      secret: keycloak-admin
+  # Envoy terminates TLS and forwards plain HTTP with X-Forwarded-*
+  # headers; Keycloak builds its URLs from the public name.
+  http:
+    httpEnabled: true
+  hostname:
+    hostname: https://keycloak.lab.savdert.com
+  proxy:
+    headers: xforwarded
+  # The route is the HTTPRoute next to this file.
+  ingress:
+    enabled: false
+  # spec.networkPolicy stays at its default: the operator creates a
+  # NetworkPolicy that admits HTTP from any source (so Envoy reaches it)
+  # and limits the clustering ports to Keycloak's own pods.
+  # Resources stay at the operator's default until phase 8 decides them
+  # from observed usage.
+  unsupported:
+    # The restricted pod security level. The operator uses this template
+    # as the basis of the StatefulSet and edits only the first container's
+    # name, image, ports and env (KeycloakDeploymentDependentResource).
+    podTemplate:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        containers:
+          - name: keycloak
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]

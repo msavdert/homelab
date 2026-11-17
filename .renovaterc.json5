@@ -17,7 +17,8 @@
   labels: ["dependencies"],
   prConcurrentLimit: 5,
   commitBodyTable: true,
-  // Flux objects under kubernetes/: OCIRepository tags of the charts.
+  // Flux objects under kubernetes/: OCIRepository tags of the charts and
+  // GitRepository tags (the Keycloak Operator).
   flux: {
     managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
   },
@@ -75,7 +76,7 @@
     },
     {
       description: "Components of the cluster move with an upgrade drill (D23)",
-      matchPackageNames: ["/siderolabs/", "/talos/", "/cilium/", "/flux/", "/cloudnative-pg/"],
+      matchPackageNames: ["/siderolabs/", "/talos/", "/cilium/", "/flux/", "/cloudnative-pg/", "/keycloak/"],
       matchUpdateTypes: ["minor", "major"],
       groupName: null,
       labels: ["dependencies", "upgrade-drill"],

@@ -1,0 +1,12 @@
+---
+# Keycloak, its operator and its database cluster keycloak-db (D38, D39).
+# Neither the operator's Deployment nor the Keycloak pod it builds sets a
+# securityContext (operator 26.8.2 manifests and source); both images run
+# as uid 1000. The settings restricted asks for are added in
+# keycloak-operator/ks.yaml and in the Keycloak resource.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloak
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
