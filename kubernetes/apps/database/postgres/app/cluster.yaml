@@ -27,8 +27,23 @@ spec:
     enablePodAntiAffinity: true
     podAntiAffinityType: required
     topologyKey: kubernetes.io/hostname
+  # D45: a rebuilt cluster recovers from the previous archive generation
+  # and archives under the next one. Bootstrap only runs at creation.
+  bootstrap:
+    recovery:
+      source: previous
+      database: app
+      owner: app
+  externalClusters:
+    - name: previous
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: object-storage
+          serverName: postgres
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
         barmanObjectName: object-storage
+        serverName: postgres-g2
