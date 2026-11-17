@@ -38,8 +38,14 @@ spec:
   # spec.networkPolicy stays at its default: the operator creates a
   # NetworkPolicy that admits HTTP from any source (so Envoy reaches it)
   # and limits the clustering ports to Keycloak's own pods.
-  # Resources stay at the operator's default until phase 8 decides them
-  # from observed usage.
+  # D40: about 550 MiB working set a few minutes after start; the JVM heap
+  # is 70% of the limit, so the limit stays at the operator's default 2Gi
+  # and only the request is lowered from its default 1700Mi.
+  resources:
+    requests:
+      memory: 1Gi
+    limits:
+      memory: 2Gi
   unsupported:
     # The restricted pod security level. The operator uses this template
     # as the basis of the StatefulSet and edits only the first container's
