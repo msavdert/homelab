@@ -1,0 +1,20 @@
+---
+# Metrics and the dashboard for every CloudNativePG cluster (D42). After
+# victoria-metrics, whose HelmRelease installs the VMPodScrape CRD.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cnpg-monitoring
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: victoria-metrics
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+  path: ./kubernetes/apps/observability/cnpg-monitoring/app
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

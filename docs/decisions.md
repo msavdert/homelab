@@ -700,7 +700,8 @@ Scraping:
   `spec.monitoring.enablePodMonitor` is deprecated, and the operator's
   conversion of Prometheus Operator resources needs their CRDs, which the
   VictoriaMetrics operator does not install. The conversion is turned off
-  and those CRDs are not installed.
+  and those CRDs are not installed. A second `VMPodScrape` scrapes the
+  CloudNativePG operator, whose metrics the dashboard's operator panels use.
 - Talos: kube-proxy is not scraped (Cilium replaces it). etcd, the
   scheduler and the controller manager are not scraped in this phase: etcd
   serves metrics only after a machine config change (port 2381), and Talos
@@ -714,6 +715,26 @@ metrics page; opentelemetry-kube-stack 0.27.1 Chart.yaml; all read
 2026-11-17), reference (buroa/home-ops and onedr0p/home-ops observability
 HelmReleases, kube-prometheus-stack 93.3.1), the owner's `obenhub` ADR 0002,
 judgment. The owner left the choice to the architect on 2026-11-17.
+
+Settled while building, 2026-11-17:
+- vmalert stays and evaluates the chart's recording and alerting rules,
+  which the dashboards use; Alertmanager is off and vmalert runs with
+  `-notifier.blackhole`, so alerts go nowhere until a receiver is chosen.
+- VMSingle keeps 30 days in a 20 GiB volume (the chart's default size) on
+  local-path; the data disk has 100 GiB per node.
+- The release is named `vm`: the subcharts name their objects after the
+  release, so Grafana's Service is `vm-grafana`.
+- The VictoriaMetrics CRDs stay plain (the default, `crds.plain: true`):
+  the operator chart's `crds` subchart carries them in its `crds/`
+  directory; templated CRDs fail the first install, because Helm maps the
+  VMAgent and VMSingle of the same release before any CRD exists (tested in
+  a throwaway kind cluster, 2026-11-17). Flux upgrades them
+  (`upgrade.crds: CreateReplace`), and the chart's uninstall hook that
+  deletes them is off.
+- Accepted: the chart's sync Job downloads the dashboards and rules from
+  upstream `master` branches at every install and upgrade, so they are not
+  pinned and the install needs GitHub. Pinning them would mean keeping
+  copies in Git, which the lab does not need.
 
 ## D43 Grafana login: Grafana's own OIDC against Keycloak realm `lab`
 

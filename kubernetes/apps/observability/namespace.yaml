@@ -1,0 +1,11 @@
+---
+# Monitoring (D42). Privileged because node-exporter needs the host network
+# and PID namespace. The level applies to the whole namespace; the other
+# pods run with the chart's own security contexts, not all of which meet
+# level restricted (the sync Job sets none).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
