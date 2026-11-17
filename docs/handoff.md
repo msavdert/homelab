@@ -3,10 +3,10 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-17, phase 9 (start page: Homepage behind a Keycloak
-login) closed. Phase 10, monitoring, is open (D42, D43). The owner also
-asked what Pi-hole and Uptime Kuma are (summarised in the session of
-2026-11-17); neither is planned.
+Last updated: 2026-11-17, phase 10 (monitoring) closed. Every phase of
+the roadmap is done; the next work is for the owner to choose (see "For
+the architect"). The owner asked what Pi-hole and Uptime Kuma are
+(summarised in the session of 2026-11-17); neither is planned.
 
 ## How to start a session
 
@@ -101,6 +101,15 @@ asked what Pi-hole and Uptime Kuma are (summarised in the session of
   `homelab-cluster`). Applications appear on the page from annotations on
   their `HTTPRoute`. How, and the gate output:
   [Homepage](guide/09-homepage.md).
+- **Phase 10 (monitoring): done 2026-11-17.** victoria-metrics-k8s-stack
+  0.98.1 as release `vm` in namespace `observability` (privileged, for
+  node-exporter): VMSingle (30 days, 20 GiB), VMAgent, vmalert without
+  Alertmanager, kube-state-metrics, node-exporter, and Grafana at
+  `https://grafana.lab.savdert.com` with its own OIDC against realm `lab`,
+  client `grafana` (D42, D43; item `grafana`). Every CloudNativePG cluster
+  is scraped through one `VMPodScrape`. The tool used 933 MiB after start
+  and 1310 MiB seven hours later. How, and the gate output:
+  [Monitoring](guide/10-monitoring.md).
 - Checked and working on 2026-11-15: the Proxmox token (four permission
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
@@ -194,8 +203,12 @@ raw API calls, not with OpenTofu.
   flux manager documents it, but no pull request has arrived yet.
 - Behaviour of the bootstrap admin when item `keycloak` changes (believed
   not to apply, see the Keycloak guide).
-- Rotating the client secret of `homepage` (Homepage guide, "Day-two
-  tasks").
+- Rotating the client secret of `homepage` or `grafana` (Homepage and
+  Monitoring guides, "Day-two tasks").
+- The memory of the monitoring tool after days of data; only the first
+  seven hours were measured (Monitoring guide, "Day-two tasks").
+- etcd, scheduler and controller manager metrics on Talos (not scraped,
+  D42).
 
 ## Waiting on the owner
 
@@ -278,5 +291,17 @@ accepted:
 - A Renovate bump of Homepage: list `/app/src/skeleton` in the new image
   first; every file there needs a ConfigMap entry and a mount, or the pod
   crashes after login (Homepage guide, "Day-two tasks").
+- Grafana: `https://grafana.lab.savdert.com`; queries from the box go to
+  VMSingle through `kubectl -n observability port-forward svc/vmsingle-vm
+  8428`. A new application is scraped with a `VMServiceScrape` or
+  `VMPodScrape`, not a `ServiceMonitor` (D42). OpenTelemetry metrics can go
+  to `/opentelemetry/v1/metrics` on VMSingle once a collector is decided.
+- A subagent that runs `kind` from inside the clone writes into the
+  clone's `kubeconfig`; give it its own `KUBECONFIG` (Monitoring guide,
+  "When it goes wrong").
+- Candidates for the next phase, none decided: alerting (an Alertmanager
+  receiver), logs (VictoriaLogs, which both reference repositories run),
+  an OpenTelemetry Collector shared with the owner's `obenhub`, etcd
+  metrics on Talos, the open phase 7 follow-up 6b (D37).
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.
