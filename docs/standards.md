@@ -72,7 +72,8 @@ same pull request; a page that is not in `nav` is not linked on the site.
   directory is created by the phase that fills it.
 - Kubernetes: `kubernetes/apps/<namespace>/<app>/` with `ks.yaml` (the Flux
   Kustomization) and `app/` (`kustomization.yaml`, `ocirepository.yaml`,
-  `helmrelease.yaml`, chart values in `values.yaml`); see D32. Resources
+  `helmrelease.yaml`, chart values inline or in `values.yaml`); see D32
+  and D44. Resources
   of the app's own CRDs go in a second directory next to `app/` (such as
   `stores/`), with its own Flux Kustomization in the same `ks.yaml` that
   depends on the first, so the CRDs exist before they are used.

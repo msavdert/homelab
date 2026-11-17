@@ -48,7 +48,7 @@ merges in this order (D06):
 
 | File | Applies to | Says |
 |---|---|---|
-| `talos/patches/cluster.yaml` | every node | the installer image; no flannel |
+| `talos/patches/cluster.yaml` | every node | the installer image; no flannel; from phase 6 a `UserVolumeConfig` for the data disk (Storage guide) |
 | `talos/patches/controlplane.yaml` | control-plane nodes (all three) | no kube-proxy; the virtual IP; no control-plane taint |
 | `talos/nodes/k8s-N.yaml` | one node | its hostname |
 
