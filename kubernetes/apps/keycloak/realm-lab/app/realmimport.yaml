@@ -10,6 +10,13 @@ metadata:
   name: lab
 spec:
   keycloakCRName: keycloak
+  # The import Job does not inherit the Keycloak resource's memory (D40);
+  # without this it requests the operator default of 1700 MiB.
+  resources:
+    requests:
+      memory: 1Gi
+    limits:
+      memory: 2Gi
   placeholders:
     HOMEPAGE_CLIENT_SECRET:
       secret:

@@ -5,19 +5,9 @@ metadata:
   name: homepage
   labels:
     app.kubernetes.io/name: homepage
-secrets:
-  - name: homepage
----
-# Long-lived token of the ServiceAccount, as in the upstream manifests.
-apiVersion: v1
-kind: Secret
-type: kubernetes.io/service-account-token
-metadata:
-  name: homepage
-  labels:
-    app.kubernetes.io/name: homepage
-  annotations:
-    kubernetes.io/service-account.name: homepage
+# No long-lived token Secret as in the upstream manifests: the pod gets a
+# projected, short-lived token (automountServiceAccountToken), and the name
+# `homepage` belongs to the Secret from the ExternalSecret.
 ---
 # The upstream ClusterRole without its traefik, ingress and metrics.k8s.io
 # rules: this cluster has no Traefik, no Ingress and no metrics API.
