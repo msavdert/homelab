@@ -129,13 +129,19 @@ cmd_upgrade() {
   talosctl --nodes "$ip" upgrade --image "$image" "$@"
 }
 
+# Upgrade Kubernetes to KUBERNETES_VERSION (mise.toml) through k8s-1; extra
+# arguments go to talosctl (--dry-run shows the plan).
+cmd_upgrade_k8s() {
+  talosctl --nodes "$(address k8s-1)" upgrade-k8s --to "$KUBERNETES_VERSION" "$@"
+}
+
 # Print the Image Factory ID of schematic.yaml.
 cmd_schematic() {
   curl -fsS -X POST --data-binary @talos/schematic.yaml https://factory.talos.dev/schematics | jq -r .id
 }
 
 cmd="${1:-}"
-[ -n "$cmd" ] || die "usage: talos.sh secrets|render|apply|config|bootstrap|kubeconfig|upgrade|schematic [args]"
+[ -n "$cmd" ] || die "usage: talos.sh secrets|render|apply|config|bootstrap|kubeconfig|upgrade|upgrade-k8s|schematic [args]"
 shift
 case "$cmd" in
   secrets) cmd_secrets "$@" ;;
@@ -145,6 +151,7 @@ case "$cmd" in
   bootstrap) cmd_bootstrap "$@" ;;
   kubeconfig) cmd_kubeconfig "$@" ;;
   upgrade) cmd_upgrade "$@" ;;
+  upgrade-k8s) cmd_upgrade_k8s "$@" ;;
   schematic) cmd_schematic "$@" ;;
   *) die "unknown command: $cmd" ;;
 esac

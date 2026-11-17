@@ -109,12 +109,13 @@ fluxinstance.fluxcd.controlplane.io/flux condition met
 kustomization.kustomize.toolkit.fluxcd.io/flux-system condition met
 ```
 
-The output is from the first run; the task has since gained two more
-waits (every Kustomization, every HelmRelease), which print further
-"condition met" lines. It installs flux-operator with Helm from
-`flux-operator/app/`,
-applies the FluxInstance and waits until the FluxInstance, every
-Kustomization and every HelmRelease is Ready. Flux then manages
+The output is from the first run; the task has since gained waits for
+HelmReleases `cilium` and `flux-operator`, which print further
+"condition met" lines and a last line on how to watch the rest. It
+installs flux-operator with Helm from `flux-operator/app/`,
+applies the FluxInstance and waits until the FluxInstance and the two
+bootstrap releases are Ready; the other Kustomizations keep reconciling
+(`flux get kustomizations -A --watch`). Flux then manages
 flux-operator and the FluxInstance like any other application.
 
 After this, `bootstrap:cilium` and `bootstrap:flux` are for an empty
