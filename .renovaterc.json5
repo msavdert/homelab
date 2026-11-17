@@ -22,7 +22,8 @@
   flux: {
     managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
   },
-  // Container images in plain manifests under kubernetes/ (the echo fixture).
+  // Container images in plain manifests under kubernetes/ (none today; kept
+  // for applications installed without a chart).
   kubernetes: {
     managerFilePatterns: ["/^kubernetes/.+\\.ya?ml$/"],
   },
