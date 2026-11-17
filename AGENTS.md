@@ -24,6 +24,12 @@ Nothing is done until its gate has passed on the real system.
 - One phase is open at a time (`docs/roadmap.md` says which). A phase ends
   when every gate command passes and the output is shown to the owner.
 - No manifests, directories or code for a later phase.
+- Between phases, when none is open, maintenance is allowed: fixes,
+  documentation, CI, comments and configuration of what already exists
+  (review follow-ups, routine Renovate updates). Each pull request states
+  its purpose and the checks that prove it, and the audit holds it to
+  those. Work that needs a live gate of its own (a new component, a drill
+  that destroys or rebuilds something) opens a new phase instead.
 - `docs/roadmap.md` says what is built and what comes next.
   `docs/architecture.md` and `docs/decisions.md` describe the whole design,
   including layers that are not built yet; they are kept as they are until
@@ -77,10 +83,10 @@ Routing rules:
 - Commands that change a live system are run by the architect only, after
   the plan or diff was shown: `tofu apply/destroy`, `talosctl apply-config`,
   `upgrade`, `upgrade-k8s`, `reset`, `reboot`, `bootstrap`, `kubectl apply`,
-  `create`, `delete`, `drain`, `cordon` and `uncordon` outside Flux, any
-  Proxmox write, any 1Password write. Gate commands that do any of these
-  are the architect's too. `grunt` and `locate`
-  never run them.
+  `create`, `delete`, `edit`, `patch`, `drain`, `cordon` and `uncordon`
+  outside Flux, any Proxmox write, any 1Password write. Gate commands that
+  do any of these are the architect's too. `executor`, `grunt` and
+  `locate` never run them; their definitions repeat this list.
 
 ## Changes, releases and updates
 
