@@ -30,4 +30,4 @@ application, is open. The
 
 A guide is added when its phase is finished and verified. They are listed
 under "Guide" in the navigation, from [00 Repository](guide/00-repository.md)
-to [07 Database](guide/07-database.md).
+to [10 Monitoring](guide/10-monitoring.md).

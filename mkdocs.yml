@@ -24,3 +24,4 @@ nav:
       - 07 Database: guide/07-database.md
       - 08 Keycloak: guide/08-keycloak.md
       - 09 Homepage: guide/09-homepage.md
+      - 10 Monitoring: guide/10-monitoring.md
