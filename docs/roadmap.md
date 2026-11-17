@@ -852,9 +852,14 @@ and Alertmanager is off (D42); the whole stack sits in the cluster it
 watches, on one host.
 
 **Needs from the owner**
-- Nothing new (owner, 2026-11-17: the owner prepares nothing for this
-  phase, the note in phase 11 included, and the plan is followed as
-  written). The phase reuses what the owner already runs for
+- One thing, asked for when the phase reaches it and not before (owner,
+  2026-11-17): a Telegram bot of the lab's own. When the receiver is
+  the next thing to build, the architect tells the owner; the owner
+  creates the bot, sends it one message so that it may answer, and
+  gives the token and chat id, or the name of the item holding them.
+  Everything else in the phase goes on meanwhile and the owner prepares
+  nothing else, the note in phase 11 included. The rest reuses what the
+  owner already runs for
   `perp-live` on the agent box, read in that repository on 2026-11-17
   (`docs/decisions/0002-canary-monitoring.md`,
   `docs/operations/monitoring.md`, `src/perplive/alarm.py`):
@@ -863,10 +868,10 @@ watches, on one host.
     `dotfiles`; `perp-live` creates its checks through the management
     API and pings `hc-ping.com/<ping key>/<slug>`. Its dead man's check
     alarms by email and a Bark push, both outside the host.
-  - Notification: Alertmanager's own Telegram receiver with the bot
-    `perp-live` pushes through (item `Hermes`, vault `dotfiles`), or
-    email. Unverified: the fields of that item and that the bot may
-    post to the owner's chat from a second sender.
+  - Notification: Alertmanager's own Telegram receiver with the lab's
+    new bot. The bot `perp-live` pushes through (item `Hermes`, vault
+    `dotfiles`) is not used, so no secret of `dotfiles` is copied into
+    the cluster.
 - The architect creates one check, `homelab-watchdog` (tag `homelab`),
   and attaches the channels the `perp-live` check has; which those are
   is read from the account, not from `perp-live`'s code, where the owner
@@ -933,14 +938,10 @@ watches, on one host.
   to the owner's channel, grouped so that one fault is one message.
 
 **Decide here**
-- The channel for ordinary alerts. Default: Telegram with the existing
-  bot. If its item lacks what the receiver needs, or the bot cannot
-  post from a second sender, stop and ask; email has no credentials
-  named anywhere and is not a silent fallback.
-- The shared bot token. Copying it into `homelab-cluster` puts a secret
-  of `dotfiles` inside the cluster, and whoever takes it there can post
-  as the bot `perp-live` uses. Record it as an accepted risk, or ask the
-  owner for a bot of the lab's own.
+- Nothing about the channel: ordinary alerts go to Telegram through the
+  lab's own bot (owner, 2026-11-17). If the bot cannot post to the
+  owner's chat, stop and ask; email has no credentials named anywhere
+  and is not a silent fallback.
 - Whether the default rules and dashboards stay unpinned (D42). Once rules
   page a person, a change upstream changes what pages without a pull
   request. Criteria: pin (copies in Git, or the chart's sync switched off)
