@@ -1,0 +1,35 @@
+---
+# Cluster keycloak-db with its backups (D39) and Keycloak itself (D38).
+# Ready only when the database is healthy and Keycloak reports Ready.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: keycloak
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: external-secrets-stores
+    - name: local-path-provisioner
+    - name: plugin-barman-cloud
+    - name: keycloak-operator
+    # The HTTPRoute CRD and Gateway lab (D34).
+    - name: envoy-gateway-gateway
+  interval: 1h
+  retryInterval: 2m
+  timeout: 15m
+  path: ./kubernetes/apps/keycloak/keycloak/app
+  prune: true
+  wait: true
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+    - apiVersion: k8s.keycloak.org/v2beta1
+      kind: Keycloak
+      current: status.conditions.exists(e, e.type == 'Ready' && e.status == 'True')
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

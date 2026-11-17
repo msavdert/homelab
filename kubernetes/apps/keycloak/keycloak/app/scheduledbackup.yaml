@@ -1,0 +1,16 @@
+---
+# Daily base backup at 03:30 UTC, after cluster postgres; six fields, the
+# first is seconds. immediate takes the first backup at once for the gate.
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: keycloak-db-daily
+spec:
+  schedule: "0 30 3 * * *"
+  immediate: true
+  backupOwnerReference: self
+  method: plugin
+  cluster:
+    name: keycloak-db
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

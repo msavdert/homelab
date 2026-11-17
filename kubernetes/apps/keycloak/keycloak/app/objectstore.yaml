@@ -1,0 +1,40 @@
+---
+# s3://homelab/cnpg/keycloak-db/ (D24, D39); the cluster name is appended
+# to the destination path. Same settings as cluster postgres (D36).
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: object-storage
+spec:
+  # As cluster postgres while follow-up 6b of phase 7 is open (D37).
+  retentionPolicy: 1d
+  configuration:
+    destinationPath: s3://homelab/cnpg/
+    s3AddressingStyle: path
+    s3Credentials:
+      accessKeyId:
+        name: object-storage
+        key: access-key
+      secretAccessKey:
+        name: object-storage
+        key: secret-key
+      region:
+        name: object-storage
+        key: region
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  # The sidecar reads env only when an instance pod is created (plugin
+  # issue #918); after a change here, run `kubectl cnpg restart`.
+  instanceSidecarConfiguration:
+    env:
+      - name: AWS_ENDPOINT_URL_S3
+        valueFrom:
+          secretKeyRef:
+            name: object-storage
+            key: endpoint
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
