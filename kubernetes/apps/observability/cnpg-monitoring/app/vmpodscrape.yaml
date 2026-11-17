@@ -1,0 +1,34 @@
+---
+# Every CloudNativePG instance in every namespace, port metrics (9187). The
+# Cluster field spec.monitoring.enablePodMonitor is deprecated and would
+# create a Prometheus Operator PodMonitor, which this cluster does not have.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: cnpg-instances
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      cnpg.io/podRole: instance
+  podMetricsEndpoints:
+    - port: metrics
+      scheme: http
+---
+# The CloudNativePG operator (port metrics, 8080): the dashboard's operator
+# panels use its controller_runtime_* metrics.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: cnpg-operator
+spec:
+  namespaceSelector:
+    matchNames:
+      - cnpg-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+  podMetricsEndpoints:
+    - port: metrics
+      scheme: http

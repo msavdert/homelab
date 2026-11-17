@@ -1,0 +1,99 @@
+---
+# victoria-metrics-k8s-stack (D42). Values differ from the chart defaults
+# only where a comment says why. The chart's post-install sync Job creates
+# the dashboards (ConfigMaps) and the recording and alerting rules (VMRules)
+# from upstream master branches at install and upgrade time: not in Git and
+# not pinned (D42).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  interval: 1h
+  timeout: 10m
+  # Release name vm, not the default (the HelmRelease name): the subcharts
+  # (Grafana, kube-state-metrics, node-exporter) name their objects after
+  # the release and ignore fullnameOverride below.
+  releaseName: vm
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics-k8s-stack
+  # Helm itself never upgrades CRDs from crds/; Flux does with these.
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values:
+    # Short names for the VM resources: VMSingle vm, VMAgent vm.
+    fullnameOverride: vm
+    victoria-metrics-operator:
+      crds:
+        # The chart's default plain CRDs: the operator chart's crds subchart
+        # holds them in its crds/ directory, installed before the templates
+        # and upgraded by spec.upgrade.crds. Templated
+        # CRDs cannot be installed in the same release as the VMAgent and
+        # VMSingle that use them.
+        plain: true
+        # The chart's uninstall hook would delete the CRDs and every
+        # VictoriaMetrics resource with them.
+        cleanup:
+          enabled: false
+      operator:
+        # No Prometheus Operator CRDs in the cluster; scrapes are VM
+        # resources (D42).
+        disable_prometheus_converter: true
+    vmsingle:
+      spec:
+        retentionPeriod: 30d
+        storage:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+    vmalert:
+      spec:
+        extraArgs:
+          # No Alertmanager yet: vmalert evaluates the recording rules the
+          # dashboards use; alerts go nowhere (D42).
+          notifier.blackhole: "true"
+    alertmanager:
+      enabled: false
+    # Talos: not scraped in this phase (D42). kube-proxy is off by default.
+    kubeEtcd:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    defaultDashboards:
+      dashboards:
+        etcd:
+          enabled: false
+    grafana:
+      # Keys admin-user and admin-password (ExternalSecret grafana).
+      admin:
+        existingSecret: grafana
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana
+            key: oidc-client-secret
+      grafana.ini:
+        server:
+          root_url: https://grafana.lab.savdert.com
+        # D43: every user of realm lab is Admin; the realm holds only owner.
+        auth.generic_oauth:
+          enabled: true
+          name: Keycloak
+          client_id: grafana
+          scopes: openid profile email
+          auth_url: https://keycloak.lab.savdert.com/realms/lab/protocol/openid-connect/auth
+          token_url: https://keycloak.lab.savdert.com/realms/lab/protocol/openid-connect/token
+          api_url: https://keycloak.lab.savdert.com/realms/lab/protocol/openid-connect/userinfo
+          # Double quotes inside the value: Grafana's ini parser strips bare
+          # single quotes, and JMESPath needs 'Admin' as a literal.
+          role_attribute_path: "\"'Admin'\""
+          role_attribute_strict: true
+          use_pkce: true

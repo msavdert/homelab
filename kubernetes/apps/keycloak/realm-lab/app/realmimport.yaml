@@ -22,6 +22,10 @@ spec:
       secret:
         name: realm-lab
         key: homepage-client-secret
+    GRAFANA_CLIENT_SECRET:
+      secret:
+        name: realm-lab
+        key: grafana-client-secret
     OWNER_PASSWORD:
       secret:
         name: realm-lab
@@ -43,6 +47,21 @@ spec:
           - https://home.lab.savdert.com
         attributes:
           post.logout.redirect.uris: "https://home.lab.savdert.com/*"
+      # Added on 2026-11-17 with kcadm.sh (D43); realm lab already existed.
+      - clientId: grafana
+        name: Grafana
+        protocol: openid-connect
+        publicClient: false
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: false
+        secret: "${GRAFANA_CLIENT_SECRET}"
+        redirectUris:
+          - https://grafana.lab.savdert.com/login/generic_oauth
+        webOrigins:
+          - https://grafana.lab.savdert.com
+        attributes:
+          pkce.code.challenge.method: S256
+          post.logout.redirect.uris: "https://grafana.lab.savdert.com/*"
     users:
       - username: owner
         enabled: true

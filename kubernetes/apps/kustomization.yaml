@@ -14,3 +14,4 @@ resources:
   - ./kube-system
   - ./local-path-storage
   - ./network
+  - ./observability

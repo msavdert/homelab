@@ -693,22 +693,22 @@ Grafana's own OIDC against realm `lab` (D43).
   `https://grafana.lab.savdert.com/login/generic_oauth`), created with
   `kcadm.sh` and written into the `KeycloakRealmImport`.
 - Namespace `observability`, pod security level `privileged` because
-  node-exporter needs the host network and PID namespace; every other pod
-  is kept within `restricted` where the chart allows it.
+  node-exporter needs the host network and PID namespace; the other pods
+  keep the chart's own security contexts.
 - The chart from its OCI repository through an `OCIRepository` and one
   `HelmRelease`: VMSingle on local-path storage, VMAgent, kube-state-metrics,
   node-exporter, Grafana. kube-proxy, etcd, scheduler and controller manager
   scraping off; Prometheus conversion off (D42).
-- A `VMPodScrape` for every CloudNativePG instance, the CloudNativePG
-  dashboard, an `ExternalSecret` on item `grafana`, and an `HTTPRoute`
-  through Gateway `lab`.
+- A `VMPodScrape` for every CloudNativePG instance and one for the
+  operator, the CloudNativePG dashboard, an `ExternalSecret` on item
+  `grafana`, and an `HTTPRoute` through Gateway `lab`.
 
 **Decide here**
 - Whether vmalert and Alertmanager stay. The dashboards rely on recording
   rules that vmalert evaluates; Alertmanager has no receiver yet. Record
-  the outcome with D42.
+  the outcome with D42. Decided: vmalert stays, Alertmanager off (D42).
 - Retention and the VMSingle volume size, from the chart default and the
-  data disk (100 GiB per node).
+  data disk (100 GiB per node). Decided: 30 days, 20 GiB (D42).
 
 **Prove here**
 - Grafana reaches the issuer at `keycloak.lab.savdert.com` from inside the
