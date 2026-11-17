@@ -783,3 +783,46 @@ instance, so a restart of its node still restarts the application.
 Evidence: review of 2026-11-17 (V12, V17 and the accepted risk on D39),
 checked against `.renovaterc.json5` and the HelmReleases under
 `kubernetes/apps/`.
+
+## D45 A rebuilt cluster recovers its databases and archives under a new server name
+
+On a rebuild both CloudNativePG clusters, `postgres` and `keycloak-db`,
+bootstrap with `bootstrap.recovery` from an `externalClusters` entry that
+reads their previous archive through the Barman Cloud plugin
+(`barmanObjectName: object-storage`, `serverName` the previous name), and
+archive under a new name in `spec.plugins[].parameters.serverName`. This
+extends the prefix of D24 and D39: `cnpg/<server name>/`, where the
+server name defaults to the cluster name. Names count generations: the
+first archive is the cluster's own name (from `destinationPath
+s3://homelab/cnpg/` and the default; the gate lists the bucket), the next
+`<cluster>-g2`, then `-g3`. Each rebuild is one pull request that moves
+the source to the last archive and the target to the next generation; it
+is merged only after the old cluster is gone: merged earlier, Flux's
+apply fails, because a running cluster refuses a second bootstrap method
+(tested below).
+
+Over: starting empty under a new name (loses Keycloak's realms, users and
+clients, which `KeycloakRealmImport` does not re-create once the realm
+exists, D41), and `cnpg.io/skipEmptyWalArchiveCheck` on the old name
+(the documentation strongly discourages it: two timelines in one archive).
+
+The old archive is kept as the restore point of the previous generation.
+The plugin's retention is assumed to act only on the server name in use,
+so the old prefix is not pruned; it is deleted by hand, with the owner's
+approval, once the new generation has a completed base backup and the
+drill has passed.
+
+Evidence: docs (CloudNativePG recovery page: the empty-archive safety
+check, "ensure that each cluster uses a unique serverName"; plugin usage
+page: recovery through `externalClusters[].plugin` does not enable WAL
+archiving, `spec.plugins` with `isWALArchiver` does; Keycloak's CNPG
+recovery guide uses a different `serverName` for the recovered cluster
+"to prevent accidental overwrites"; read 2026-11-17), tested (a server-side dry run of the
+recovery manifest against the running `postgres` was refused with
+`spec.bootstrap: Forbidden: Only one bootstrap method can be specified at
+a time`, because the running cluster carries the defaulted `initdb`; the
+same manifest under a new name was accepted). Assumptions, to be
+proven in phase 11: retention per server name; that a cluster created
+by recovery reconciles cleanly with `bootstrap.recovery` still in Git;
+that the regenerated
+`<cluster>-app` Secret matches the recovered role.
