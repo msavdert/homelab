@@ -68,6 +68,7 @@ while IFS= read -r f; do
   fi
 done < <(git ls-files 'kubernetes/**kustomization.yaml' 'talos/**kustomization.yaml' | sort)
 echo "kustomize: built $n directories, $fail failed"
+[ "$n" -gt 0 ] || { echo "no kustomization.yaml found" >&2; exit 1; }
 [ "$fail" -eq 0 ]
 '''
 
