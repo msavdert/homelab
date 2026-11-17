@@ -4,9 +4,9 @@ Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
 Last updated: 2026-11-17, phase 9 (start page: Homepage behind a Keycloak
-login) closed. The next phase is 10, monitoring. The owner also asked what
-Pi-hole and Uptime Kuma are (summarised in the session of 2026-11-17);
-neither is planned.
+login) closed. Phase 10, monitoring, is open (D42, D43). The owner also
+asked what Pi-hole and Uptime Kuma are (summarised in the session of
+2026-11-17); neither is planned.
 
 ## How to start a session
 
@@ -205,7 +205,7 @@ raw API calls, not with OpenTofu.
 | Phase 8 | The name of the first application | done 2026-11-16: Keycloak |
 | Next phase | Which comes first: the start page or monitoring | done 2026-11-17: the start page (D41) |
 | Phase 9 | Login method, realm user name, 1Password items | done 2026-11-17: Homepage OIDC, user `owner`, items approved |
-| Phase 10 | Nothing known yet; read the phase before starting | - |
+| Phase 10 | Nothing; the owner left the tool and the login to the architect (D42, D43) | done 2026-11-17 |
 
 Everything else the earlier phases need is in place.
 
