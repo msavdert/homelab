@@ -34,7 +34,7 @@ Each phase lists:
 | 5 Ingress | done 2026-11-15, see [Ingress](guide/05-ingress.md) |
 | 6 Storage | done 2026-11-16, see [Storage](guide/06-storage.md) |
 | 7 First database | done 2026-11-16 (step 6b follow-up open, D37), see [Database](guide/07-database.md) |
-| 8 First application: Keycloak | open |
+| 8 First application: Keycloak | done 2026-11-17, see [Keycloak](guide/08-keycloak.md) |
 | 9 Monitoring | not started |
 
 ## Phase 0: repository foundation
@@ -555,7 +555,7 @@ gate.
 **Decide here**
 - Memory request and limit for Keycloak, from its usage after start. The
   operator's default is 1700 MiB requested and a 2 GiB limit; the sizing
-  guide gives 1250 MB as the base per pod.
+  guide gives 1250 MB as the base per pod. Decided: D40.
 - Backup of application volumes: none needed. Keycloak keeps its state in
   `keycloak-db`, which D15 backs up; D16 stands.
 
