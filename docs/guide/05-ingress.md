@@ -161,7 +161,9 @@ $ mise run dns:apply --check
 exists   A *.lab.savdert.com -> 10.0.6.20
 ```
 
-From the agent box, which reaches the VNet through the host:
+From the agent box, which reaches the VNet through the host. The echo
+fixture used here was removed after phase 8; repeat these checks against
+`keycloak.lab.savdert.com`:
 
 ```
 $ curl -sS -m 10 https://echo.lab.savdert.com/ -o /dev/null -w '%{http_code} %{ssl_verify_result}\n'
@@ -243,9 +245,6 @@ default; that case was not tested.
 - **Upgrade.** Renovate proposes the chart tags in the two
   `ocirepository.yaml` files. Envoy Gateway's CRDs move with the chart;
   read its upgrade notes for a Gateway API version change first.
-- **The echo fixture is removed.** Keycloak now proves the path through the
-  Gateway, so `gateway/echo.yaml` and its line in `gateway/kustomization.yaml`
-  were deleted.
 
 ## When it goes wrong
 

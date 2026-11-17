@@ -60,7 +60,7 @@ comes first.
   wildcard certificate that cert-manager v1.21.3 issues by DNS-01, and
   `mise run dns:apply` keeps the record `*.lab.savdert.com` in Cloudflare.
   Gateway API CRDs come from the Envoy Gateway chart (D34). The echo
-  fixture was removed once Keycloak was served. How, how
+  fixture was removed once Keycloak was served. How it works, how
   to expose a service, and the gate output: [Ingress](guide/05-ingress.md).
 - **Phase 6 (storage): done 2026-11-16.** The data disk of each node is
   the Talos user volume `local-path-provisioner` (`/dev/sdb1`, XFS,
