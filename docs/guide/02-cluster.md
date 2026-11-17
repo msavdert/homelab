@@ -434,13 +434,14 @@ are how `talosctl` reports the end of a step, not errors.
      `bootstrap:cilium`.
   4. `mise run bootstrap:secrets`. It creates namespace `external-secrets`
      and applies the token External Secrets reads 1Password with; without
-     it the next step waits for the store until it times out.
+     it every Kustomization that needs a Secret from 1Password stays not
+     Ready.
   5. `mise run bootstrap:flux`. It installs flux-operator, applies the
      FluxInstance and returns when Flux has adopted the two bootstrap
      releases (HelmReleases `cilium` and `flux-operator` are Ready). The
      other Kustomizations keep reconciling; watch them with
-     `flux get kustomizations -A --watch`. Flux adopts the Cilium and flux-operator releases in place,
-     and with the feature gate of D33 no pod should restart (shown for
+     `flux get kustomizations -A --watch`. Flux adopts the Cilium and
+     flux-operator releases in place, and with the feature gate of D33 no pod should restart (shown for
      flux-operator on a test cluster; a full rebuild has not been run).
 
 ## When it goes wrong
