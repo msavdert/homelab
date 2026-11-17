@@ -665,3 +665,70 @@ nine skeleton files of v2.8.0 are mounted from the ConfigMap; logs and the
 Next.js cache are `emptyDir` volumes. Evidence: tested (the crash on the
 cluster with eight files, reproduced and fixed with the same image under
 Docker, then the phase gate).
+
+## D42 Monitoring: victoria-metrics-k8s-stack, Prometheus-format scraping, OTLP later
+
+One HelmRelease of `victoria-metrics-k8s-stack` in namespace
+`observability`: the VictoriaMetrics operator, a single-node VMSingle, a
+VMAgent that scrapes, kube-state-metrics, node-exporter and the chart's
+Grafana with the kube-prometheus dashboards it ships. Metrics are scraped in
+Prometheus format; nothing is collected through OpenTelemetry in this phase.
+
+Over:
+- `kube-prometheus-stack`, which both reference repositories run. Both cap
+  Prometheus at a 4 GiB memory limit, twice the phase's budget of 2 GiB for
+  the whole tool, and run Grafana separately through grafana-operator.
+- An OpenTelemetry-native stack (`opentelemetry-kube-stack`). It installs
+  the OpenTelemetry operator and a collector but no storage and no Grafana,
+  so it is two tools. Nothing in the cluster emits OTLP today: CloudNativePG,
+  the kubelet, kube-state-metrics and node-exporter all expose Prometheus
+  metrics, and the dashboards for them expect Prometheus names, which the
+  collector's own receivers (kubeletstats) do not produce.
+
+Reason: VictoriaMetrics accepts OTLP metrics over HTTP (protobuf) at
+`/opentelemetry/v1/metrics`, and VictoriaLogs and VictoriaTraces are opt-in
+parts of the same chart, so OpenTelemetry is added later without replacing
+the store: a collector writes OTLP into the same VMSingle. The owner's
+`obenhub` project already uses an OpenTelemetry Collector with
+VictoriaMetrics, VictoriaLogs and VictoriaTraces as its reference backend,
+so queries, rules and dashboards can move between the two. Neither chart
+publishes memory figures, so "lighter than Prometheus" is an assumption;
+the gate measures it.
+
+Scraping:
+- CloudNativePG through a `VMPodScrape` written in Git: the Cluster field
+  `spec.monitoring.enablePodMonitor` is deprecated, and the operator's
+  conversion of Prometheus Operator resources needs their CRDs, which the
+  VictoriaMetrics operator does not install. The conversion is turned off
+  and those CRDs are not installed.
+- Talos: kube-proxy is not scraped (Cilium replaces it). etcd, the
+  scheduler and the controller manager are not scraped in this phase: etcd
+  serves metrics only after a machine config change (port 2381), and Talos
+  documents no metrics endpoint for the other two. Each is a later change
+  with its own record.
+
+Evidence: docs (victoria-metrics-k8s-stack 0.98.1 Chart.yaml, values.yaml
+and documentation page; VictoriaMetrics operator Prometheus integration and
+OpenTelemetry ingestion pages; CloudNativePG monitoring page; Talos etcd
+metrics page; opentelemetry-kube-stack 0.27.1 Chart.yaml; all read
+2026-11-17), reference (buroa/home-ops and onedr0p/home-ops observability
+HelmReleases, kube-prometheus-stack 93.3.1), the owner's `obenhub` ADR 0002,
+judgment. The owner left the choice to the architect on 2026-11-17.
+
+## D43 Grafana login: Grafana's own OIDC against Keycloak realm `lab`
+
+Grafana signs in with its generic OAuth against
+`https://keycloak.lab.savdert.com/realms/lab`, confidential client
+`grafana`, in the pattern of D41: no proxy in front, and every user of
+realm `lab` (only `owner`) gets the Grafana role Admin. The login form
+stays for the local `admin` user as the way in when Keycloak is down; its
+password and the client secret come from 1Password item `grafana` in vault
+`homelab-cluster` through an `ExternalSecret`.
+
+Realm `lab` exists, so the operator will not import it again (D41): the
+client is created with `kcadm.sh` and written back into the
+`KeycloakRealmImport`, so that a rebuilt cluster gets it.
+
+Evidence: judgment (D41 left an application with its own login to its own
+OIDC), docs to be read in phase 10 (Grafana generic OAuth for the pinned
+version).
