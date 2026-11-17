@@ -84,7 +84,8 @@ Talos nodes answer in maintenance mode".
 | Ingress | Envoy Gateway (Gateway API) | address from Cilium LB-IPAM, announced on the VNet |
 | Storage | local-path-provisioner | volumes on each node's data disk |
 | Object storage | bucket `homelab` (Oracle, S3-compatible) | `tofu/` state, `cnpg/` backups |
-| Databases | CloudNativePG | backups to an S3-compatible bucket |
+| Databases | CloudNativePG | backups to an S3-compatible bucket; one cluster per application (D39) |
+| Identity | Keycloak, by the Keycloak Operator | first application; SSO and the identity-integration lab (D38) |
 | Updates | Renovate | hosted GitHub app; opens pull requests |
 
 Left out on purpose: replicated storage (Rook-Ceph, Longhorn), a service
@@ -134,6 +135,7 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `cloudflare-dns` | `credential` (token limited to DNS edit on savdert.com) | the `dns:apply` task |
 | `cloudflare-dns` (vault `homelab-cluster`) | `credential` (same token) | cert-manager |
 | `object-storage` (vault `homelab-cluster`) | as above, but a key limited to bucket `homelab` | CloudNativePG backups |
+| `keycloak` (vault `homelab-cluster`) | `username`, `password` | Keycloak bootstrap admin |
 | `homelab-op-service-account` (vault `dotfiles`) | `credential` | tasks that read or write vault `homelab`; never given to the cluster |
 | `Proxmox API` (vault `dotfiles`) | `username`, `credential` | the administrator token; `infra/host/prepare.py` only |
 | `tailscale-oauth-readonly` (vault `dotfiles`) | `client-id`, `credential` | reading the tailnet policy and routes to check the owner's steps |

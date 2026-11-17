@@ -541,3 +541,70 @@ database guide, 2026-11-16), source (plugin v0.16.0
 `barman/retention_policies.py` as read at 3.12.1, while the sidecar runs
 3.20.1), the CRD read from the cluster, issues
 (plugin-barman-cloud #770, #1115).
+
+## D38 Identity provider: Keycloak, installed by its own operator
+
+The first application is Keycloak (26.8.2 when this was written), chosen
+over authentik, ZITADEL, Kanidm, Ory, Authelia with LLDAP, Pocket ID,
+Rauthy, Casdoor and Logto. The lab has two uses for an identity provider:
+single sign-on for the owner's applications, and practice of enterprise
+identity integration for databases and applications (LDAP and Active
+Directory federation, Kerberos). Every candidate does OIDC; the second use
+decides. Keycloak documents LDAP and Active Directory user federation and
+a Kerberos bridge as standard features, is Apache-2.0 with no paid feature
+tier, is a CNCF incubating project and is the base of Red Hat's commercial
+build, so the skill carries over to enterprise environments.
+
+authentik came closest: PostgreSQL only since 2025.10, Active Directory
+and LDAP sources, and an LDAP outpost that a database could bind against.
+It was not chosen because its Kerberos source is a preview, several
+directory integrations need its enterprise licence, and enterprise
+databases bind against Active Directory, which the lab will provide with a
+directory server in a later phase in any case. ZITADEL has no LDAP server
+and no Kerberos and moved to AGPL with v3; Kanidm keeps its state in an
+embedded store outside CloudNativePG and has neither SAML nor Kerberos;
+Ory keeps SAML in its enterprise edition and ships no login interface;
+Authelia, Pocket ID and Rauthy lack SAML or directory federation; Casdoor
+and Logto lack Kerberos. Keycloak is not a directory: LDAP, Kerberos and
+Active Directory practice needs a directory server, which is a phase of
+its own.
+
+Installation: the official Keycloak Operator in single-namespace mode,
+from the `keycloak-k8s-resources` kustomize resources at the release tag.
+Rejected: the operator's Helm chart (documented as experimental), the
+Bitnami chart (its images moved to an unmaintained legacy registry in
+2025), codecentric's `keycloakx` chart (third party) and a plain
+Deployment (an optimized start needs a custom image). One operator version
+supports one Keycloak version; an upgrade sets the new image first, then
+upgrades the operator. Deleting the operator's CRDs deletes every Keycloak
+resource, so they are excluded from pruning. `KeycloakRealmImport` only
+creates a realm and never updates one; how realm configuration is kept in
+Git is decided when the first client is added. Evidence: docs (Keycloak
+operator installation, basic deployment, advanced configuration, realm
+import and sizing pages; the documentation and READMEs of every
+candidate; all read 2026-11-16), judgment.
+
+## D39 Application databases: one CloudNativePG cluster per application
+
+Each application that needs PostgreSQL gets its own CloudNativePG cluster,
+over one shared cluster with a database per application. The CloudNativePG
+FAQ recommends one cluster per database. Recovery and major upgrades act
+on a whole cluster: a point-in-time restore of a shared cluster rewinds
+every application in it, and an in-place major upgrade stops them all at
+once. Cluster `postgres` (D27) stays the drill target, and a drill on it
+does not touch application data.
+
+An application cluster is named `<app>-db` and lives in the application's
+namespace, because the application reads the generated `<app>-db-app`
+Secret and Secrets do not cross namespaces. Defaults: two instances with
+pod anti-affinity, so that a node restart during a manual upgrade (D17)
+fails over instead of stopping the application; 5 GiB per instance with WAL
+on the same volume; image and plugin as in D36; its own `ObjectStore`
+writing to `cnpg/<app>-db/` (D24); a daily base backup and WAL archiving,
+retention as for `postgres` (D27, D37). A shared Flux component for this is
+extracted when the second application needs one, not before. The cost is
+one more set of PostgreSQL pods and one more WAL archive per application.
+Application data in these clusters is backed up by D15; D16 still holds
+for volumes. Evidence: docs (CloudNativePG FAQ, bootstrap and upgrade
+pages, read 2026-11-16 on GitHub for `main` and `release-1.30`), judgment;
+bjw-s-labs/home-ops runs one cluster per application in the same way.
