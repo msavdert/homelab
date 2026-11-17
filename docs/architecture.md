@@ -136,6 +136,8 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `cloudflare-dns` (vault `homelab-cluster`) | `credential` (same token) | cert-manager |
 | `object-storage` (vault `homelab-cluster`) | as above, but a key limited to bucket `homelab` | CloudNativePG backups |
 | `keycloak` (vault `homelab-cluster`) | `username`, `password` | Keycloak bootstrap admin |
+| `keycloak-lab-user` (vault `homelab-cluster`) | `username`, `password` | the user of realm `lab` |
+| `homepage` (vault `homelab-cluster`) | `oidc-client-secret`, `auth-secret` | the Keycloak client of Homepage and its session key |
 | `homelab-op-service-account` (vault `dotfiles`) | `credential` | tasks that read or write vault `homelab`; never given to the cluster |
 | `Proxmox API` (vault `dotfiles`) | `username`, `credential` | the administrator token; `infra/host/prepare.py` only |
 | `tailscale-oauth-readonly` (vault `dotfiles`) | `client-id`, `credential` | reading the tailnet policy and routes to check the owner's steps |

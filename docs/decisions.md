@@ -627,3 +627,33 @@ read showed 1.3 cores in use shortly after start and under 15 millicores
 for the database and operator pods. Evidence: tested (kubelet stats
 summary of `keycloak-0`, 2026-11-17), docs (Keycloak memory and CPU
 sizing), the owner's approval on 2026-11-17.
+
+## D41 Start page: Homepage with its own OIDC login against Keycloak realm `lab`
+
+The start page is Homepage (gethomepage.dev), installed from plain
+manifests in the shape of its Kubernetes installation page; there is no
+official chart. It comes before monitoring, which becomes phase 10; where
+earlier records say "phase 9" for monitoring, they mean that phase.
+
+The login is Homepage's own: since version 2.0 it has a gate with a
+password or OIDC, and with it on, every page and API route needs a
+session except the health check. It signs in against a new Keycloak realm
+`lab` with a confidential client `homepage`; realm `master` stays for
+administration. Not chosen: an Envoy Gateway `SecurityPolicy` with OIDC
+(an alpha API, and Envoy itself would have to reach the issuer) and
+oauth2-proxy (one more Deployment). Either becomes the subject of a new
+record when an application without its own login arrives. Homepage
+checks no claims, so whoever can sign in to realm `lab` gets in; the
+realm holds only user `owner`.
+
+Realm `lab`, the client and the user are created by a `KeycloakRealmImport`
+in Git, with the client secret and the password passed as placeholders from
+a Secret. The operator imports only a realm that does not exist yet; a
+later change to the resource does not change the realm, so changes after
+the first import are made with `kcadm.sh` and written back into the
+resource.
+
+Evidence: docs (Homepage installation pages, "Security / Authentication",
+read and checked 2026-11-17 for v2.8.0; Keycloak Operator realm import
+page and the 26.8.2 source of the import Job; Envoy Gateway OIDC task for
+v1.10), the owner's choice on 2026-11-17.

@@ -3,10 +3,8 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-17, phase 8 (Keycloak) closed. The next phase is
-not chosen yet: the owner wants a start page for all applications
-(Homepage, behind a Keycloak login) and phase 9 is monitoring; ask which
-comes first.
+Last updated: 2026-11-17, phase 9 (start page: Homepage behind a Keycloak
+login, D41) opened. Monitoring moved to phase 10.
 
 ## How to start a session
 
@@ -193,7 +191,8 @@ raw API calls, not with OpenTofu.
 |---|---|---|
 | Phase 7 | An access key limited to bucket `homelab`, in vault `homelab-cluster` as `object-storage` | done 2026-11-15 |
 | Phase 8 | The name of the first application | done 2026-11-16: Keycloak |
-| Next phase | Which comes first: the start page (Homepage behind Keycloak) or phase 9 monitoring | open |
+| Next phase | Which comes first: the start page or monitoring | done 2026-11-17: the start page (D41) |
+| Phase 9 | Login method, realm user name, 1Password items | done 2026-11-17: Homepage OIDC, user `owner`, items approved |
 
 Everything else the earlier phases need is in place.
 
