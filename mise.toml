@@ -52,9 +52,29 @@ run = [
 description = "shellcheck the tracked shell scripts"
 run = "git ls-files -z '*.sh' | xargs -0 -r shellcheck"
 
+[tasks."lint:kubernetes"]
+shell = "bash -c"
+description = "build every kustomization under kubernetes/ and talos/ with kubectl kustomize (offline)"
+run = '''
+set -uo pipefail
+fail=0
+n=0
+while IFS= read -r f; do
+  d="$(dirname "$f")"
+  n=$((n + 1))
+  if ! err="$(kubectl kustomize "$d" 2>&1 >/dev/null)"; then
+    printf 'FAIL %s\n%s\n' "$d" "$err" >&2
+    fail=$((fail + 1))
+  fi
+done < <(git ls-files 'kubernetes/**kustomization.yaml' 'talos/**kustomization.yaml' | sort)
+echo "kustomize: built $n directories, $fail failed"
+[ "$n" -gt 0 ] || { echo "no kustomization.yaml found" >&2; exit 1; }
+[ "$fail" -eq 0 ]
+'''
+
 [tasks.check]
 description = "everything that can be validated without a cluster, as CI runs it"
-depends = ["docs:build", "lint:python", "lint:shell", "lint:tofu"]
+depends = ["docs:build", "lint:kubernetes", "lint:python", "lint:shell", "lint:tofu"]
 
 # OpenTofu in infra/. Credentials are references in infra/op.env, resolved
 # per command with the service account of vault homelab.
