@@ -55,7 +55,6 @@ kubernetes/apps/
       envoyproxy.yaml        proxy Deployment and Service settings
       gatewayclass.yaml      GatewayClass envoy
       gateway.yaml           Gateway lab, HTTPS on 443
-      echo.yaml              the gate fixture: Deployment, Service, HTTPRoute
 infra/dns/apply.py           the DNS record (mise run dns:apply)
 ```
 
@@ -244,8 +243,9 @@ default; that case was not tested.
 - **Upgrade.** Renovate proposes the chart tags in the two
   `ocirepository.yaml` files. Envoy Gateway's CRDs move with the chart;
   read its upgrade notes for a Gateway API version change first.
-- **Remove the echo fixture.** Delete `gateway/echo.yaml` and its line in
-  `gateway/kustomization.yaml` once a real application is served.
+- **The echo fixture is removed.** Keycloak now proves the path through the
+  Gateway, so `gateway/echo.yaml` and its line in `gateway/kustomization.yaml`
+  were deleted.
 
 ## When it goes wrong
 

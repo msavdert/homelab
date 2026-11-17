@@ -17,7 +17,7 @@ spec:
     kind: GitRepository
     name: flux-system
 ---
-# The certificate, the Gateway and the echo fixture. Ready only when the
+# The certificate and the Gateway. Ready only when the
 # certificate is issued and the Gateway is programmed. Issuance by DNS-01
 # takes minutes, hence the longer timeout.
 apiVersion: kustomize.toolkit.fluxcd.io/v1

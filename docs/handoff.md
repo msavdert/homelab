@@ -60,7 +60,7 @@ comes first.
   wildcard certificate that cert-manager v1.21.3 issues by DNS-01, and
   `mise run dns:apply` keeps the record `*.lab.savdert.com` in Cloudflare.
   Gateway API CRDs come from the Envoy Gateway chart (D34). The echo
-  fixture in `network` stays until a real application is served. How, how
+  fixture was removed once Keycloak was served. How, how
   to expose a service, and the gate output: [Ingress](guide/05-ingress.md).
 - **Phase 6 (storage): done 2026-11-16.** The data disk of each node is
   the Talos user volume `local-path-provisioner` (`/dev/sdb1`, XFS,
@@ -260,8 +260,7 @@ accepted:
   (check step 3) and `kcadm.sh` commands into
   `kubectl -n keycloak exec -i keycloak-0 -- sh`; the credentials come from
   the pod's environment, not from the box.
-- The echo fixture in `network` was meant to go once a real application
-  is served; Keycloak is that application. Remove it in its own pull
-  request.
+- The echo fixture in `network` was removed once Keycloak was served
+  through the Gateway.
 - When a phase closes: update the state table in the roadmap, write the
   guide page, rewrite this page.
