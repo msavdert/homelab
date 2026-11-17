@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.12.0](https://github.com/msavdert/homelab/compare/v0.11.0...v0.12.0) (2026-11-17)
+
+
+### Features
+
+* **database:** recover both clusters from their archives on rebuild (D45) ([#56](https://github.com/msavdert/homelab/issues/56)) ([844289c](https://github.com/msavdert/homelab/commit/844289cad491e7b38825ed08bcc8219c059c0ce9))
+* **talos:** add talos:upgrade-k8s; bootstrap:flux ends when the bootstrap releases are adopted ([#55](https://github.com/msavdert/homelab/issues/55)) ([16944f8](https://github.com/msavdert/homelab/commit/16944f8270854e44c242ce7e113b1fbeedd5b902))
+
+
+### Bug fixes
+
+* **database:** resources for both PostgreSQL clusters and their sidecars ([#53](https://github.com/msavdert/homelab/issues/53)) ([57dec49](https://github.com/msavdert/homelab/commit/57dec499f859dea9d1a06fe41a1d8820b9173b89))
+
+
+### Documentation
+
+* add the between-phases rule and align agent command lists ([#49](https://github.com/msavdert/homelab/issues/49)) ([6b1658f](https://github.com/msavdert/homelab/commit/6b1658f4665d2fa231faef2456876766426f30fb))
+* bring entry documents, architecture and comments up to phase 10 ([#52](https://github.com/msavdert/homelab/issues/52)) ([99161b5](https://github.com/msavdert/homelab/commit/99161b5a55a73596adcc31afee34fa15d6866d2c))
+* close phase 11, Rebuild guide ([#57](https://github.com/msavdert/homelab/issues/57)) ([e3559c9](https://github.com/msavdert/homelab/commit/e3559c9efce4726da5beda466d384ca5eef9d9e7))
+* open phase 11, rebuild and restore drill (D45) ([#54](https://github.com/msavdert/homelab/issues/54)) ([8efa4f8](https://github.com/msavdert/homelab/commit/8efa4f83b6d1480effc14eb631f5b9f634e99d70))
+
 ## [0.11.0](https://github.com/msavdert/homelab/compare/v0.10.0...v0.11.0) (2026-11-17)
 
 
