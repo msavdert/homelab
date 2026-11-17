@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.10.0](https://github.com/msavdert/homelab/compare/v0.9.0...v0.10.0) (2026-11-17)
+
+
+### Features
+
+* **homepage:** Homepage behind Keycloak realm lab (D41) ([#42](https://github.com/msavdert/homelab/issues/42)) ([4e473ff](https://github.com/msavdert/homelab/commit/4e473ffe3b141853c83f7628cab66514188892da))
+
+
+### Bug fixes
+
+* **homepage:** mount proxmox.yaml so the read-only root does not crash /api/validate ([#43](https://github.com/msavdert/homelab/issues/43)) ([b833884](https://github.com/msavdert/homelab/commit/b833884a1a8b18a20b432861515096b98aa416e3))
+
+
+### Documentation
+
+* close phase 9, Homepage guide ([#44](https://github.com/msavdert/homelab/issues/44)) ([1f9b54a](https://github.com/msavdert/homelab/commit/1f9b54a28443083951556d6f87cb63a6e9f56009))
+* open phase 9, the start page: Homepage behind Keycloak realm lab (D41) ([#40](https://github.com/msavdert/homelab/issues/40)) ([42e9b03](https://github.com/msavdert/homelab/commit/42e9b036bc78c0483537518cae367f683c913737))
+
 ## [0.9.0](https://github.com/msavdert/homelab/compare/v0.8.0...v0.9.0) (2026-11-17)
 
 
