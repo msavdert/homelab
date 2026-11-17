@@ -114,8 +114,9 @@ creates namespace `external-secrets` if it is missing, and pipes
 `{{ op://homelab/eso-service-account/credential }}`; the value goes
 through the pipe and never touches a file or a command line. It needs
 only the API server, so on a rebuild it runs between `bootstrap:cilium`
-and `bootstrap:flux` ([Cluster](02-cluster.md), "Day-two tasks"). Without it,
-`bootstrap:flux` waits for the store until it times out.
+and `bootstrap:flux` ([Cluster](02-cluster.md), "Day-two tasks").
+Without it, the store and every Kustomization that depends on it stay
+not Ready.
 
 The token Secret is not in Git and not in Flux's inventory, so Flux never
 changes or prunes it. The namespace carries
