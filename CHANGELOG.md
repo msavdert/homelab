@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/msavdert/homelab/compare/v0.8.0...v0.9.0) (2026-11-17)
+
+
+### Features
+
+* **keycloak:** Keycloak Operator, cluster keycloak-db and Keycloak behind the gateway ([#36](https://github.com/msavdert/homelab/issues/36)) ([cbb2556](https://github.com/msavdert/homelab/commit/cbb2556249d58c381289b3bbea938a51e59d20f7))
+* **keycloak:** request 1 GiB of memory, keep the 2 GiB limit (D40) ([#37](https://github.com/msavdert/homelab/issues/37)) ([e6ff256](https://github.com/msavdert/homelab/commit/e6ff256088aaa9775e08172a8ef7563029ae4cda))
+
+
+### Documentation
+
+* close phase 8, Keycloak guide ([#38](https://github.com/msavdert/homelab/issues/38)) ([93a494a](https://github.com/msavdert/homelab/commit/93a494a4d03955d7b0226b150bd39b5f46513da2))
+* open phase 8 with Keycloak, one database cluster per application (D38, D39) ([#34](https://github.com/msavdert/homelab/issues/34)) ([9dc56a2](https://github.com/msavdert/homelab/commit/9dc56a2c30f3d3bd9a2fa387db0fb1a62c9d25d6))
+
 ## [0.8.0](https://github.com/msavdert/homelab/compare/v0.7.0...v0.8.0) (2026-11-16)
 
 
