@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/msavdert/homelab/compare/v0.10.0...v0.11.0) (2026-11-17)
+
+
+### Features
+
+* **observability:** victoria-metrics-k8s-stack with Grafana behind Keycloak realm lab (D42, D43) ([#47](https://github.com/msavdert/homelab/issues/47)) ([f72e66c](https://github.com/msavdert/homelab/commit/f72e66cc71b92e558020b16add6742c58c3bec46))
+
+
+### Documentation
+
+* close phase 10, Monitoring guide ([#48](https://github.com/msavdert/homelab/issues/48)) ([e7df60b](https://github.com/msavdert/homelab/commit/e7df60b75a92e32717cd4490176edd76d4ded504))
+* open phase 10, monitoring with victoria-metrics-k8s-stack (D42, D43) ([#45](https://github.com/msavdert/homelab/issues/45)) ([b802644](https://github.com/msavdert/homelab/commit/b8026448b2c5de4339d22e71eafdaf7bbf405153))
+
 ## [0.10.0](https://github.com/msavdert/homelab/compare/v0.9.0...v0.10.0) (2026-11-17)
 
 
