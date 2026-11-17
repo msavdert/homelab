@@ -3,10 +3,9 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-17, phase 10 (monitoring) closed. Every phase of
-the roadmap is done; the next work is for the owner to choose (see "For
-the architect"). The owner asked what Pi-hole and Uptime Kuma are
-(summarised in the session of 2026-11-17); neither is planned.
+Last updated: 2026-11-17, phase 11 (rebuild and restore drill) opened
+after the review of 2026-11-17; phases 0 to 10 are done. The drill starts
+after phase 7 follow-up 6b is closed (see "Where things stand").
 
 ## How to start a session
 
@@ -115,6 +114,13 @@ the architect"). The owner asked what Pi-hole and Uptime Kuma are
   paths), the Cloudflare token (zone `savdert.com` only, DNS write), the
   bucket `homelab` (upload, conditional write, delete), write access to
   vault `homelab` and `homelab-cluster`.
+- **Phase 11 (rebuild and restore drill): open 2026-11-17.** Opened after
+  the review of 2026-11-17 (D45). Built before the destroy:
+  `bootstrap:flux` ends when the bootstrap releases are adopted,
+  `talos:upgrade-k8s`. Branch `feat/recover-databases-g2` holds the
+  recovery manifests; merge it only after the old cluster is destroyed
+  (the running clusters refuse a second bootstrap method). Starts after
+  follow-up 6b.
 
 ## What was tested during planning
 
@@ -247,9 +253,9 @@ accepted:
 
 ## For the architect
 
-- The design is closed and every phase of the roadmap is done. Between
-  phases, maintenance follows the "Between phases" rule in AGENTS.md; work
-  with a live gate of its own opens a new phase.
+- The design is closed. Phase 11 is open (roadmap). Between phases,
+  maintenance follows the "Between phases" rule in AGENTS.md; work with a
+  live gate of its own opens a new phase.
 - Start of every session: Dependency Dashboard (issue #6) and the open
   Renovate pull requests (D23). Minor and major updates of `talosctl`,
   `kubectl`, `flux2` and `cilium-cli` arrive labelled `upgrade-drill`.

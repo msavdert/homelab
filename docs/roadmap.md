@@ -38,6 +38,7 @@ Each phase lists:
 | 8 First application: Keycloak | done 2026-11-17, see [Keycloak](guide/08-keycloak.md) |
 | 9 Start page: Homepage | done 2026-11-17, see [Homepage](guide/09-homepage.md) |
 | 10 Monitoring | done 2026-11-17, see [Monitoring](guide/10-monitoring.md) |
+| 11 Rebuild and restore drill | open 2026-11-17 |
 
 ## Phase 0: repository foundation
 
@@ -741,3 +742,83 @@ Grafana's own OIDC against realm `lab` (D43).
    still returns data from before the deletion.
 
 **Guide**: `docs/guide/10-monitoring.md`.
+
+## Phase 11: rebuild and restore drill
+
+Destroy the three nodes and rebuild the cluster from Git alone, with both
+databases restored from their archives. This is the only way to prove
+that Git and the bucket are enough to get the lab back (review of
+2026-11-17, V1), and it is the database recovery practice the lab exists
+for. Alerting, the phase the review placed before this one, is being
+prepared by the owner separately and is not part of the roadmap yet.
+
+The owner approved `tofu destroy` of the lab VMs (pool `homelab`, VMs 201
+to 203) on 2026-11-17 for this drill only. Settled: both clusters
+bootstrap by recovery from their previous archive and archive under a new
+server name (D45).
+
+**Needs from the owner**
+- Nothing new. The drill starts after phase 7 follow-up 6b is closed, so
+  that the plugin's retention run is seen on the old archive first.
+
+**Read first** (done 2026-11-17, sources in D45)
+- CloudNativePG recovery through the Barman Cloud plugin:
+  `bootstrap.recovery.source`, `externalClusters[].plugin`, the empty
+  archive check, `serverName`.
+- What recovery does with the application database, its owner and the
+  `<cluster>-app` Secret.
+- Retention of the plugin when the server name changes.
+- `talosctl upgrade-k8s`; how the installer image and the disk image
+  relate after a Talos upgrade.
+- flux-operator: how to tell that the FluxInstance is installed.
+
+**Build** (before the destroy)
+- `bootstrap:flux` ends when the two bootstrap releases are adopted and
+  prints how to watch the rest (V10).
+- `talos:upgrade-k8s` (D17, V11).
+- A pull request, merged only after the destroy, that gives both clusters
+  `bootstrap.recovery` from their current archive and a new server name
+  (D45).
+
+**Prove here**
+- The plugin accepts the new server name as an empty archive and starts
+  archiving; the old archive is untouched.
+- Keycloak starts against the recovered `keycloak-db` with its realms,
+  users and clients as before; the generated `keycloak-db-app` Secret
+  works with the recovered role.
+- A cluster created by recovery reconciles cleanly afterwards with
+  `bootstrap.recovery` still in Git.
+- New VMs boot from the disk image pinned in `infra/main.tf` and install
+  the version from the installer image (V18).
+- Flux adopts Cilium and flux-operator without a pod restart (D33).
+
+**Gate**
+1. Before the destroy: marker row and user exist, then a backup of each
+   cluster completes after them.
+   - `kubectl -n database exec postgres-1 -c postgres -- psql -d app -tc
+     'select note from drill_marker'` prints the marker (run on the
+     primary; created with `create table drill_marker`).
+   - `kcadm.sh get users -r lab -q username=drill-marker` (Keycloak guide,
+     check step 3) returns one user.
+   - `kubectl get backup -A` shows a `completed` backup of each cluster
+     younger than the markers.
+   - A listing of `s3://homelab/cnpg/` shows prefixes `postgres/` and
+     `keycloak-db/` only.
+2. `tofu destroy` plan lists VMs 201 to 203 and nothing else; then the
+   rebuild of guide 02, "Rebuild the cluster from nothing", with the
+   recovery pull request merged after the destroy.
+3. `kubectl get nodes` shows three nodes Ready; `flux get ks -A` and
+   `flux get hr -A` show every object Ready.
+4. `kubectl cnpg status` for `postgres` and `keycloak-db`: healthy, WAL
+   archiving OK; `kubectl get cluster -A -o jsonpath` shows
+   `ContinuousArchiving` True; a new backup of each completes.
+5. The two commands of step 1 return the marker row and the user; the
+   owner signs in to Grafana and Homepage through realm `lab`.
+6. A listing of `s3://homelab/cnpg/` shows the old prefixes with their
+   objects unchanged and new prefixes `postgres-g2/` and `keycloak-db-g2/`
+   holding WAL and a base backup.
+7. After one Flux interval, `flux get ks postgres keycloak` still Ready
+   with the recovery manifest applied.
+8. The time of each rebuild step is written into the guide.
+
+**Guide**: `docs/guide/11-rebuild.md`.
