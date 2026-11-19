@@ -85,7 +85,9 @@ Flux Kustomization `postgres`.
   `kubernetes.io/hostname`, 10Gi each, image
   `ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie`, and the plugin
   as WAL archiver. The `minimal` image is enough because Barman runs in
-  the sidecar, not in the PostgreSQL image.
+  the sidecar, not in the PostgreSQL image. `backup.target: primary`
+  makes every backup run on the primary: one taken on an idle replica
+  ends in a WAL segment that is never archived (D48).
 - `scheduledbackup.yaml`: `"0 0 3 * * *"` (six fields, the first is
   seconds) is daily at 03:00 UTC; `immediate: true` takes the first backup
   at once.

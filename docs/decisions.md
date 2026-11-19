@@ -971,3 +971,42 @@ output on 2026-11-19 (`kubectl get vmrule`, vmalert `/api/v1/alerts` and
 vmalert.spec.paused`, healthchecks.io `GET /api/v3/checks/` and
 `/api/v3/channels/`; `op item create` reading the item from stdin, in a
 dry run); judgment for routes and storage.
+
+## D48 Backups run on the primary
+
+Both CloudNativePG clusters set `spec.backup.target: primary`, so every
+backup, scheduled or taken by hand with `kubectl cnpg backup` (as the
+rebuild drill does), runs on the primary. The default,
+`prefer-standby`, took every daily backup on a replica; a backup from a
+standby does not switch the WAL on the primary (CloudNativePG 1.28,
+"Backup"), and on an idle primary `archive_timeout` never switches it
+either, so the backup's last segment stays unarchived and the backup
+cannot be restored. Seen on 2026-11-19: both remaining `postgres-g2`
+backups (from `postgres-2`) ended in `...1C`, which had not been
+archived since 2026-11-17 14:48; the plugin's retention had meanwhile
+deleted the older backup. A manual `pg_switch_wal()` on the primary
+archived `...1C` at 03:52 UTC. An on-demand backup with `target: primary`
+ran on `postgres-1` and its end segment `...1E` was archived at once.
+That Backup, `postgres-primary-test-20261119`, is left to retention like
+the scheduled ones.
+`keycloak-db` was not affected, because Keycloak writes often enough,
+but it gets the same setting so that both clusters behave alike.
+
+Cost: the backup reads the primary's disk. The databases are small
+(about 4 MiB compressed for `postgres`); judgment: negligible here.
+Over: `target: primary` on the two `ScheduledBackup` objects only (manual
+backups would keep the default); a job that runs `pg_switch_wal()` after
+each backup (one more moving part for what one field does); relying on
+`archive_timeout` (it switches only after WAL was written).
+
+Recorded for phase 13: its backup alerts should also catch a completed
+backup whose last segment is not archived.
+
+Evidence: docs (CloudNativePG 1.28 "Backup": the default target and the
+missing WAL switch on standby backups; the cluster runs 1.30.1, and that
+the page still holds there is an assumption, supported by the behaviour
+seen); `kubectl explain cluster.spec.backup.target` (empty means
+`prefer-standby`); reference (cloudnative-pg issue
+#10416, the same symptom, fixed by `pg_switch_wal()` or `target:
+primary`); command output on 2026-11-19 (`Backup` status begin and end
+WAL, `pg_stat_archiver`, `archive_status/*.done`).

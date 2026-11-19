@@ -41,6 +41,11 @@ spec:
         parameters:
           barmanObjectName: object-storage
           serverName: postgres
+  # Every backup, scheduled or manual, runs on the primary, so that
+  # pg_backup_stop switches the WAL and the last segment is archived at
+  # once (D48).
+  backup:
+    target: primary
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
