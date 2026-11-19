@@ -1,0 +1,20 @@
+---
+# Rules of the lab's own (D47). Watchdog proves vmalert, Alertmanager and
+# the way out, not that samples arrive: this fires when no target has
+# sent an up sample for five minutes and that lasted two more (seven in
+# all), e.g. vmagent stopped.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: lab-rules
+spec:
+  groups:
+    - name: lab.rules
+      rules:
+        - alert: NoFreshSamples
+          expr: absent_over_time(up[5m])
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: No scrape sample has arrived for 5 minutes; vmagent or scraping is down.

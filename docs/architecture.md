@@ -150,8 +150,9 @@ An item is created in the phase that first needs it. In vault `homelab`,
 `proxmox-tofu`, `tofu-state`, `object-storage` and `cloudflare-dns` exist
 and were checked on 2026-11-15. Vault `homelab-cluster` holds
 `cloudflare-dns`, `object-storage`, `keycloak`, `keycloak-lab-user`,
-`homepage` and `grafana` (the items the ExternalSecrets in `kubernetes/`
-read); its service account was shown on
+`homepage`, `grafana` and `alertmanager` (the last since 2026-11-19,
+field `watchdog-url` only until the Telegram bot exists; the items the
+ExternalSecrets in `kubernetes/` read); its service account was shown on
 2026-11-15 to see only that vault and to be refused a write. The
 `object-storage` key belongs to the OCI user `homelab-cnpg`, whose policy
 `homelab-cnpg` allows only bucket `homelab`; the limit is per bucket, so
