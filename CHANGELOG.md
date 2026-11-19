@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.13.0](https://github.com/msavdert/homelab/compare/v0.12.0...v0.13.0) (2026-11-19)
+
+
+### Features
+
+* **observability:** Alertmanager with the Watchdog dead man (phase 12) ([#64](https://github.com/msavdert/homelab/issues/64)) ([d0abb01](https://github.com/msavdert/homelab/commit/d0abb01e95e32c610ab97f9ac89839c42de723c0))
+* **observability:** Telegram receiver for Alertmanager (phase 12) ([#66](https://github.com/msavdert/homelab/issues/66)) ([2f8aaec](https://github.com/msavdert/homelab/commit/2f8aaecce8f1d268ac533ebbaeca90b58969aee2))
+
+
+### Bug fixes
+
+* **database:** take every backup on the primary (D48) ([#67](https://github.com/msavdert/homelab/issues/67)) ([030f989](https://github.com/msavdert/homelab/commit/030f989e1f7bf36069803f8309bb0138e259a76b))
+* **observability:** vmalert external URL points at Grafana ([#68](https://github.com/msavdert/homelab/issues/68)) ([63386c5](https://github.com/msavdert/homelab/commit/63386c555fefa993c3d70e14075f759585450112))
+
+
+### Documentation
+
+* **database:** close phase 7 follow-up 6b, retention back to 7d ([#69](https://github.com/msavdert/homelab/issues/69)) ([ec65873](https://github.com/msavdert/homelab/commit/ec6587369ac641b26a33e26ae19b11b6a0b5d439))
+* **decisions:** record D47, alert delivery for phase 12 ([#63](https://github.com/msavdert/homelab/issues/63)) ([8a8c4b2](https://github.com/msavdert/homelab/commit/8a8c4b289e04e7528f91d8409d41e39b77fff89e))
+* **handoff:** phase 12 progress, gates 1, 4 and 7 passed ([#65](https://github.com/msavdert/homelab/issues/65)) ([4a302a6](https://github.com/msavdert/homelab/commit/4a302a6096238b027df8b60e1f2568204a80288f))
+* open phase 12, alert delivery and dead man's switch ([#62](https://github.com/msavdert/homelab/issues/62)) ([d502cef](https://github.com/msavdert/homelab/commit/d502cef81924cf80ed0d588a809afafe4abcb543))
+* plan monitoring phases 12 to 16 and record D46 ([#58](https://github.com/msavdert/homelab/issues/58)) ([451bb76](https://github.com/msavdert/homelab/commit/451bb765b07b2e5fe0fc6aac069a064d11e3bde4))
+* **roadmap:** phase 12 reuses the owner's healthchecks.io account ([#60](https://github.com/msavdert/homelab/issues/60)) ([58b94da](https://github.com/msavdert/homelab/commit/58b94da88457a3bec48656dbc8230b2ddb151bf7))
+* **roadmap:** phase 12 uses a Telegram bot of the lab's own ([#61](https://github.com/msavdert/homelab/issues/61)) ([ce271f6](https://github.com/msavdert/homelab/commit/ce271f64f45333607da87b516d380b9f4070e367))
+
 ## [0.12.0](https://github.com/msavdert/homelab/compare/v0.11.0...v0.12.0) (2026-11-17)
 
 
