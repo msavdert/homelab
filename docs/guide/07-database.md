@@ -1,10 +1,10 @@
 # 07 Database
 
-!!! note "One follow-up is open"
+!!! note "Follow-up 6b closed on 2026-11-19"
     The gate passed on 2026-11-16. Step 6b, the plugin's own retention
-    removing an expired backup (D37), is expected on 2026-11-17 at about
-    19:00 UTC. Its output and the return to 7-day retention are added
-    here when it has been observed.
+    removing an expired backup (D37), was observed on archive generation
+    2 on 2026-11-19 (output under step 6 of the check); retention is back
+    to 7 days.
 
 ## What this adds
 
@@ -354,8 +354,8 @@ to `postgres-2` on k8s-2. `postgres-rw` failed for about 12 seconds
 (04:34:04 to 04:34:15) and then answered from the new primary. After the
 uncordon, `postgres-1` came back on k8s-3 as a replica.
 
-**6. Retention.** Split in two (D37). Retention is set to `1d` until 6b
-has been observed (pull request #31).
+**6. Retention.** Split in two (D37). Retention was `1d` until 6b had
+been observed (pull request #31); it is `7d` since 2026-11-19.
 
 *6a, retention delete on the bucket (2026-11-16).* The plugin cannot
 expire a backup sooner than a day, so the same Barman command it runs is
@@ -431,13 +431,48 @@ cnpg/postgres/wals/0000000200000000/00000002000000000000000D.gz
 
 The table `retention_probe` was dropped afterwards.
 
-*6b, the plugin's own run (follow-up).* With `1d`, backup
+*6b, the plugin's own run (follow-up, closed 2026-11-19).* The plan on
+generation 1: with `1d`, backup
 `20261116T184904` becomes obsolete when `20261116T184933` ended more than
 a day ago, on 2026-11-17 after 18:49:40 UTC; the next 30-minute retention
-run on the primary should remove it and WAL segment 2/C. Check the
+run on the primary was to remove it and WAL segment 2/C. Check the
 sidecar log, the bucket listing and `kubectl get backup -n database`
 (only `postgres-manual-3` should go: plugin issue #1115 deletes Backup
 objects on a short catalog listing).
+
+The phase 11 rebuild moved both clusters to archive generation 2 before
+that run was due, so 6b was observed there instead, on 2026-11-19. As
+observed (the Barman documentation was not read for it), a recovery
+window keeps the newest backup that ended before the window starts: the
+first `-g2` backups of 2026-11-17 went only once the 2026-11-18 backups
+were a day old, and `firstRecoverabilityPoint` moved to those. Sidecar logs of the primaries:
+
+```
+$ kubectl -n database logs postgres-1 -c plugin-barman-cloud --timestamps | grep -iE 'retention|delet'
+03:15:50.501 Applying backup retention policy (retentionPolicy 1d)
+03:15:55.013 Deleting backup not in the catalog, backup=postgres-daily-20261117144024
+$ kubectl -n keycloak logs keycloak-db-1 -c plugin-barman-cloud --timestamps | grep -iE 'retention|delet'
+03:49:03.562 Applying backup retention policy (retentionPolicy 1d)
+03:49:09.055 Deleting backup not in the catalog, backup=keycloak-db-daily-20261117144258
+```
+
+The bucket afterwards (objects per prefix; two per base backup):
+
+| prefix | base | WAL | 2026-11-19 00:17 UTC |
+|---|---|---|---|
+| `postgres/` (generation 1) | 10 | 11 | 10 / 11 |
+| `keycloak-db/` (generation 1) | 8 | 143 | 8 / 143 |
+| `postgres-g2/` | 4 | 2 | 4 / 12 |
+| `keycloak-db-g2/` | 4 | 294 | 4 / 411 |
+
+Between the two listings a 2026-11-19 backup was added to each `-g2`
+prefix, so the base count stays at four while the oldest backup left.
+
+The base directories `20261117T144227` and `20261117T144532` are gone,
+WAL older than the new first backup was removed with them, and
+generation 1 was left alone. The same check found D48: the remaining
+`postgres` backups had been taken on an idle replica and ended in a WAL
+segment that was never archived.
 
 ## Day-two tasks
 

@@ -103,8 +103,8 @@ In `keycloak/app/`, following D39 and the files of cluster `postgres`:
 - `objectstore.yaml`: destination `s3://homelab/cnpg/`; the plugin
   appends the cluster name, so backups land in `cnpg/keycloak-db/`. The
   checksum variables and the endpoint from the Secret are the same as in
-  [07 Database](07-database.md). Retention is `1d` like `postgres` until
-  the phase 7 follow-up is closed (D37);
+  [07 Database](07-database.md). Retention is `7d` like `postgres` (D27,
+  D37);
 - `cluster.yaml`: `keycloak-db`, two instances, required anti-affinity
   per node, 5Gi each, image `18.6-minimal-trixie`, backups on the
   primary (D48);

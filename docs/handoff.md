@@ -4,9 +4,8 @@ Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
 Last updated: 2026-11-19, phase 12 (alert delivery and dead man's
-switch) open, gates 1, 4 and 7 passed, Telegram receiver added. Phases 0 to 11 are done; 13 to 16 are
-planned (D46). Open beside it: follow-up 6b, now on archive generation 2
-(below).
+switch) open, gates 1, 4 and 7 passed, Telegram receiver added.
+Phases 0 to 11 are done; 13 to 16 are planned (D46).
 
 ## How to start a session
 
@@ -75,12 +74,9 @@ planned (D46). Open beside it: follow-up 6b, now on archive generation 2
   The bucket refuses bulk deletes (`MissingContentMD5`); Barman 3.20.1
   falls back to single deletes, which work, including a retention delete
   with `REDUNDANCY 2` (gate step 6a, D37). How, and the gate output:
-  [Database](guide/07-database.md). **Follow-up 6b:** retention is `1d`
-  until the plugin's own run is seen on archive generation 2 (phase 11
-  moved the clusters there first); what to check and when is under "Not
-  verified". Then set retention back to `7d` and add the output to the
-  Database guide; if the plugin did not delete (issue #770), apply the
-  fallback in D24. The bucket-limited
+  [Database](guide/07-database.md). Follow-up 6b closed on
+  2026-11-19 on archive generation 2; retention is `7d`. Every backup
+  runs on the primary (D48). The bucket-limited
   key is in vault `homelab-cluster` as `object-storage` (checked
   2026-11-15, see [Architecture](architecture.md), "Secrets").
 - **Phase 8 (first application, Keycloak): done 2026-11-17.** The
@@ -190,30 +186,20 @@ raw API calls, not with OpenTofu.
   bucket accepts retention deletes through Barman's
   per-object fallback (D37). Details in [Database](guide/07-database.md),
   "Check".
+- Phase 7 follow-up 6b, on 2026-11-19: the plugin's own retention removed
+  the first backups of archive generation 2 and their WAL and left
+  generation 1 alone ([Database](guide/07-database.md), "Check", step 6);
+  retention is back to `7d`.
 - `kubectl` 1.37.2 against the 1.36.6 cluster: one minor of skew, used
   for the whole gate without problems.
 
 ## Not verified
 
-- The plugin's own retention run deleting an expired backup (phase 7
-  follow-up 6b, D37). The rebuild of phase 11 moved the clusters to
-  archive generation 2 before the run on generation 1 was due, so 6b is
-  repeated there: retention stays `1d`. On 2026-11-19 at 00:17 UTC the
-  first `-g2` backups (`postgres-daily-20261117144024`,
-  `keycloak-db-daily-20261117144258`) were still there, generation 1 was
-  untouched, and the sidecars had applied the policy every 30 minutes
-  with no error. Assumption, not read in the Barman documentation: a
-  recovery window keeps the newest backup that ended before the window
-  starts, so these go only once the 2026-11-18 backups (03:00 and 03:30
-  UTC) are older than one day, from about 2026-11-19 03:30 UTC.
-  Check the sidecar log of the primary, the bucket listing (Rebuild guide,
-  "Look at the bucket") and `kubectl get backup -A`; then `7d`.
 - Failover of the load-balancer address on a hard stop of its holder (lease
   expiry, 15 s by default); only a clean reboot was tested.
 - `upgrade-k8s` has not been run for real (only `--dry-run`). That a
   newer installer image than the disk image installs cleanly on a new VM
   (V18) was not tested; both were v1.14.6 in the drill.
-- That the plugin's retention leaves older archive generations alone.
 - A Renovate pull request for Flux or flux-operator has not arrived yet.
 - Renovate updating the `GitRepository` tag of the Keycloak Operator; the
   flux manager documents it, but no pull request has arrived yet.
@@ -339,8 +325,7 @@ accepted:
   logs, 16 control plane metrics ([Roadmap](roadmap.md)). The lab's
   monitoring does not depend on the owner's `obenhub`; obenhub may read
   this cluster later, as its own work (D46). The Telegram bot of phase 12
-  is asked for when the receiver is the next thing to build, not before.
-  The phase 7 follow-up 6b (D37) stays open beside it.
+  exists (`@homelab_846_bot`).
 - When a phase closes: update the state table in the roadmap, write the
   guide page, bring `README.md`, `docs/index.md` and
   `docs/architecture.md` up to date, rewrite this page.

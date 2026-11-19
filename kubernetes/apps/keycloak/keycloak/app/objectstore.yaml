@@ -6,8 +6,8 @@ kind: ObjectStore
 metadata:
   name: object-storage
 spec:
-  # As cluster postgres while follow-up 6b of phase 7 is open (D37).
-  retentionPolicy: 1d
+  # As cluster postgres (D27, D37).
+  retentionPolicy: 7d
   configuration:
     destinationPath: s3://homelab/cnpg/
     s3AddressingStyle: path

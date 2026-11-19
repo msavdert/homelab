@@ -34,7 +34,7 @@ Each phase lists:
 | 4 Secrets | done 2026-11-15, see [Secrets](guide/04-secrets.md) |
 | 5 Ingress | done 2026-11-15, see [Ingress](guide/05-ingress.md) |
 | 6 Storage | done 2026-11-16, see [Storage](guide/06-storage.md) |
-| 7 First database | done 2026-11-16 (step 6b follow-up open, D37), see [Database](guide/07-database.md) |
+| 7 First database | done 2026-11-16 (follow-up 6b closed 2026-11-19, D37), see [Database](guide/07-database.md) |
 | 8 First application: Keycloak | done 2026-11-17, see [Keycloak](guide/08-keycloak.md) |
 | 9 Start page: Homepage | done 2026-11-17, see [Homepage](guide/09-homepage.md) |
 | 10 Monitoring | done 2026-11-17, see [Monitoring](guide/10-monitoring.md) |
