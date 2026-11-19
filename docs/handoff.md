@@ -102,8 +102,8 @@ planned (D46). Open beside it: follow-up 6b, now on archive generation 2
   [Homepage](guide/09-homepage.md).
 - **Phase 10 (monitoring): done 2026-11-17.** victoria-metrics-k8s-stack
   0.98.1 as release `vm` in namespace `observability` (privileged, for
-  node-exporter): VMSingle (30 days, 20 GiB), VMAgent, vmalert without
-  Alertmanager, kube-state-metrics, node-exporter, and Grafana at
+  node-exporter): VMSingle (30 days, 20 GiB), VMAgent, vmalert (with
+  Alertmanager since phase 12, D47), kube-state-metrics, node-exporter, and Grafana at
   `https://grafana.lab.savdert.com` with its own OIDC against realm `lab`,
   client `grafana` (D42, D43; item `grafana`). Every CloudNativePG cluster
   is scraped through one `VMPodScrape`. The tool used 933 MiB after start

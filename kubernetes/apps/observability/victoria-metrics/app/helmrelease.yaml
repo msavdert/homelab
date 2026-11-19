@@ -52,14 +52,17 @@ spec:
           resources:
             requests:
               storage: 20Gi
-    vmalert:
-      spec:
-        extraArgs:
-          # No Alertmanager yet: vmalert evaluates the recording rules the
-          # dashboards use; alerts go nowhere (D42).
-          notifier.blackhole: "true"
+    # vmalert gets the Alertmanager as its notifier from the chart; the
+    # blackhole flag of D42 is gone, vmalert refuses both at once (D47).
     alertmanager:
-      enabled: false
+      enabled: true
+      # The receivers use their default messages (D47).
+      monzoTemplate:
+        enabled: false
+      spec:
+        # Key alertmanager.yaml (ExternalSecret alertmanager); the chart's
+        # own config is then ignored.
+        configSecret: alertmanager
     # Talos: not scraped in this phase (D42). kube-proxy is off by default.
     kubeEtcd:
       enabled: false

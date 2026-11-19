@@ -14,7 +14,7 @@ namespace observability (pod security: privileged, for node-exporter)
                  kube-state-metrics, node-exporter, VMPodScrapes
       -> vmsingle-vm  stores 30 days in PVC vmsingle-vm (20 GiB, local-path)
     vmalert-vm   evaluates the recording and alerting rules
-                 (alerts go nowhere: -notifier.blackhole, no Alertmanager)
+                 (since phase 12: alerts go to vmalertmanager-vm, D47)
     vm-grafana   datasource VictoriaMetrics (type prometheus) -> vmsingle-vm
       <- HTTPRoute grafana.lab.savdert.com <- Gateway network/lab
       -> https://keycloak.lab.savdert.com/realms/lab  (OIDC login)
