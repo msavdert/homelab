@@ -144,15 +144,15 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `alertmanager` (vault `homelab-cluster`) | `watchdog-url` (ping URL of check `homelab-watchdog`), `telegram-bot-token`, `telegram-chat-id` | Alertmanager's configuration (D47) |
 | `homelab-op-service-account` (vault `dotfiles`) | `credential` | tasks that read or write vault `homelab`; never given to the cluster |
 | `Proxmox API` (vault `dotfiles`) | `username`, `credential` | the administrator token; `infra/host/prepare.py` only |
+| `telegram-bot-homelab` (vault `homelab`) | `credential` (token of the lab's bot, created by the owner) | copied into item `alertmanager` of `homelab-cluster`; never read by the cluster |
 | `tailscale-oauth-readonly` (vault `dotfiles`) | `client-id`, `credential` | reading the tailnet policy and routes to check the owner's steps |
 
 An item is created in the phase that first needs it. In vault `homelab`,
 `proxmox-tofu`, `tofu-state`, `object-storage` and `cloudflare-dns` exist
 and were checked on 2026-11-15. Vault `homelab-cluster` holds
 `cloudflare-dns`, `object-storage`, `keycloak`, `keycloak-lab-user`,
-`homepage`, `grafana` and `alertmanager` (the last since 2026-11-19,
-field `watchdog-url` only until the Telegram bot exists; the items the
-ExternalSecrets in `kubernetes/` read); its service account was shown on
+`homepage`, `grafana` and `alertmanager` (the last since 2026-11-19;
+the items the ExternalSecrets in `kubernetes/` read); its service account was shown on
 2026-11-15 to see only that vault and to be refused a write. The
 `object-storage` key belongs to the OCI user `homelab-cnpg`, whose policy
 `homelab-cnpg` allows only bucket `homelab`; the limit is per bucket, so

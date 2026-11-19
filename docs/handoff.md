@@ -4,7 +4,7 @@ Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
 Last updated: 2026-11-19, phase 12 (alert delivery and dead man's
-switch) open, gates 1, 4 and 7 passed, waiting for the Telegram bot. Phases 0 to 11 are done; 13 to 16 are
+switch) open, gates 1, 4 and 7 passed, Telegram receiver added. Phases 0 to 11 are done; 13 to 16 are
 planned (D46). Open beside it: follow-up 6b, now on archive generation 2
 (below).
 
@@ -328,12 +328,13 @@ accepted:
   undo; whether the owner received the email or Bark is to be asked);
   gate 7 (1215 MiB, Alertmanager 25 MiB). Healthchecks.io takes
   Alertmanager's POST (first ping 03:05:57, `webhook` counter 1).
-  Next: the owner creates the Telegram bot and gives token and chat id
-  (asked on 2026-11-19); then add fields `telegram-bot-token` and
-  `telegram-chat-id`, the Telegram receiver as the default route and
-  `inhibit_rules` for `InfoInhibitor` (audit note of #64), and run gates
-  2, 3, 5 and 6. Until then every alert but the Watchdog goes to
-  receiver `none`, Alertmanager's own alerts included.
+  The owner received the gate 4 alarm. The lab's bot
+  (`@homelab_846_bot`, item `telegram-bot-homelab` in vault `homelab`)
+  sends every alert of severity above `info` to the owner's chat; the
+  token and chat id are in item `alertmanager` (#66). Next: gates 2, 3,
+  5 and 6. Known gap: Alertmanager replaces a Telegram message over 4096
+  characters with a placeholder (HTML mode); a group of many alerts can
+  hit it (audit of #66).
   Planned after it: 13 backup and database alerts, 14 Proxmox host and ZFS, 15
   logs, 16 control plane metrics ([Roadmap](roadmap.md)). The lab's
   monitoring does not depend on the owner's `obenhub`; obenhub may read
