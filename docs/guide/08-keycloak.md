@@ -106,7 +106,8 @@ In `keycloak/app/`, following D39 and the files of cluster `postgres`:
   [07 Database](07-database.md). Retention is `1d` like `postgres` until
   the phase 7 follow-up is closed (D37);
 - `cluster.yaml`: `keycloak-db`, two instances, required anti-affinity
-  per node, 5Gi each, image `18.6-minimal-trixie`;
+  per node, 5Gi each, image `18.6-minimal-trixie`, backups on the
+  primary (D48);
 - `scheduledbackup.yaml`: daily at 03:30 UTC, `immediate: true`.
 
 CloudNativePG creates the database `app`, owned by user `app`, and the
