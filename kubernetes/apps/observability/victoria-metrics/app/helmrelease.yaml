@@ -54,6 +54,13 @@ spec:
               storage: 20Gi
     # vmalert gets the Alertmanager as its notifier from the chart; the
     # blackhole flag of D42 is gone, vmalert refuses both at once (D47).
+    vmalert:
+      spec:
+        extraArgs:
+          # The base of the Source link in every alert: the chart's
+          # explore?left=... path then opens the query in Grafana. Left
+          # empty, the link is "http:/explore...".
+          external.url: https://grafana.lab.savdert.com
     alertmanager:
       enabled: true
       # The receivers use their default messages (D47).
