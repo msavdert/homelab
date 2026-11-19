@@ -39,7 +39,7 @@ Each phase lists:
 | 9 Start page: Homepage | done 2026-11-17, see [Homepage](guide/09-homepage.md) |
 | 10 Monitoring | done 2026-11-17, see [Monitoring](guide/10-monitoring.md) |
 | 11 Rebuild and restore drill | done 2026-11-17, see [Rebuild](guide/11-rebuild.md) |
-| 12 Alert delivery and dead man's switch | planned (D46), not open |
+| 12 Alert delivery and dead man's switch | open 2026-11-19 |
 | 13 Backup and database alerts | planned (D46), not open |
 | 14 Proxmox host and ZFS | planned (D46), not open |
 | 15 Logs | planned (D46), not open |
