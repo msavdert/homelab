@@ -889,3 +889,85 @@ Evidence: judgment; reference (obenhub ADR 0001, 0002, 0005 and 0006,
 read 2026-11-17); owner's decision 2026-11-17. Assumption: the box
 (10.0.0.11) and the lab subnet reach each other through the host (D21),
 so obenhub's gateway needs no new network; not tested for this purpose.
+
+## D47 Alert delivery: Alertmanager from the chart, a dead man's check outside, default rules stay unpinned
+
+Phase 12 decisions, taken after its "Read first" list on 2026-11-19.
+This completes D42's "until a receiver is chosen": its blackhole flag
+and its Alertmanager switched off are replaced; the rest of D42 stands.
+
+- **Alertmanager** is the chart's `VMAlertmanager` (`alertmanager.enabled`,
+  one replica, image v0.34.2 from the chart's `global.versions`). Its
+  whole configuration is the key `alertmanager.yaml` of
+  a Secret that an `ExternalSecret` renders from item `alertmanager` in
+  vault `homelab-cluster`; `alertmanager.spec.configSecret` names it, so
+  the chart's own `alertmanager.config` is ignored and the chart creates
+  no Secret of its own. The Monzo template is switched off; the receivers
+  use their default messages.
+- **vmalert** loses `notifier.blackhole`. vmalert refuses to start when
+  the blackhole flag and a notifier are both set, and the chart does not
+  drop the flag when it adds the Alertmanager notifier, so the two change
+  in one commit.
+- **Routes.** `Watchdog` goes to a webhook receiver whose URL is the ping
+  URL of check `homelab-watchdog` on healthchecks.io, with
+  `send_resolved: false` and `group_interval` and `repeat_interval` of
+  one minute. The check has a period of 300 s and a grace of 300 s, so
+  silence pages the owner within ten minutes, by email and Bark, outside
+  the host. `perp-live` uses a grace of 900 s; 300 s is enough here
+  because the Watchdog arrives every one to two minutes (judgment).
+  Assumption until gate 2: healthchecks.io takes Alertmanager's JSON
+  POST as a success ping (its docs accept POST and store the body). That
+  body, the alert's labels and annotations, is kept in the check's ping
+  log outside the host; it holds no secret. Alerts with severity `info`
+  or `none` go to a receiver with no integration (the kube-prometheus convention; `InfoInhibitor` exists to
+  mute them). Everything else goes to Telegram through the lab's own bot,
+  grouped by `alertname` and `namespace`.
+- **Silences and notification state** live in an `emptyDir`. A restart
+  loses silences and may repeat one notification; a volume would bind the
+  pod to one node (D35) for state that is cheap to lose.
+- **No `HTTPRoute`.** Alertmanager has no login; it is reached with
+  `kubectl port-forward`.
+- **Default rules and dashboards stay unpinned (D42 stands).** The
+  criterion was whether default alerts had to be switched off: on
+  2026-11-19 the 148 alerting rules of the 33 synced `VMRule` objects
+  fired `Watchdog` only, and no rule group had an evaluation error. Once
+  the chart's `alertmanager` source is enabled its rules are added too; a
+  default alert that fires without a fault later is a reason to revisit
+  this.
+- **Platform alerts are a gap.** External Secrets, cert-manager and the
+  Flux controllers are not scraped (no scrape object, no `up` series on
+  2026-11-19), so none of their alerts can be taken now. Recorded here; a
+  later phase that scrapes them adds the alerts.
+- **A rule for silent scraping.** `Watchdog` (`vector(1)`) proves vmalert,
+  Alertmanager and the way out, not that samples arrive. One lab rule
+  fires when no `up` sample is fresh; gate 6 proves its expression.
+- **The fault for gate 3** is a temporary Deployment with an image that
+  cannot be pulled, in a temporary namespace. The default rules
+  (`KubePodNotReady`, `KubeDeploymentReplicasMismatch`, both with `for:
+  15m`) fire on it; deleting the namespace resolves them.
+- **Stopping the Watchdog for gate 4.** vmalert is stopped, since it is
+  the source of the alert. `VMAlert` has a `paused` field
+  (`kubectl explain`, no description there); the operator source at
+  v0.75.2 says "all actions on the underlying managed objects are not
+  going to be performed, except for delete actions". So the plan is: suspend
+  the HelmRelease, set `paused`, scale the vmalert Deployment to zero;
+  undo in reverse. Assumption until gate 4 runs: the operator leaves the
+  scaled Deployment alone while paused.
+
+The healthchecks.io account is the owner's (phase 12, "Needs from the
+owner"). It held five checks of the free plan's twenty on 2026-11-19 and
+two integrations, an email and a webhook named `bark`. The check
+object of the API carries its integrations (`channels`): `perp-live-loop`,
+the `perp-live` dead man, has two. `homelab-watchdog` is created with the
+same list, read from that check at creation time.
+
+Evidence: source (chart 0.98.1 `values.yaml` and
+`templates/victoria-metrics-operator/vmalertmanager/vmalertmanager.yaml`;
+vmalert v1.156.0 `app/vmalert/notifier/init.go`; operator v0.75.2
+`api/operator/v1beta1/vmextra_types.go`); docs (Alertmanager
+configuration; healthchecks.io ping and management API, pricing); command
+output on 2026-11-19 (`kubectl get vmrule`, vmalert `/api/v1/alerts` and
+`/api/v1/rules`, `count by (job) (up)`, `kubectl explain
+vmalert.spec.paused`, healthchecks.io `GET /api/v3/checks/` and
+`/api/v3/channels/`; `op item create` reading the item from stdin, in a
+dry run); judgment for routes and storage.
