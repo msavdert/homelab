@@ -22,8 +22,8 @@ the lab is disposable; the procedures are what matter.
 
 ## State
 
-Phases 0 to 11 are finished and none is open: the nodes, the cluster, Flux,
-secrets, ingress, storage, the first PostgreSQL cluster, Keycloak, the
+Phases 0 to 11 are finished and phase 12 (alert delivery) is open: the
+nodes, the cluster, Flux, secrets, ingress, storage, the first PostgreSQL cluster, Keycloak, the
 Homepage start page and monitoring run, and a rebuild from Git with both
 databases restored has been done once. The
 [Roadmap](roadmap.md) has the detail.

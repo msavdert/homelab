@@ -3,10 +3,10 @@
 Start here in a new session. This page says where things stand and what to
 do next. It is rewritten at the end of every phase.
 
-Last updated: 2026-11-17, phase 11 (rebuild and restore drill) closed.
-Phases 0 to 11 are done; phases 12 to 16 (monitoring, D46) were planned
-on 2026-11-17 and none is open, so maintenance follows AGENTS.md. Open:
-follow-up 6b, now on archive generation 2 (below).
+Last updated: 2026-11-19, phase 12 (alert delivery and dead man's
+switch) opened by the owner. Phases 0 to 11 are done; 13 to 16 are
+planned (D46). Open beside it: follow-up 6b, now on archive generation 2
+(below).
 
 ## How to start a session
 
@@ -198,9 +198,14 @@ raw API calls, not with OpenTofu.
 - The plugin's own retention run deleting an expired backup (phase 7
   follow-up 6b, D37). The rebuild of phase 11 moved the clusters to
   archive generation 2 before the run on generation 1 was due, so 6b is
-  repeated there: retention stays `1d`; from 2026-11-18 about 15:00 UTC a
-  newer completed backup should make the plugin remove the first `-g2`
-  backups (`postgres-daily-20261117144024`, `keycloak-db-daily-20261117144258`).
+  repeated there: retention stays `1d`. On 2026-11-19 at 00:17 UTC the
+  first `-g2` backups (`postgres-daily-20261117144024`,
+  `keycloak-db-daily-20261117144258`) were still there, generation 1 was
+  untouched, and the sidecars had applied the policy every 30 minutes
+  with no error. Assumption, not read in the Barman documentation: a
+  recovery window keeps the newest backup that ended before the window
+  starts, so these go only once the 2026-11-18 backups (03:00 and 03:30
+  UTC) are older than one day, from about 2026-11-19 03:30 UTC.
   Check the sidecar log of the primary, the bucket listing (Rebuild guide,
   "Look at the bucket") and `kubectl get backup -A`; then `7d`.
 - Failover of the load-balancer address on a hard stop of its holder (lease
@@ -258,7 +263,7 @@ accepted:
 
 ## For the architect
 
-- Phases 0 to 11 are done; 12 to 16 are planned, none open (D46). Between phases,
+- Phases 0 to 11 are done; phase 12 is open (roadmap); 13 to 16 are planned (D46). Between phases,
   maintenance follows the "Between phases" rule in AGENTS.md; work with a
   live gate of its own opens a new phase.
 - Start of every session: Dependency Dashboard (issue #6) and the open
@@ -311,13 +316,13 @@ accepted:
 - A subagent that runs `kind` from inside the clone writes into the
   clone's `kubeconfig`; give it its own `KUBECONFIG` (Monitoring guide,
   "When it goes wrong").
-- Next phases, planned and none open: 12 alert delivery and dead man's
-  switch, 13 backup and database alerts, 14 Proxmox host and ZFS, 15
+- Phase 12, alert delivery and dead man's switch, is open (2026-11-19).
+  Planned after it: 13 backup and database alerts, 14 Proxmox host and ZFS, 15
   logs, 16 control plane metrics ([Roadmap](roadmap.md)). The lab's
   monitoring does not depend on the owner's `obenhub`; obenhub may read
-  this cluster later, as its own work (D46). Phase 12 starts when the
-  owner opens it and has answered its "Needs from the owner". The phase 7
-  follow-up 6b (D37) stays open beside them.
+  this cluster later, as its own work (D46). The Telegram bot of phase 12
+  is asked for when the receiver is the next thing to build, not before.
+  The phase 7 follow-up 6b (D37) stays open beside it.
 - When a phase closes: update the state table in the roadmap, write the
   guide page, bring `README.md`, `docs/index.md` and
   `docs/architecture.md` up to date, rewrite this page.
