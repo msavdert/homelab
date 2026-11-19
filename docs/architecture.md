@@ -141,6 +141,7 @@ the one command. Everything OpenTofu needs is in `homelab`, so a single
 | `keycloak-lab-user` (vault `homelab-cluster`) | `password` | the user of realm `lab` |
 | `homepage` (vault `homelab-cluster`) | `oidc-client-secret`, `auth-secret` | the Keycloak client of Homepage and its session key; the client secret is also read by realm `lab` |
 | `grafana` (vault `homelab-cluster`) | `admin-user`, `admin-password`, `oidc-client-secret` | Grafana's administrator and its Keycloak client; the client secret is also read by realm `lab` |
+| `alertmanager` (vault `homelab-cluster`) | `watchdog-url` (ping URL of check `homelab-watchdog`), `telegram-bot-token`, `telegram-chat-id` | Alertmanager's configuration (D47) |
 | `homelab-op-service-account` (vault `dotfiles`) | `credential` | tasks that read or write vault `homelab`; never given to the cluster |
 | `Proxmox API` (vault `dotfiles`) | `username`, `credential` | the administrator token; `infra/host/prepare.py` only |
 | `tailscale-oauth-readonly` (vault `dotfiles`) | `client-id`, `credential` | reading the tailnet policy and routes to check the owner's steps |
