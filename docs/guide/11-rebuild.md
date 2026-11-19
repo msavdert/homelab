@@ -175,15 +175,14 @@ With `bootstrap.recovery` still in Git, `flux reconcile ks postgres` and
   parameters.serverName` to the last generation (`postgres-g2`), the
   archive `serverName` to the next (`postgres-g3`), the same for
   `keycloak-db`. Merge it after the destroy, never before.
-- **Old generations.** The plugin is assumed not to prune them (the old
-  prefixes were unchanged after the rebuild; the 6b run on generation 2
-  will show it for retention). Keep the previous
+- **Old generations.** The plugin does not prune them: the 6b retention
+  run on generation 2 left the generation 1 prefixes unchanged
+  (2026-11-19, Database guide). Keep the previous
   generation as a restore point; delete older prefixes by hand with the
   owner's approval once the current one has a completed base backup.
-- **Retention.** Follow-up 6b of phase 7 is repeated on generation 2: with
-  `retentionPolicy: 1d`, a day after the rebuild the plugin should remove
-  the first `-g2` backup once a newer one completes. Then retention goes
-  back to `7d`.
+- **Retention.** Follow-up 6b of phase 7 was repeated on generation 2
+  with `retentionPolicy: 1d`: on 2026-11-19 the plugin removed the first
+  `-g2` backups; retention is `7d` again.
 
 ## When it goes wrong
 
