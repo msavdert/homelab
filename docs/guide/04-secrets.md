@@ -6,7 +6,7 @@ A Secret in the cluster can come from 1Password. External Secrets Operator
 2.15.0 reads vault `homelab-cluster` through the 1Password SDK provider,
 with a service account that can only read that vault (D11, D25). An
 `ExternalSecret` names an item and a field; the operator writes the value
-into a Kubernetes Secret and refreshes it every hour. No secret value is
+into a Kubernetes Secret and refreshes it once a day (D49). No secret value is
 in Git; the one token the operator needs is applied once by a bootstrap
 task.
 
@@ -178,7 +178,7 @@ cluster is the value in 1Password, and it was never printed.
      metadata:
        name: <app>
      spec:
-       refreshInterval: 1h
+       refreshInterval: 24h # D49: 1h used the 1Password daily request limit
        secretStoreRef:
          kind: ClusterSecretStore
          name: onepassword
@@ -191,11 +191,17 @@ cluster is the value in 1Password, and it was never printed.
      ```
 
      For every field of an item at once, use
-     `dataFrom: [{extract: {key: <item>}}]` instead of `data`.
+     `dataFrom: [{extract: {key: <item>}}]` instead of `data`. It writes
+     every field of the item into the Secret, so use it only when the
+     Secret should hold all of them (D49).
   3. Merge. `kubectl -n <ns> get externalsecret <app>` shows
      `SecretSynced`. A changed value in 1Password reaches the cluster
-     within `refreshInterval`; `kubectl annotate externalsecret <app>
-     force-sync=$(date +%s) --overwrite` fetches it at once.
+     within `refreshInterval` (24h); `kubectl -n <ns> annotate
+     externalsecret <app> external-secrets.io/force-sync=$(date +%s)
+     --overwrite` fetches it at once.
+     Keep `refreshInterval: 24h`: every field costs about two 1Password
+     requests per refresh (inferred from the measured total, D49), and the account allows 1,000 service-account
+     requests a day shared with every other service account (D49).
   If the application's Kustomization applies before External Secrets is
   ready on a new cluster, it retries; add `dependsOn:
   external-secrets-stores` to its `ks.yaml` if it must not start without

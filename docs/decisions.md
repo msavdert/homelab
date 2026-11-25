@@ -1010,3 +1010,91 @@ seen); `kubectl explain cluster.spec.backup.target` (empty means
 #10416, the same symptom, fixed by `pg_switch_wal()` or `target:
 primary`); command output on 2026-11-19 (`Backup` status begin and end
 WAL, `pg_stat_archiver`, `archive_status/*.done`).
+
+## D49 ExternalSecrets refresh once a day: the 1Password request budget
+
+Decided 2026-11-25 by the owner, investigated and applied from the
+perp-live session (a different repository on the same workstation).
+Every ExternalSecret sets `refreshInterval: 24h` instead of `1h`. Nothing
+else changes: same items, fields, keys and values; no store change.
+
+Why. The 1Password account is on the individual plan: service accounts
+share one budget of 1,000 requests a day for the whole account (per token
+1,000 reads an hour), and every service account counts against it: this
+cluster's `homelabcls`, the workstation's `dotfiles`, the trading host's
+`live`. When the budget is gone, every service account is refused until
+the daily window resets: the trading host's alerts and the workstation's
+`op` calls stop with it. The account was at 750 of 1,000 by 18:53 UTC on
+2026-11-25 and had run out on 2026-11-13.
+
+Measured on 2026-11-25 (`op service-account ratelimit` every 5 minutes,
+plus a trace of every `op` process on the workstation):
+
+- The account count rose by 44 between 19:40 and 19:55 UTC while the
+  workstation token's hourly count stayed 0 and the trading host ran
+  nothing. The 8 ExternalSecrets' `status.refreshTime` were 19:45:41 to
+  19:50:08, and the owner's console showed `homelabcls` last accessed at
+  19:50:04 UTC.
+- 8 ExternalSecrets carry 22 `data[].remoteRef` entries. One uncached
+  1Password item read measured 2 requests (`op item get --cache=false`
+  raised the token and account counts by 2), so 22 x 2 = 44 per hourly
+  refresh, about 1,056 a day: more than the account's whole budget.
+  Assumption: the split of 2 per remoteRef is inferred from the CLI read
+  and the observed total; ESO uses the Go SDK, and the 44 could also
+  divide per item or per ExternalSecret. The store's client also reads
+  the vault once per controller start or store change, not counted here.
+- The provider resolves each remoteRef separately: one SDK
+  `Secrets().Resolve` per reference, no batching (ESO v2.15.0
+  `providers/v1/onepasswordsdk/client.go`).
+
+At 24h the cluster costs about 44 requests a day. A value changed in
+1Password reaches the cluster within a day, or at once with
+`kubectl -n <ns> annotate externalsecret <name>
+external-secrets.io/force-sync=$(date +%s) --overwrite`. Any change of
+the ExternalSecret's labels or annotations forces a sync (ESO v2.15.0
+`GetResourceVersion` in `pkg/controllers/util/util.go`,
+`shouldRefreshPeriodic` in
+`pkg/controllers/externalsecret/externalsecret_controller.go`), so the
+guide's old unprefixed `force-sync=` worked too; the prefixed name is the
+constant `AnnotationForceSync` in `externalsecret_types.go` and is used by
+convention. A deleted target Secret is recreated at once (the controller
+treats a missing Secret as invalid and syncs). The merge of this change
+itself makes all 8 refresh once (the spec changes), about 44 requests.
+
+Considered and not taken:
+
+- `dataFrom: extract` per item (fewer requests for items with several
+  fields): it writes every field of the item into the Secret, not only
+  the keys the workloads use, so Secrets change. By the item table in
+  `architecture.md`, `object-storage` has five fields and both of its
+  ExternalSecrets read four (no `bucket`); `realm-lab` and `alertmanager`
+  rename keys. The candidates (both `object-storage`, `homepage`,
+  `keycloak-admin`, `grafana`) carry 15 remoteRefs, about 30 requests a
+  day at 24h. An extract of an item named by title is one `Items().List`
+  plus one `Items().Get` (ESO v2.15.0 `client.go`); the list is cached
+  only with the store `cache`, which this store does not set, so about 4
+  requests per extract if each SDK call costs 2 (inferred, not
+  documented): five extracts about 20 a day. About 10 a day saved,
+  against changed Secrets.
+- The store's experimental `cache` (`spec.provider.onepasswordSDK.cache`,
+  default ttl 5m): it only helps references repeated inside the ttl, and
+  a ttl long enough to matter makes `force-sync` return the cached old
+  value after a rotation.
+- `refreshPolicy: OnChange` (no provider call until the ExternalSecret
+  changes): zero steady-state cost; an edited or deleted target Secret
+  is still repaired, but a value changed in 1Password never arrives
+  without a manual force-sync. 24h is cheap enough and keeps that.
+- 1Password Connect: rejected by D11 (marked superseded in the External
+  Secrets documentation).
+
+Rule from here: a new ExternalSecret uses `refreshInterval: 24h`; count
+its fields x 2 against the daily budget before adding it. Check the
+account with `op service-account ratelimit` (it does not consume quota).
+
+Evidence: command output on 2026-11-25 (`op service-account ratelimit`
+samples, `kubectl get externalsecrets -A` refresh times, the owner's
+1Password service-account list); ESO v2.15.0 source and docs
+(external-secrets.io/v2.15.0/provider/1password-sdk/, the files named
+above); 1Password rate limits (1password.dev/service-accounts/rate-limits/,
+2026-11-25: individual and families 1,000 a day per account, 1,000 reads
+an hour per token).

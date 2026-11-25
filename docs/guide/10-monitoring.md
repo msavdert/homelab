@@ -238,7 +238,8 @@ background.
   ConfigMaps.
 - **Rotate the client secret.** As for Homepage: regenerate it in Keycloak
   (client `grafana`), put it in item `grafana` field `oidc-client-secret`,
-  wait for the ExternalSecret to refresh, restart `deploy/vm-grafana`.
+  force the ExternalSecret to refresh (once a day otherwise, D49; the
+  annotation is in [Secrets](04-secrets.md)), restart `deploy/vm-grafana`.
   Not tested here.
 - **OpenTelemetry later.** VMSingle accepts OTLP metrics over HTTP
   (protobuf) at `http://vmsingle-vm.observability:8428/opentelemetry/v1/metrics`.
