@@ -189,7 +189,9 @@ The gate of phase 9, run on 2026-11-17 after the merges of pull requests
   password in Keycloak and then in the item.
 - **Rotate the client secret.** Regenerate it in Keycloak (client
   `homepage`, Credentials), put the new value in item `homepage` field
-  `oidc-client-secret`, wait for the ExternalSecret to refresh, then
+  `oidc-client-secret`, force the ExternalSecret to refresh (it refreshes
+  only once a day, D49: annotate it with
+  `external-secrets.io/force-sync=$(date +%s) --overwrite`), then
   restart the Deployment. Not tested here.
 
 ## When it goes wrong

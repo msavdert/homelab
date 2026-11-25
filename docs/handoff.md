@@ -116,6 +116,22 @@ Phases 0 to 11 are done; 13 to 16 are planned (D46).
   clients came back; Cilium was adopted without a restart (D33). The next
   rebuild moves both to generation 3 in one pull request merged after the
   destroy ([Rebuild](guide/11-rebuild.md)).
+- **ExternalSecrets refresh once a day (D49), 2026-11-25.** A fix asked
+  by the owner while phase 12 is open, made from the perp-live session:
+  the 1Password account (individual plan) has 1,000 service-account
+  requests a day shared by every service account, and the 8
+  ExternalSecrets at `refreshInterval: 1h` used about 1,056 of them
+  (44 measured in one hourly refresh, x 24). This change sets all to `24h` (live once Flux applies the
+  merge); a new ExternalSecret stays at 24h
+  and counts its fields x 2 against the budget. A changed value: annotate
+  `external-secrets.io/force-sync` ([Secrets](guide/04-secrets.md)).
+- **Unfinished local work, found 2026-11-25.** The main checkout
+  (`~/work/homelab` on the workstation) holds branch `docs/close-phase-12`
+  with uncommitted edits of 2026-11-18 (README, handoff, index, roadmap,
+  architecture, mkdocs.yml, a new `docs/guide/12-alerting.md`); the
+  branch has no commit of its own and was never pushed. The owner opened
+  no homelab session since; finish or drop it with the owner before
+  closing phase 12; commit it, then rebase on main (this page changed).
 
 ## What was tested during planning
 
